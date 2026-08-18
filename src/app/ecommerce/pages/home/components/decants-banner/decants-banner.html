@@ -1,0 +1,81 @@
+<section class="section decants-section">
+  <div class="container">
+    <div class="decants-banner">
+      <div class="decants-visual-side" aria-hidden="true">
+        <div class="decants-glow"></div>
+        <div class="decants-ring decants-ring--outer"></div>
+        <div class="decants-ring decants-ring--inner"></div>
+
+        <div class="decants-showcase">
+          <svg class="decant-bottle decant-bottle--lg" viewBox="0 0 60 130">
+            <rect x="22" y="4" width="16" height="9" rx="3" class="decant-bottle-cap" />
+            <rect x="10" y="17" width="40" height="108" rx="10" class="decant-bottle-body" />
+            <rect x="16" y="46" width="28" height="52" rx="4" class="decant-bottle-label" />
+          </svg>
+          <svg class="decant-bottle decant-bottle--md" viewBox="0 0 48 100">
+            <rect x="17" y="3" width="14" height="7" rx="2.5" class="decant-bottle-cap" />
+            <rect x="8" y="13" width="32" height="80" rx="8" class="decant-bottle-body" />
+            <rect x="13" y="36" width="22" height="40" rx="3" class="decant-bottle-label" />
+          </svg>
+          <svg class="decant-bottle decant-bottle--sm" viewBox="0 0 36 78">
+            <rect x="13" y="3" width="10" height="5" rx="2" class="decant-bottle-cap" />
+            <rect x="6" y="11" width="24" height="60" rx="6" class="decant-bottle-body" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="decants-text-side">
+        <div>
+          <span class="section-label">Probá antes de enamorarte</span>
+          <h2 class="section-title">
+            Decants
+            <br />
+            <em class="section-title-accent">premium</em>
+          </h2>
+          <p class="section-subtitle">
+            La forma más inteligente de descubrir perfumes originales. Desde 2ml — antes de invertir en el frasco
+            completo.
+          </p>
+        </div>
+
+        <div class="decant-sizes" role="group" aria-label="Tamaño de decant">
+          @for (size of sizes; track size.ml) {
+            <button
+              type="button"
+              class="decant-size-card"
+              [class.active]="selectedSize() === size.ml"
+              [attr.aria-pressed]="selectedSize() === size.ml"
+              (click)="selectSize(size.ml)"
+            >
+              <span class="decant-size-ml">{{ size.ml }}</span>
+              <span class="decant-size-from">{{ size.from }}</span>
+            </button>
+          }
+        </div>
+
+        <ul class="decants-benefits">
+          <li class="decant-benefit">
+            <span class="decant-benefit-icon" aria-hidden="true">✦</span>
+            Perfumes 100% originales, fraccionados con cuidado
+          </li>
+          <li class="decant-benefit">
+            <span class="decant-benefit-icon" aria-hidden="true">✦</span>
+            Envasado en atomizadores premium
+          </li>
+          <li class="decant-benefit">
+            <span class="decant-benefit-icon" aria-hidden="true">✦</span>
+            +200 fragancias disponibles para decant
+          </li>
+          <li class="decant-benefit">
+            <span class="decant-benefit-icon" aria-hidden="true">✦</span>
+            Ideal para viaje o para descubrir nuevas esencias
+          </li>
+        </ul>
+
+        <a [routerLink]="'/productos'" [queryParams]="{ cat: 'decants' }" class="btn btn-primary">
+          Ver decants disponibles
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

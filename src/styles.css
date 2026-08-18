@@ -1,3 +1,176 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+:root {
+  /* Aurora palette - the exact 4 colors driving the hero mesh background.
+     Every accented element in the app should be built from these, not one-off hex values. */
+  --color-aurora-emerald: #10b981;
+  --color-aurora-teal: #34d399;
+  --color-aurora-cyan: #06b6d4;
+  --color-aurora-violet: #8b5cf6;
+
+  /* Base surfaces */
+  --color-bg: #100e0b;
+  --color-surface: #17140f;
+  --color-surface-elevated: #1f1a14;
+
+  /* Text */
+  --color-text-primary: #f5f3ff;
+  --color-text-secondary: rgb(245 243 255 / 75%);
+  --color-text-muted: rgb(245 243 255 / 60%);
+
+  /* Borders */
+  --color-border-subtle: rgb(255 255 255 / 10%);
+  --color-border-accent: rgb(6 182 212 / 35%);
+
+  /* Semantic accent roles - swap these two if the brand accent ever shifts */
+  --color-accent: var(--color-aurora-cyan);
+  --color-accent-strong: var(--color-aurora-emerald);
+  --color-focus-ring: var(--color-aurora-cyan);
+
+  /* Shared gradients, built only from the aurora palette above */
+  --gradient-aurora-text: linear-gradient(
+    100deg,
+    var(--color-aurora-teal),
+    var(--color-aurora-cyan) 55%,
+    var(--color-aurora-violet)
+  );
+  --gradient-primary: linear-gradient(135deg, #047857, #0e7490);
+  --gradient-primary-hover: linear-gradient(135deg, #065f46, #155e75);
+
+  /* Shape */
+  --radius-full: 999px;
+
+  --header-height: 60px;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+/* ── Shared layout primitives ─────────────────────────
+   Every home section is built from these so the whole page
+   stays in the same rhythm/typography/color system. */
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.section {
+  padding-block: 88px;
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding-block: 56px;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.section-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.section-title-accent {
+  font-style: normal;
+  background: var(--gradient-aurora-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-subtitle {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+  margin-top: 10px;
+  max-width: 42rem;
+}
+
+/* Buttons - used across every section, not just the hero */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: var(--radius-full);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn-sm {
+  padding: 9px 18px;
+  font-size: 13px;
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: #ffffff;
+  box-shadow: 0 10px 28px -14px color-mix(in srgb, var(--color-accent-strong) 70%, transparent);
+}
+
+.btn-primary:hover {
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--color-accent-strong) 80%, transparent);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-accent);
+  border-color: var(--color-border-subtle);
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-border-accent);
+  transform: translateY(-1px);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Card base - category/product/feature cards all start here */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 20px;
+}

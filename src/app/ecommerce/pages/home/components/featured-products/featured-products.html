@@ -1,0 +1,63 @@
+<section class="section products-section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <span class="section-label">Top picks</span>
+        <h2 class="section-title">Más <em class="section-title-accent">deseados</em></h2>
+        <p class="section-subtitle">
+          Los favoritos de nuestra comunidad. Fragancias que enamoran desde el primer spray.
+        </p>
+      </div>
+      <a routerLink="/productos" class="btn btn-ghost">Ver todos →</a>
+    </div>
+
+    <div class="products-grid">
+      @for (product of products; track product.id) {
+        <article class="product-card" [style.--accent-color]="product.accentVar">
+          <div class="product-card-visual">
+            <svg class="product-bottle" viewBox="0 0 100 180" aria-hidden="true">
+              <rect x="38" y="8" width="24" height="14" rx="4" class="product-bottle-cap" />
+              <rect x="14" y="26" width="72" height="146" rx="16" class="product-bottle-body" />
+              <rect x="24" y="66" width="52" height="66" rx="6" class="product-bottle-label" />
+            </svg>
+            @if (product.badge) {
+              <span class="product-card-badge">{{ product.badge }}</span>
+            }
+          </div>
+
+          <div class="product-card-body">
+            <span class="product-card-brand">{{ product.brand }}</span>
+            <h3 class="product-card-name">{{ product.name }}</h3>
+            <span class="product-card-subtitle">{{ product.subtitle }}</span>
+
+            <div class="product-card-notes">
+              @for (note of product.notes; track note) {
+                <span class="note-pill">{{ note }}</span>
+              }
+            </div>
+
+            <div class="product-card-footer">
+              <div class="product-price">
+                @if (product.oldPrice) {
+                  <span class="product-price-old">{{ product.oldPrice }}</span>
+                } @else {
+                  <span class="product-price-from">desde</span>
+                }
+                <span class="product-price-amount">{{ product.price }}</span>
+              </div>
+              <a
+                [routerLink]="['/productos', product.id]"
+                class="product-card-link"
+                [attr.aria-label]="'Ver ' + product.name"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path d="M7 17L17 7M17 7H7M17 7v10" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>

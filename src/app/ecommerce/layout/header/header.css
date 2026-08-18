@@ -1,0 +1,25 @@
+.header__container {
+  width: 100%;
+  height: var(--header-height);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  .header__content {
+    width: 90%;
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .header__nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+  }
+}

@@ -1,0 +1,274 @@
+/* Aurora Borealis - Aura */
+/* Base color lives on the body (see src/styles.css) - these layers blend against it */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
+  /* No background-color here - layers must blend against the body */
+}
+
+.aura-layer-1,
+.aura-layer-2,
+.aura-layer-3,
+.aura-layer-4 {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  transform: translateZ(0);
+  will-change: transform;
+  pointer-events: none;
+}
+
+.aura-layer-1 {
+  background: radial-gradient(circle at 15% 50%, rgba(16, 185, 129, 0.8) 0%, transparent 45%);
+  filter: blur(200px);
+}
+
+.aura-layer-2 {
+  background: radial-gradient(circle at 55% 30%, rgba(52, 211, 153, 0.5) 0%, transparent 40%);
+  filter: blur(200px);
+}
+
+.aura-layer-3 {
+  background: radial-gradient(circle at 80% 60%, rgba(139, 92, 246, 0.7) 0%, transparent 50%);
+  filter: blur(175px);
+}
+
+.aura-layer-4 {
+  background: radial-gradient(circle at 40% 80%, rgba(6, 182, 212, 0.4) 0%, transparent 35%);
+  filter: blur(150px);
+}
+
+@media (min-width: 1024px) {
+  .aura-layer-1,
+  .aura-layer-2 {
+    filter: blur(260px);
+  }
+
+  .aura-layer-3 {
+    filter: blur(252px);
+  }
+
+  .aura-layer-4 {
+    filter: blur(216px);
+  }
+}
+
+/* Subtle grid overlay, faded toward the edges */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 51rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  animation: fade-up 0.6s ease both;
+}
+
+.hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 16px 6px 10px;
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, transparent);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.hero-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 2s infinite;
+}
+
+.hero-title {
+  font-size: clamp(2.75rem, 9vw, 6.75rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.hero-title-accent {
+  display: block;
+  line-height: 1.2;
+  padding-bottom: 0.08em;
+  background: var(--gradient-aurora-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 32px color-mix(in srgb, var(--color-accent-strong) 25%, transparent));
+}
+
+.hero-title-sub {
+  display: block;
+  font-family: 'Playfair Display', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.4em;
+  letter-spacing: -0.015em;
+  color: var(--color-text-secondary);
+}
+
+.hero-desc {
+  font-size: 17px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  max-width: 32.5rem;
+  margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hero-stats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.hero-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0 32px;
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.hero-stat-item:last-child {
+  border-right: none;
+}
+
+.hero-stat-value {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: var(--color-text-primary);
+}
+
+.hero-stat-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  opacity: 0.35;
+  animation: fade-in 1s ease 1.2s both;
+}
+
+.hero-scroll span {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.hero-scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-accent) 70%, transparent),
+    transparent
+  );
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.35;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-content,
+  .hero-scroll,
+  .hero-chip-dot,
+  .hero-scroll-line {
+    animation: none;
+  }
+}

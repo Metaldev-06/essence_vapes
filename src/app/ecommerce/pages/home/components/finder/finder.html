@@ -1,0 +1,45 @@
+<section id="finder" class="section finder-section">
+  <div class="container">
+    <div class="finder-intro">
+      <span class="section-label">Personalización</span>
+      <h2 class="section-title">
+        Encontrá
+        <br />
+        <em class="section-title-accent">tu esencia</em>
+      </h2>
+      <p class="section-subtitle">
+        Elegí los estilos que más te representan y te mostramos las fragancias perfectas para vos.
+      </p>
+    </div>
+
+    <div class="finder-grid" role="group" aria-label="Estilos olfativos">
+      @for (style of styles; track style.id) {
+        <button
+          type="button"
+          class="finder-pill"
+          [class.selected]="isSelected(style.id)"
+          [attr.aria-pressed]="isSelected(style.id)"
+          (click)="toggle(style.id)"
+        >
+          <span class="finder-pill-emoji" aria-hidden="true">{{ style.emoji }}</span>
+          <span class="finder-pill-label">{{ style.label }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="finder-footer">
+      <p class="finder-footer-hint">
+        @if (selectedCount() > 0) {
+          {{ selectedCount() }} estilo{{ selectedCount() === 1 ? '' : 's' }} seleccionado{{
+            selectedCount() === 1 ? '' : 's'
+          }}
+        } @else {
+          Elegí al menos un estilo para ver recomendaciones
+        }
+      </p>
+      <a [routerLink]="'/productos'" [queryParams]="{ styles: selectedParam() }" class="btn btn-primary">
+        Ver mis recomendaciones →
+      </a>
+    </div>
+  </div>
+</section>

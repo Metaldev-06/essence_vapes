@@ -1,0 +1,22 @@
+<section class="divider" aria-label="Marcas que trabajamos">
+  <div class="divider-viewport">
+    <div class="divider-track">
+      <ul class="divider-group">
+        @for (brand of brands; track brand) {
+          <li class="divider-item">
+            <span class="divider-dot" aria-hidden="true"></span>
+            {{ brand }}
+          </li>
+        }
+      </ul>
+      <ul class="divider-group" aria-hidden="true">
+        @for (brand of brands; track brand) {
+          <li class="divider-item">
+            <span class="divider-dot" aria-hidden="true"></span>
+            {{ brand }}
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</section>

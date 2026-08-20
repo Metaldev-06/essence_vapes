@@ -1,0 +1,55 @@
+<footer class="site-footer">
+  <div class="container footer-main">
+    <div class="footer-brand">
+      <a routerLink="/" class="footer-logo">Essence Vapes</a>
+      <p class="footer-tagline">
+        Perfumes originales, decants y esencias para quienes saben lo que quieren.
+      </p>
+      <div class="footer-social">
+        <a href="https://wa.me/5491100000000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 5h16v11H8l-4 4V5Z" />
+          </svg>
+        </a>
+        <a href="https://instagram.com/essencevapes.ar" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="15" rx="4" />
+            <circle cx="12" cy="12.5" r="4" />
+            <circle cx="17" cy="8" r="0.6" fill="currentColor" stroke="none" />
+          </svg>
+        </a>
+        <a href="mailto:hola@essencevapes.com.ar" aria-label="Email">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="3" />
+            <path d="m4 7 8 6 8-6" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <nav class="footer-nav" aria-label="Explorar">
+      <span class="footer-nav-title">Explorar</span>
+      <ul>
+        @for (link of navLinks; track link.label) {
+          <li><a [routerLink]="link.routerLink">{{ link.label }}</a></li>
+        }
+      </ul>
+    </nav>
+
+    <nav class="footer-nav" aria-label="Categorías">
+      <span class="footer-nav-title">Categorías</span>
+      <ul>
+        @for (link of categoryLinks; track link.label) {
+          <li><a [routerLink]="link.routerLink" [queryParams]="link.queryParams">{{ link.label }}</a></li>
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p>© {{ year }} Essence Vapes. Todos los derechos reservados.</p>
+      <p class="footer-bottom-note">Envíos a todo el país · Productos 100% originales</p>
+    </div>
+  </div>
+</footer>

@@ -5,6 +5,41 @@
   <h1 class="product-details-name">{{ product().name }}</h1>
   <p class="product-details-subtitle">{{ product().subtitle }}</p>
 
+  @if (hasQuickFacts()) {
+    <div class="product-details-facts">
+      @if (product().year) {
+        <span class="fact-chip">{{ product().year }}</span>
+      }
+      @if (product().origin) {
+        <span class="fact-chip">{{ product().origin }}</span>
+      }
+      @if (genderLabel()) {
+        <span class="fact-chip">{{ genderLabel() }}</span>
+      }
+    </div>
+  }
+
+  @if (product().rating) {
+    <div class="product-details-rating">
+      <span class="star-row" aria-hidden="true">
+        @for (fill of starFills(); track $index) {
+          <span class="star">
+            <svg class="star-bg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.6 6.8L12 17.1 5.8 20.5l1.6-6.8L2.2 9l6.9-.7L12 2Z" />
+            </svg>
+            <svg class="star-fg" [style.clip-path]="'inset(0 ' + (100 - fill) + '% 0 0)'" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.6 6.8L12 17.1 5.8 20.5l1.6-6.8L2.2 9l6.9-.7L12 2Z" />
+            </svg>
+          </span>
+        }
+      </span>
+      <span class="product-details-rating-value">{{ product().rating }}</span>
+      @if (product().ratingCount) {
+        <span class="product-details-rating-count">{{ product().ratingCount }} calificaciones</span>
+      }
+    </div>
+  }
+
   <div class="product-details-price">
     @if (product().oldPrice) {
       <span class="product-details-price-old">{{ product().oldPrice }}</span>
@@ -14,11 +49,22 @@
     <span class="product-details-price-amount">{{ product().price }}</span>
   </div>
 
-  @if (product().notes.length > 0) {
+  @if (product().accords; as accords) {
     <div class="product-details-notes">
-      @for (note of product().notes; track note) {
-        <span class="note-pill">{{ note }}</span>
-      }
+      <span class="notes-label">Acordes principales</span>
+      <div class="notes-pills">
+        @for (accord of accords; track accord) {
+          <span class="note-pill note-pill--accord">{{ accord }}</span>
+        }
+      </div>
+    </div>
+  } @else if (product().notes.length > 0) {
+    <div class="product-details-notes">
+      <div class="notes-pills">
+        @for (note of product().notes; track note) {
+          <span class="note-pill">{{ note }}</span>
+        }
+      </div>
     </div>
   }
 

@@ -1,0 +1,44 @@
+<section
+  class="section fragrance-profile-section"
+  [style.--accent-color]="accentVar()"
+  aria-labelledby="fragrance-profile-heading"
+>
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <span class="section-label">{{ isFlavor() ? 'Perfil de sabor' : 'Perfil olfativo' }}</span>
+        <h2 id="fragrance-profile-heading" class="section-title">
+          Cómo se <em class="section-title-accent">despliega</em>
+        </h2>
+        <p class="section-subtitle">
+          @if (isFlavor()) {
+            Así evoluciona el sabor de esta mezcla, de la primera calada al final.
+          } @else {
+            Así evoluciona esta fragancia sobre la piel, minuto a minuto.
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="fragrance-tiers">
+      @for (tier of tiers(); track tier.step) {
+        <div class="fragrance-tier">
+          <div class="fragrance-tier-head">
+            <span class="fragrance-tier-step">{{ tier.step }}</span>
+            <span class="fragrance-tier-label">{{ tier.label }}</span>
+          </div>
+          <div class="fragrance-tier-notes">
+            @for (note of tier.notes; track note) {
+              <span class="fragrance-tier-note-pill">{{ note }}</span>
+            }
+          </div>
+          <p class="fragrance-tier-desc">{{ tier.description }}</p>
+          <div class="fragrance-tier-bar-track">
+            <span class="fragrance-tier-bar" [style.width]="tier.barWidth"></span>
+          </div>
+          <span class="fragrance-tier-duration">{{ tier.duration }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</section>

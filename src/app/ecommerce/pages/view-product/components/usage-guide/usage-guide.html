@@ -1,0 +1,112 @@
+<section class="section usage-guide-section" aria-labelledby="usage-guide-heading">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <span class="section-label">Guía de uso</span>
+        <h2 id="usage-guide-heading" class="section-title">
+          Estado de ánimo y <em class="section-title-accent">estilo</em>
+        </h2>
+        <p class="section-subtitle">Lo que transmite esta fragancia y cuándo brilla más.</p>
+      </div>
+    </div>
+
+    @if (product().mood; as mood) {
+      <div class="mood-row">
+        @for (item of mood; track item) {
+          <span class="mood-pill">{{ item }}</span>
+        }
+      </div>
+    }
+
+    @if (seasonBars().length > 0) {
+      <div class="usage-group">
+        <span class="usage-group-title">Mejores estaciones</span>
+        <div class="usage-cards">
+          @for (bar of seasonBars(); track bar.label) {
+            <div class="usage-card">
+              <span class="usage-card-icon" aria-hidden="true">
+                @switch (bar.icon) {
+                  @case ('primavera') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 21V10" />
+                      <path d="M12 10c0-3.5 2.2-6 5.5-6.5C17.2 6.8 15 9.5 12 10Z" />
+                      <path d="M12 13c0-3-2-5-5.5-5.5C6.8 10.8 9 13.5 12 13Z" />
+                    </svg>
+                  }
+                  @case ('verano') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M12 3v2M12 19v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M3 12h2M19 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5" />
+                    </svg>
+                  }
+                  @case ('otono') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3c4.5 2 7 5.5 7 10a5 5 0 0 1-9.5 2.2C8 12.5 10 7 12 3Z" />
+                      <path d="M12 21c0-5 1-8 3-11" />
+                    </svg>
+                  }
+                  @case ('invierno') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11" />
+                    </svg>
+                  }
+                }
+              </span>
+              <span class="usage-card-label">{{ bar.label }}</span>
+              <div class="usage-card-track">
+                <span class="usage-card-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
+              </div>
+              <span class="usage-card-value">{{ bar.value }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (dayBars().length > 0) {
+      <div class="usage-group">
+        <span class="usage-group-title">Hora del día</span>
+        <div class="usage-cards usage-cards--half">
+          @for (bar of dayBars(); track bar.label) {
+            <div class="usage-card">
+              <span class="usage-card-icon" aria-hidden="true">
+                @if (bar.icon === 'dia') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 3v2M12 19v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M3 12h2M19 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5" />
+                  </svg>
+                } @else {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3a7 7 0 1 0 6 11 8 8 0 0 1-6-11Z" />
+                  </svg>
+                }
+              </span>
+              <span class="usage-card-label">{{ bar.label }}</span>
+              <div class="usage-card-track">
+                <span class="usage-card-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
+              </div>
+              <span class="usage-card-value">{{ bar.value }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (occasionBars().length > 0) {
+      <div class="usage-group">
+        <span class="usage-group-title">Ocasiones</span>
+        <div class="occasion-list">
+          @for (bar of occasionBars(); track bar.label) {
+            <div class="occasion-row">
+              <span class="occasion-label">{{ bar.label }}</span>
+              <div class="occasion-track">
+                <span class="occasion-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
+              </div>
+              <span class="occasion-value">{{ bar.value }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>

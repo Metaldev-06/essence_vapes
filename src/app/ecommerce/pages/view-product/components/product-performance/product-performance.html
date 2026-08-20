@@ -1,0 +1,40 @@
+<section class="section performance-section" aria-labelledby="performance-heading">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <span class="section-label">Desempeño</span>
+        <h2 id="performance-heading" class="section-title">Proyección y <em class="section-title-accent">duración</em></h2>
+      </div>
+    </div>
+
+    <div class="performance-grid">
+      <div class="performance-item">
+        <span class="performance-label">Estela</span>
+        <div class="performance-track" role="img" [attr.aria-label]="'Estela: ' + sillageSteps[activeSillageIndex()].label">
+          @for (step of sillageSteps; track step.id; let i = $index) {
+            <span class="performance-segment" [class.filled]="i <= activeSillageIndex()"></span>
+          }
+        </div>
+        <div class="performance-steps">
+          @for (step of sillageSteps; track step.id; let i = $index) {
+            <span class="performance-step" [class.active]="i === activeSillageIndex()">{{ step.label }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="performance-item">
+        <span class="performance-label">Duración</span>
+        <div class="performance-track" role="img" [attr.aria-label]="'Duración: ' + longevitySteps[activeLongevityIndex()].label">
+          @for (step of longevitySteps; track step.id; let i = $index) {
+            <span class="performance-segment" [class.filled]="i <= activeLongevityIndex()"></span>
+          }
+        </div>
+        <div class="performance-steps">
+          @for (step of longevitySteps; track step.id; let i = $index) {
+            <span class="performance-step" [class.active]="i === activeLongevityIndex()">{{ step.label }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

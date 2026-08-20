@@ -9,6 +9,23 @@
   gap: 20px;
 }
 
+.related-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.related-match {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 24%, transparent);
+}
+
 @media (max-width: 900px) {
   .related-products-grid {
     grid-template-columns: repeat(2, 1fr);

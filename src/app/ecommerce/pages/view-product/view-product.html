@@ -16,8 +16,18 @@
     </div>
   </section>
 
+  <app-fragrance-profile [product]="currentProduct" />
+
+  @if (hasUsageGuide()) {
+    <app-usage-guide [product]="currentProduct" />
+  }
+
+  @if (hasPerformance()) {
+    <app-product-performance [product]="currentProduct" />
+  }
+
   @if (relatedProducts().length > 0) {
-    <app-related-products [products]="relatedProducts()" />
+    <app-related-products [currentProduct]="currentProduct" [products]="relatedProducts()" />
   }
 } @else {
   <section class="section product-not-found">

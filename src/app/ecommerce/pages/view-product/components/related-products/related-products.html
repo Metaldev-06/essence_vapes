@@ -4,12 +4,18 @@
       <div>
         <span class="section-label">Descubrí más</span>
         <h2 class="section-title">También te puede <em class="section-title-accent">gustar</em></h2>
+        <p class="section-subtitle">Acordes compartidos, mismo perfil olfativo.</p>
       </div>
     </div>
 
     <div class="related-products-grid">
-      @for (product of products(); track product.id) {
-        <app-product-card [product]="product" />
+      @for (item of items(); track item.product.id) {
+        <div class="related-item">
+          @if (item.matchPercent) {
+            <span class="related-match">{{ item.matchPercent }}% match</span>
+          }
+          <app-product-card [product]="item.product" />
+        </div>
       }
     </div>
   </div>

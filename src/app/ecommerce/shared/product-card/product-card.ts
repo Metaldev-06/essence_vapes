@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { AccentKey, Product } from '../../data/product.model';
 
@@ -19,4 +19,10 @@ export class ProductCard {
   readonly product = input.required<Product>();
 
   protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);
+
+  protected readonly isFavorite = signal(false);
+
+  protected toggleFavorite(): void {
+    this.isFavorite.update((value) => !value);
+  }
 }

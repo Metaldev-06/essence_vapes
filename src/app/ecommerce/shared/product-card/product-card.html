@@ -1,4 +1,10 @@
 <article class="product-card" [style.--accent-color]="accentVar()">
+  <a
+    [routerLink]="['/productos', product().id]"
+    class="product-card-cover-link"
+    [attr.aria-label]="'Ver ' + product().name"
+  ></a>
+
   <div class="product-card-visual">
     <svg class="product-bottle" viewBox="0 0 100 180" aria-hidden="true">
       <rect x="38" y="8" width="24" height="14" rx="4" class="product-bottle-cap" />
@@ -8,6 +14,21 @@
     @if (product().badge) {
       <span class="product-card-badge">{{ product().badge }}</span>
     }
+
+    <button
+      type="button"
+      class="product-card-favorite"
+      [class.active]="isFavorite()"
+      [attr.aria-pressed]="isFavorite()"
+      [attr.aria-label]="isFavorite() ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+      (click)="toggleFavorite()"
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" [attr.fill]="isFavorite() ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+        <path
+          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+        />
+      </svg>
+    </button>
   </div>
 
   <div class="product-card-body">
@@ -30,15 +51,14 @@
         }
         <span class="product-price-amount">{{ product().price }}</span>
       </div>
-      <a
-        [routerLink]="['/productos', product().id]"
-        class="product-card-link"
-        [attr.aria-label]="'Ver ' + product().name"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-          <path d="M7 17L17 7M17 7H7M17 7v10" />
+
+      <button type="button" class="product-card-cart" [attr.aria-label]="'Agregar ' + product().name + ' al carrito'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <path d="M16 10a4 4 0 0 1-8 0" />
         </svg>
-      </a>
+      </button>
     </div>
   </div>
 </article>

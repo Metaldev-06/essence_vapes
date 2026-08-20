@@ -1,4 +1,5 @@
 .product-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   border-radius: 20px;
@@ -11,6 +12,17 @@
 .product-card:hover {
   transform: translateY(-3px);
   border-color: color-mix(in srgb, var(--accent-color) 35%, var(--color-border-subtle));
+}
+
+.product-card-cover-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.product-card-cover-link:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
 }
 
 .product-card-visual {
@@ -56,6 +68,40 @@
   color: var(--color-text-primary);
   background: color-mix(in srgb, var(--accent-color) 30%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--accent-color) 45%, transparent);
+}
+
+.product-card-favorite {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  border: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.product-card-favorite:hover {
+  transform: scale(1.06);
+  border-color: color-mix(in srgb, var(--accent-color) 45%, transparent);
+}
+
+.product-card-favorite:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.product-card-favorite.active {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 16%, var(--color-bg));
+  border-color: color-mix(in srgb, var(--color-danger) 40%, transparent);
 }
 
 .product-card-body {
@@ -139,7 +185,9 @@
   text-decoration: line-through;
 }
 
-.product-card-link {
+.product-card-cart {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,16 +198,20 @@
   color: var(--color-text-primary);
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border-subtle);
-  text-decoration: none;
-  transition: background 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
-.product-card-link:hover {
+.product-card-cart:hover {
   background: color-mix(in srgb, var(--accent-color) 25%, var(--color-surface-elevated));
-  transform: translate(1px, -1px);
+  border-color: color-mix(in srgb, var(--accent-color) 45%, transparent);
 }
 
-.product-card-link:focus-visible {
+.product-card-cart:active {
+  transform: scale(0.92);
+}
+
+.product-card-cart:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }

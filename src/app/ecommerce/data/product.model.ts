@@ -1,5 +1,12 @@
 export type ProductCategory = 'perfumes' | 'decants' | 'vapes' | 'esencias';
 
+export const CATEGORY_LABELS: Record<ProductCategory, string> = {
+  perfumes: 'Perfumes',
+  decants: 'Decants',
+  vapes: 'Vapes',
+  esencias: 'Esencias',
+};
+
 export type ScentStyle = 'fresco' | 'dulce' | 'intenso' | 'elegante' | 'nocturno' | 'citrico';
 
 export type AccentKey = 'violet' | 'cyan' | 'emerald' | 'teal';

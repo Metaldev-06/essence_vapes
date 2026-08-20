@@ -1,0 +1,16 @@
+<section class="section related-products-section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <span class="section-label">Descubrí más</span>
+        <h2 class="section-title">También te puede <em class="section-title-accent">gustar</em></h2>
+      </div>
+    </div>
+
+    <div class="related-products-grid">
+      @for (product of products(); track product.id) {
+        <app-product-card [product]="product" />
+      }
+    </div>
+  </div>
+</section>

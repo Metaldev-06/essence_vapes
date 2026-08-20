@@ -1,15 +1,14 @@
 import { Component, computed, input, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { ACCENT_VARS } from '../../data/accent';
-import type { Product } from '../../data/product.model';
+import { ACCENT_VARS } from '../../../../data/accent';
+import type { Product } from '../../../../data/product.model';
 
 @Component({
-  selector: 'app-product-card',
-  imports: [RouterLink],
-  templateUrl: './product-card.html',
-  styleUrl: './product-card.css',
+  selector: 'app-product-gallery',
+  imports: [],
+  templateUrl: './product-gallery.html',
+  styleUrl: './product-gallery.css',
 })
-export class ProductCard {
+export class ProductGallery {
   readonly product = input.required<Product>();
 
   protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);

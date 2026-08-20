@@ -1,0 +1,64 @@
+<div class="product-details">
+  <span class="product-details-category">{{ categoryLabel() }}</span>
+
+  <span class="product-details-brand">{{ product().brand }}</span>
+  <h1 class="product-details-name">{{ product().name }}</h1>
+  <p class="product-details-subtitle">{{ product().subtitle }}</p>
+
+  <div class="product-details-price">
+    @if (product().oldPrice) {
+      <span class="product-details-price-old">{{ product().oldPrice }}</span>
+    } @else {
+      <span class="product-details-price-from">desde</span>
+    }
+    <span class="product-details-price-amount">{{ product().price }}</span>
+  </div>
+
+  @if (product().notes.length > 0) {
+    <div class="product-details-notes">
+      @for (note of product().notes; track note) {
+        <span class="note-pill">{{ note }}</span>
+      }
+    </div>
+  }
+
+  @if (description()) {
+    <p class="product-details-desc">{{ description() }}</p>
+  }
+
+  <div class="product-details-actions">
+    <div class="quantity-stepper" role="group" aria-label="Cantidad">
+      <button type="button" (click)="decreaseQuantity()" aria-label="Restar cantidad">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14" /></svg>
+      </button>
+      <span aria-live="polite">{{ quantity() }}</span>
+      <button type="button" (click)="increaseQuantity()" aria-label="Sumar cantidad">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+    </div>
+
+    <button type="button" class="btn btn-primary product-details-cart">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+      </svg>
+      Agregar al carrito
+    </button>
+  </div>
+
+  <ul class="product-details-trust">
+    <li>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 3h6M10 3v5.5L5.5 17a2 2 0 0 0 1.8 3h9.4a2 2 0 0 0 1.8-3L14 8.5V3" />
+      </svg>
+      100% original
+    </li>
+    <li>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 8l9-4 9 4-9 4-9-4Z" /><path d="M3 8v9l9 4 9-4V8" /><path d="M12 12v9" />
+      </svg>
+      Envíos a todo el país
+    </li>
+  </ul>
+</div>

@@ -1,1 +1,31 @@
-<p>view-product works!</p>
+@if (product(); as currentProduct) {
+  <section class="view-product">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a routerLink="/">Inicio</a>
+        <span aria-hidden="true">/</span>
+        <a routerLink="/productos">Productos</a>
+        <span aria-hidden="true">/</span>
+        <span class="breadcrumb-current">{{ currentProduct.name }}</span>
+      </nav>
+
+      <div class="view-product-layout">
+        <app-product-gallery [product]="currentProduct" />
+        <app-product-details [product]="currentProduct" />
+      </div>
+    </div>
+  </section>
+
+  @if (relatedProducts().length > 0) {
+    <app-related-products [products]="relatedProducts()" />
+  }
+} @else {
+  <section class="section product-not-found">
+    <div class="container product-not-found-inner">
+      <span class="section-label">Ups</span>
+      <h1 class="section-title">No encontramos esa fragancia</h1>
+      <p class="section-subtitle">Puede que el producto ya no esté disponible o el link esté mal escrito.</p>
+      <a routerLink="/productos" class="btn btn-primary">Ver todo el catálogo</a>
+    </div>
+  </section>
+}

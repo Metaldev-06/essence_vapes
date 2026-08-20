@@ -1,6 +1,9 @@
 .header__container {
   width: 100%;
   height: var(--header-height);
+  animation: blur-nav linear both;
+  animation-timeline: scroll(root block);
+  animation-range: 0 200px;
   position: fixed;
   top: 0;
   left: 0;
@@ -20,6 +23,34 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+
+      li {
+        a {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--color-text);
+          transition: all 0.2s ease-in-out;
+
+          &.active {
+            color: var(--color-accent);
+          }
+
+          &:hover {
+            color: var(--color-accent);
+          }
+        }
+      }
     }
+  }
+}
+
+@keyframes blur-nav {
+  from {
+    background-color: transparent;
+    backdrop-filter: blur(0);
+  }
+  to {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 }

@@ -1,0 +1,18 @@
+.contact-header {
+  position: relative;
+  overflow: hidden;
+  padding-block: 64px 40px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.contact-header-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 60% 100% at 15% 0%, color-mix(in srgb, var(--color-aurora-emerald) 16%, transparent), transparent 65%),
+    radial-gradient(ellipse 50% 80% at 100% 0%, color-mix(in srgb, var(--color-aurora-violet) 12%, transparent), transparent 60%);
+}
+
+.contact-header .container {
+  position: relative;
+}

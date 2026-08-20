@@ -1,0 +1,12 @@
+@if (products().length > 0) {
+  <div class="products-catalog-grid">
+    @for (product of products(); track product.id) {
+      <app-product-card [product]="product" />
+    }
+  </div>
+} @else {
+  <div class="products-empty" role="status">
+    <p class="products-empty-title">No encontramos fragancias con esos filtros</p>
+    <p class="products-empty-desc">Probá ajustar la búsqueda, la categoría o los estilos seleccionados.</p>
+  </div>
+}

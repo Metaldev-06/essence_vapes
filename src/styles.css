@@ -28,6 +28,7 @@
   --color-accent: var(--color-aurora-cyan);
   --color-accent-strong: var(--color-aurora-emerald);
   --color-focus-ring: var(--color-aurora-cyan);
+  --color-danger: #fb7185;
 
   /* Shared gradients, built only from the aurora palette above */
   --gradient-aurora-text: linear-gradient(

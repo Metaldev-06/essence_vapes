@@ -3,9 +3,13 @@
     <a [routerLink]="'/'">EssenceVapes</a>
 
     <ul class="header__nav">
-      <li><a [routerLink]="'/'">Inicio</a></li>
-      <li><a [routerLink]="'/productos'">Productos</a></li>
-      <li><a [routerLink]="'/contacto'">Contacto</a></li>
+      <li>
+        <a [routerLink]="'/'" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+          >Inicio</a
+        >
+      </li>
+      <li><a [routerLink]="'/productos'" routerLinkActive="active">Productos</a></li>
+      <li><a [routerLink]="'/contacto'" routerLinkActive="active">Contacto</a></li>
     </ul>
 
     <div class="user__actions"></div>

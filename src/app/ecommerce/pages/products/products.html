@@ -1,1 +1,17 @@
-<p>products works!</p>
+<app-products-header [count]="filteredProducts().length" />
+
+<section class="section products-body">
+  <div class="container">
+    <app-products-filters
+      [categories]="categories"
+      [sortOptions]="sortOptions"
+      [(category)]="activeCategory"
+      [(sort)]="sortBy"
+      [(search)]="search"
+      [activeStylesCount]="activeStyles().size"
+      (clearStyles)="clearStyles()"
+    />
+
+    <app-products-grid [products]="filteredProducts()" />
+  </div>
+</section>

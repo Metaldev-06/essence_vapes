@@ -1,0 +1,76 @@
+@if (!submitted()) {
+  <form class="contact-form" novalidate (submit)="onSubmit($event)">
+    <div class="form-row form-row--split">
+      <div class="form-field">
+        <label for="cf-name">Nombre</label>
+        <input
+          id="cf-name"
+          type="text"
+          placeholder="Tu nombre"
+          [formField]="contactForm.name"
+          [class.invalid]="contactForm.name().touched() && contactForm.name().invalid()"
+        />
+        @if (contactForm.name().touched() && contactForm.name().invalid()) {
+          <span class="form-error">{{ contactForm.name().errors()[0]?.message }}</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="cf-email">Email</label>
+        <input
+          id="cf-email"
+          type="email"
+          placeholder="vos@email.com"
+          [formField]="contactForm.email"
+          [class.invalid]="contactForm.email().touched() && contactForm.email().invalid()"
+        />
+        @if (contactForm.email().touched() && contactForm.email().invalid()) {
+          <span class="form-error">{{ contactForm.email().errors()[0]?.message }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-row form-row--split">
+      <div class="form-field">
+        <label for="cf-phone">Teléfono <span class="form-optional">(opcional)</span></label>
+        <input id="cf-phone" type="tel" placeholder="11 0000-0000" [formField]="contactForm.phone" />
+      </div>
+
+      <div class="form-field">
+        <label for="cf-reason">Motivo</label>
+        <select id="cf-reason" [formField]="contactForm.reason">
+          @for (reason of reasons; track reason.id) {
+            <option [value]="reason.id">{{ reason.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="cf-message">Mensaje</label>
+      <textarea
+        id="cf-message"
+        rows="5"
+        placeholder="Contanos en qué te podemos ayudar..."
+        [formField]="contactForm.message"
+        [class.invalid]="contactForm.message().touched() && contactForm.message().invalid()"
+      ></textarea>
+      @if (contactForm.message().touched() && contactForm.message().invalid()) {
+        <span class="form-error">{{ contactForm.message().errors()[0]?.message }}</span>
+      }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enviar mensaje</button>
+  </form>
+} @else {
+  <div class="contact-success" role="status">
+    <span class="contact-success-icon" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12.5l4.5 4.5L19 7" />
+      </svg>
+    </span>
+    <p class="contact-success-title">¡Mensaje enviado!</p>
+    <p class="contact-success-desc">Te vamos a responder a la brevedad por el email que dejaste.</p>
+    <button type="button" class="btn btn-ghost" (click)="sendAnother()">Enviar otro mensaje</button>
+  </div>
+}

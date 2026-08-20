@@ -1,0 +1,158 @@
+.product-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent-color) 35%, var(--color-border-subtle));
+}
+
+.product-card-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 0 16px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent-color) 16%, var(--color-surface-elevated)), var(--color-surface-elevated));
+}
+
+.product-bottle {
+  width: 72px;
+  height: 130px;
+  filter: drop-shadow(0 12px 24px color-mix(in srgb, var(--accent-color) 35%, transparent));
+}
+
+.product-bottle-cap {
+  fill: var(--accent-color);
+}
+
+.product-bottle-body {
+  fill: var(--color-surface);
+  stroke: color-mix(in srgb, var(--accent-color) 45%, transparent);
+  stroke-width: 1;
+}
+
+.product-bottle-label {
+  fill: color-mix(in srgb, var(--accent-color) 14%, transparent);
+  stroke: color-mix(in srgb, var(--accent-color) 30%, transparent);
+  stroke-width: 0.75;
+}
+
+.product-card-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--accent-color) 30%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 45%, transparent);
+}
+
+.product-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 18px 20px;
+}
+
+.product-card-brand {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-color);
+}
+
+.product-card-name {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.product-card-subtitle {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
+.product-card-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.note-pill {
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.product-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.product-price-from {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.product-price-amount {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.product-price-old {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.product-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.product-card-link:hover {
+  background: color-mix(in srgb, var(--accent-color) 25%, var(--color-surface-elevated));
+  transform: translate(1px, -1px);
+}
+
+.product-card-link:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}

@@ -1,0 +1,25 @@
+.products-header {
+  position: relative;
+  overflow: hidden;
+  padding-block: 64px 40px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.products-header-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 60% 100% at 15% 0%, color-mix(in srgb, var(--color-aurora-violet) 16%, transparent), transparent 65%),
+    radial-gradient(ellipse 50% 80% at 100% 0%, color-mix(in srgb, var(--color-aurora-cyan) 12%, transparent), transparent 60%);
+}
+
+.products-header .container {
+  position: relative;
+}
+
+.products-header-count {
+  margin-top: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}

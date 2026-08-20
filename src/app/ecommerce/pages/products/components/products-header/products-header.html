@@ -1,0 +1,13 @@
+<section class="products-header" aria-labelledby="products-heading">
+  <div class="products-header-glow" aria-hidden="true"></div>
+  <div class="container">
+    <span class="section-label">Catálogo</span>
+    <h1 id="products-heading" class="section-title">
+      Todas las <em class="section-title-accent">fragancias</em>
+    </h1>
+    <p class="section-subtitle">Perfumes originales, decants, vapes y esencias en un solo lugar.</p>
+    <p class="products-header-count">
+      {{ count() }} producto{{ count() === 1 ? '' : 's' }} encontrado{{ count() === 1 ? '' : 's' }}
+    </p>
+  </div>
+</section>

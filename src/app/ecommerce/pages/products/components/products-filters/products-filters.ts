@@ -1,5 +1,6 @@
 import { Component, input, model, output } from '@angular/core';
-import type { ProductCategory, SortOption } from '../../../../data/product.model';
+import { SCENT_STYLE_OPTIONS } from '../../../../data/scent-styles';
+import type { ProductCategory, ScentStyle, SortOption } from '../../../../data/product.model';
 
 export interface FilterOption<T extends string> {
   readonly id: T;
@@ -13,14 +14,17 @@ export interface FilterOption<T extends string> {
   styleUrl: './products-filters.css',
 })
 export class ProductsFilters {
+  protected readonly styleOptions = SCENT_STYLE_OPTIONS;
+
   readonly categories = input.required<readonly FilterOption<ProductCategory | 'todos'>[]>();
   readonly sortOptions = input.required<readonly FilterOption<SortOption>[]>();
-  readonly activeStylesCount = input(0);
+  readonly activeStyles = input<ReadonlySet<ScentStyle>>(new Set());
 
   readonly category = model.required<ProductCategory | 'todos'>();
   readonly sort = model.required<SortOption>();
   readonly search = model('');
 
+  readonly toggleStyle = output<ScentStyle>();
   readonly clearStyles = output<void>();
 
   protected onSearchInput(event: Event): void {

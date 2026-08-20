@@ -67,6 +67,18 @@ export default class Products {
     });
   });
 
+  protected toggleStyle(style: ScentStyle): void {
+    this.activeStyles.update((current) => {
+      const next = new Set(current);
+      if (next.has(style)) {
+        next.delete(style);
+      } else {
+        next.add(style);
+      }
+      return next;
+    });
+  }
+
   protected clearStyles(): void {
     this.activeStyles.set(new Set());
   }

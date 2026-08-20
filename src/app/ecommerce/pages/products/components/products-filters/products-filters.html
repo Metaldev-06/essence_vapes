@@ -1,28 +1,47 @@
 <div class="products-filters">
-  <div class="products-filters-chips" role="group" aria-label="Filtrar por categoría">
-    @for (option of categories(); track option.id) {
-      <button
-        type="button"
-        class="filter-chip"
-        [class.active]="category() === option.id"
-        [attr.aria-pressed]="category() === option.id"
-        (click)="category.set(option.id)"
-      >
-        {{ option.label }}
-      </button>
-    }
+  <div class="products-filters-left">
+    <div class="products-filters-chips" role="group" aria-label="Filtrar por categoría">
+      @for (option of categories(); track option.id) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="category() === option.id"
+          [attr.aria-pressed]="category() === option.id"
+          (click)="category.set(option.id)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+
+    <div class="products-filters-styles">
+      <div class="style-pills" role="group" aria-label="Filtrar por estilo olfativo">
+        @for (style of styleOptions; track style.id) {
+          <button
+            type="button"
+            class="style-pill"
+            [class.active]="activeStyles().has(style.id)"
+            [attr.aria-pressed]="activeStyles().has(style.id)"
+            (click)="toggleStyle.emit(style.id)"
+          >
+            <span aria-hidden="true">{{ style.emoji }}</span>
+            {{ style.label }}
+          </button>
+        }
+      </div>
+
+      @if (activeStyles().size > 0) {
+        <button type="button" class="clear-styles" (click)="clearStyles.emit()">
+          Limpiar estilos
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      }
+    </div>
   </div>
 
   <div class="products-filters-tools">
-    @if (activeStylesCount() > 0) {
-      <button type="button" class="filter-tag" (click)="clearStyles.emit()">
-        {{ activeStylesCount() }} estilo{{ activeStylesCount() === 1 ? '' : 's' }} del finder
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-          <path d="M6 6l12 12M18 6 6 18" />
-        </svg>
-      </button>
-    }
-
     <label class="products-search">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
         <circle cx="11" cy="11" r="8" />

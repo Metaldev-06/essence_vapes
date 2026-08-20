@@ -1,0 +1,24 @@
+/* Reserve roughly the deferred section's real height so it doesn't jump
+   into view once it renders - avoids layout shift while scrolling. */
+.defer-placeholder {
+  display: block;
+  background: var(--color-bg);
+}
+
+.defer-placeholder--features {
+  min-height: 620px;
+  background: var(--color-surface);
+}
+
+.defer-placeholder--products {
+  min-height: 640px;
+}
+
+.defer-placeholder--decants {
+  min-height: 660px;
+  background: var(--color-surface);
+}
+
+.defer-placeholder--finder {
+  min-height: 520px;
+}

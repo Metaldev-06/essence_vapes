@@ -1,7 +1,27 @@
 <app-hero />
 <app-divider />
 <app-categories />
-<app-features />
-<app-featured-products />
-<app-decants-banner />
-<app-finder />
+
+@defer (on viewport) {
+  <app-features />
+} @placeholder (minimum 100ms) {
+  <div class="defer-placeholder defer-placeholder--features"></div>
+}
+
+@defer (on viewport) {
+  <app-featured-products />
+} @placeholder (minimum 100ms) {
+  <div class="defer-placeholder defer-placeholder--products"></div>
+}
+
+@defer (on viewport) {
+  <app-decants-banner />
+} @placeholder (minimum 100ms) {
+  <div class="defer-placeholder defer-placeholder--decants"></div>
+}
+
+@defer (on viewport) {
+  <app-finder />
+} @placeholder (minimum 100ms) {
+  <div class="defer-placeholder defer-placeholder--finder"></div>
+}

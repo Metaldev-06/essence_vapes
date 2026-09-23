@@ -1,10 +1,14 @@
-import { Component, ElementRef, afterRenderEffect, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, afterRenderEffect, computed, input, output, viewChild } from '@angular/core';
 import { ProductCard } from '../../../../shared/product-card/product-card';
+import { ProductCardSkeleton } from '../../../../shared/product-card-skeleton/product-card-skeleton';
 import type { Product } from '../../../../data/product.model';
+
+const INITIAL_SKELETON_COUNT = 12;
+const TRAILING_SKELETON_COUNT = 4;
 
 @Component({
   selector: 'app-products-grid',
-  imports: [ProductCard],
+  imports: [ProductCard, ProductCardSkeleton],
   templateUrl: './products-grid.html',
   styleUrl: './products-grid.css',
 })
@@ -14,6 +18,12 @@ export class ProductsGrid {
   readonly hasMore = input(false);
 
   readonly loadMore = output<void>();
+
+  protected readonly initialSkeletons = Array.from({ length: INITIAL_SKELETON_COUNT });
+  protected readonly trailingSkeletons = Array.from({ length: TRAILING_SKELETON_COUNT });
+
+  protected readonly showInitialSkeleton = computed(() => this.isLoading() && this.products().length === 0);
+  protected readonly showTrailingSkeleton = computed(() => this.isLoading() && this.products().length > 0);
 
   private readonly sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
 

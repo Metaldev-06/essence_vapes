@@ -41,10 +41,3 @@
 .products-sentinel {
   height: 1px;
 }
-
-.products-loading-more {
-  text-align: center;
-  padding: 24px 0;
-  font-size: 13.5px;
-  color: var(--color-text-muted);
-}

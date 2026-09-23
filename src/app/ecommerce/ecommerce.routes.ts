@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
-import { inject } from '@angular/core';
 import { Ecommerce } from './ecommerce';
-import { ProductsService } from './data/products.service';
 
 export const ecommerceRoutes: Routes = [
   {
@@ -28,10 +26,7 @@ export const ecommerceRoutes: Routes = [
       {
         path: 'productos/:id',
         loadComponent: () => import('./pages/view-product/view-product'),
-        title: (route) => {
-          const product = inject(ProductsService).getById(route.paramMap.get('id') ?? '');
-          return product ? `${product.name} | Essence Vapes` : 'Producto | Essence Vapes';
-        },
+        title: 'Producto | Essence Vapes',
         data: {
           description: 'Conocé los detalles, notas y precio de esta fragancia en Essence Vapes.',
         },

@@ -1,363 +1,57 @@
-import { Injectable } from '@angular/core';
-import type { Product } from './product.model';
+import { Injectable, Signal } from '@angular/core';
+import { httpResource } from '@angular/common/http';
 
-const CATALOG: readonly Product[] = [
-  {
-    id: 'sauvage-elixir',
-    brand: 'Dior',
-    name: 'Sauvage Elixir',
-    subtitle: 'Extrait de Parfum · Amaderado',
-    notes: ['Bergamota', 'Ambroxan', 'Madera'],
-    price: '$8.500',
-    priceValue: 8500,
-    badge: 'Top ventas',
-    accent: 'violet',
-    category: 'perfumes',
-    styles: ['intenso', 'nocturno'],
-    featured: true,
-    year: 2021,
-    origin: 'Francia',
-    gender: 'masculino',
-    rating: 4.6,
-    ratingCount: 842,
-    accords: ['Amaderado', 'Especiado', 'Ambarado'],
-    fragranceNotes: {
-      top: ['Bergamota', 'Pimienta de Sichuan'],
-      heart: ['Ambroxan', 'Lavanda'],
-      base: ['Madera de Cachemira', 'Vainilla'],
-    },
-    mood: ['Intenso', 'Magnético', 'Nocturno'],
-    seasonUsage: { primavera: 3, verano: 2, otono: 4, invierno: 5 },
-    dayUsage: { dia: 2, noche: 5 },
-    occasions: { trabajo: 3, romantico: 4, social: 4, casual: 3, formal: 4, deporte: 1 },
-    sillage: 'fuerte',
-    longevity: '8-12h',
-  },
-  {
-    id: 'y-eau-de-parfum',
-    brand: 'Yves Saint Laurent',
-    name: 'Y Eau de Parfum',
-    subtitle: 'Pour Homme · Aromático Fresco',
-    notes: ['Manzana', 'Salvia', 'Cedro'],
-    price: '$6.200',
-    priceValue: 6200,
-    badge: 'Nuevo',
-    accent: 'cyan',
-    category: 'perfumes',
-    styles: ['fresco', 'elegante'],
-    featured: true,
-    year: 2018,
-    origin: 'Francia',
-    gender: 'masculino',
-    rating: 4.4,
-    ratingCount: 511,
-    accords: ['Aromático', 'Amaderado', 'Fresco'],
-    fragranceNotes: {
-      top: ['Manzana', 'Bergamota'],
-      heart: ['Salvia', 'Geranio'],
-      base: ['Cedro', 'Musgo de Roble'],
-    },
-    mood: ['Fresco', 'Confiado', 'Versátil'],
-    seasonUsage: { primavera: 5, verano: 5, otono: 3, invierno: 2 },
-    dayUsage: { dia: 5, noche: 3 },
-    occasions: { trabajo: 5, romantico: 3, social: 4, casual: 5, formal: 3, deporte: 2 },
-    sillage: 'moderado',
-    longevity: '6-8h',
-  },
-  {
-    id: 'la-vie-est-belle',
-    brand: 'Lancôme',
-    name: 'La Vie Est Belle',
-    subtitle: 'EDP · Floral Gourmand',
-    notes: ['Iris', 'Pralinée', 'Vainilla'],
-    price: '$7.900',
-    priceValue: 7900,
-    badge: 'Exclusivo',
-    accent: 'teal',
-    category: 'perfumes',
-    styles: ['dulce', 'elegante'],
-    featured: true,
-    year: 2012,
-    origin: 'Francia',
-    gender: 'femenino',
-    rating: 4.7,
-    ratingCount: 1024,
-    accords: ['Gourmand', 'Floral', 'Dulce'],
-    fragranceNotes: {
-      top: ['Grosella Negra', 'Pera'],
-      heart: ['Iris', 'Jazmín', 'Azahar'],
-      base: ['Pralinée', 'Vainilla', 'Pachulí'],
-    },
-    mood: ['Dulce', 'Romántico', 'Femenino'],
-    seasonUsage: { primavera: 4, verano: 2, otono: 4, invierno: 5 },
-    dayUsage: { dia: 3, noche: 5 },
-    occasions: { trabajo: 3, romantico: 5, social: 4, casual: 3, formal: 4, deporte: 1 },
-    sillage: 'fuerte',
-    longevity: '8-12h',
-  },
-  {
-    id: 'n5-leau',
-    brand: 'Chanel',
-    name: "N°5 L'Eau",
-    subtitle: 'EDP · Floral Aldehídico',
-    notes: ['Aldeídos', 'Rosa', 'Sándalo'],
-    price: '$11.500',
-    priceValue: 11500,
-    oldPrice: '$13.200',
-    badge: 'Últimas unidades',
-    accent: 'emerald',
-    category: 'perfumes',
-    styles: ['elegante', 'nocturno'],
-    featured: true,
-    year: 2016,
-    origin: 'Francia',
-    gender: 'femenino',
-    rating: 4.5,
-    ratingCount: 693,
-    accords: ['Floral Aldehídico', 'Elegante', 'Polvoroso'],
-    fragranceNotes: {
-      top: ['Aldeídos', 'Cítricos'],
-      heart: ['Rosa', 'Ylang-Ylang'],
-      base: ['Sándalo', 'Almizcle'],
-    },
-    mood: ['Elegante', 'Clásico', 'Atemporal'],
-    seasonUsage: { primavera: 5, verano: 4, otono: 3, invierno: 2 },
-    dayUsage: { dia: 4, noche: 4 },
-    occasions: { trabajo: 4, romantico: 4, social: 4, casual: 2, formal: 5, deporte: 1 },
-    sillage: 'moderado',
-    longevity: '6-8h',
-  },
-  {
-    id: 'decant-bleu-chanel',
-    brand: 'Chanel',
-    name: 'Decant Bleu de Chanel 5ml',
-    subtitle: 'Eau de Parfum · Amaderado Aromático',
-    notes: ['Pomelo', 'Menta', 'Incienso'],
-    price: '$3.200',
-    priceValue: 3200,
-    accent: 'cyan',
-    category: 'decants',
-    styles: ['fresco', 'intenso'],
-    year: 2014,
-    origin: 'Francia',
-    gender: 'masculino',
-    rating: 4.6,
-    ratingCount: 758,
-    accords: ['Amaderado Aromático', 'Fresco', 'Especiado'],
-    fragranceNotes: {
-      top: ['Pomelo', 'Menta', 'Pimienta Rosa'],
-      heart: ['Jengibre', 'Nuez Moscada', 'Incienso'],
-      base: ['Sándalo', 'Cedro', 'Labdanum'],
-    },
-    mood: ['Versátil', 'Confiado', 'Fresco'],
-    seasonUsage: { primavera: 4, verano: 4, otono: 4, invierno: 3 },
-    dayUsage: { dia: 4, noche: 4 },
-    occasions: { trabajo: 5, romantico: 4, social: 4, casual: 4, formal: 4, deporte: 2 },
-    sillage: 'moderado',
-    longevity: '6-8h',
-  },
-  {
-    id: 'decant-baccarat-540',
-    brand: 'Maison Francis Kurkdjian',
-    name: 'Decant Baccarat Rouge 540 10ml',
-    subtitle: 'Extrait de Parfum · Ambarado',
-    notes: ['Azafrán', 'Jazmín', 'Ámbar Gris'],
-    price: '$6.800',
-    priceValue: 6800,
-    badge: 'Más pedido',
-    accent: 'violet',
-    category: 'decants',
-    styles: ['dulce', 'nocturno'],
-    year: 2015,
-    origin: 'Francia',
-    gender: 'unisex',
-    rating: 4.8,
-    ratingCount: 1240,
-    accords: ['Ambarado', 'Dulce', 'Amaderado'],
-    fragranceNotes: {
-      top: ['Azafrán', 'Jazmín'],
-      heart: ['Ámbar Gris', 'Madera de Cedro'],
-      base: ['Almizcle Blanco', 'Abeto'],
-    },
-    mood: ['Lujoso', 'Magnético', 'Exclusivo'],
-    seasonUsage: { primavera: 3, verano: 2, otono: 5, invierno: 5 },
-    dayUsage: { dia: 3, noche: 5 },
-    occasions: { trabajo: 2, romantico: 5, social: 5, casual: 2, formal: 5, deporte: 1 },
-    sillage: 'enorme',
-    longevity: '12h+',
-  },
-  {
-    id: 'decant-oud-wood',
-    brand: 'Tom Ford',
-    name: 'Decant Oud Wood 5ml',
-    subtitle: 'Eau de Parfum · Amaderado Especiado',
-    notes: ['Oud', 'Sándalo', 'Cardamomo'],
-    price: '$4.500',
-    priceValue: 4500,
-    accent: 'emerald',
-    category: 'decants',
-    styles: ['intenso', 'nocturno'],
-    year: 2007,
-    origin: 'Estados Unidos',
-    gender: 'unisex',
-    rating: 4.7,
-    ratingCount: 612,
-    accords: ['Amaderado', 'Especiado', 'Ahumado'],
-    fragranceNotes: {
-      top: ['Oud', 'Cardamomo'],
-      heart: ['Sándalo', 'Palo de Rosa'],
-      base: ['Vetiver', 'Ámbar', 'Vainilla'],
-    },
-    mood: ['Sofisticado', 'Cálido', 'Exótico'],
-    seasonUsage: { primavera: 2, verano: 1, otono: 5, invierno: 5 },
-    dayUsage: { dia: 2, noche: 5 },
-    occasions: { trabajo: 3, romantico: 4, social: 3, casual: 2, formal: 5, deporte: 1 },
-    sillage: 'moderado',
-    longevity: '8-12h',
-  },
-  {
-    id: 'decant-aventus',
-    brand: 'Creed',
-    name: 'Decant Aventus 10ml',
-    subtitle: 'Eau de Parfum · Afrutado Amaderado',
-    notes: ['Piña', 'Abedul', 'Almizcle'],
-    price: '$5.900',
-    priceValue: 5900,
-    accent: 'teal',
-    category: 'decants',
-    styles: ['fresco', 'intenso'],
-    year: 2010,
-    origin: 'Francia',
-    gender: 'masculino',
-    rating: 4.7,
-    ratingCount: 980,
-    accords: ['Afrutado', 'Amaderado', 'Ahumado'],
-    fragranceNotes: {
-      top: ['Piña', 'Grosella Negra', 'Bergamota'],
-      heart: ['Abedul', 'Pachulí', 'Jazmín'],
-      base: ['Almizcle', 'Roble', 'Ámbar'],
-    },
-    mood: ['Exitoso', 'Enérgico', 'Confiado'],
-    seasonUsage: { primavera: 5, verano: 4, otono: 4, invierno: 2 },
-    dayUsage: { dia: 5, noche: 3 },
-    occasions: { trabajo: 5, romantico: 3, social: 4, casual: 4, formal: 4, deporte: 2 },
-    sillage: 'fuerte',
-    longevity: '8-12h',
-  },
-  {
-    id: 'pod-aurora-x1',
-    brand: 'Essence Vapes',
-    name: 'Pod Recargable Aurora X1',
-    subtitle: '2ml · 650mAh · USB-C',
-    notes: ['Menta Glacial', 'Frutos Rojos', 'Tabaco'],
-    price: '$12.000',
-    priceValue: 12000,
-    accent: 'cyan',
-    category: 'vapes',
-    styles: ['fresco'],
-  },
-  {
-    id: 'kit-desechable-5000',
-    brand: 'Essence Vapes',
-    name: 'Kit Desechable 5000 Puffs',
-    subtitle: 'Malla 0.8Ω · Batería 650mAh',
-    notes: ['Sandía Hielo', 'Mango', 'Uva'],
-    price: '$9.500',
-    priceValue: 9500,
-    badge: 'Nuevo',
-    accent: 'emerald',
-    category: 'vapes',
-    styles: ['dulce', 'fresco'],
-  },
-  {
-    id: 'vape-pen-mesh-pro',
-    brand: 'Essence Vapes',
-    name: 'Vape Pen Mesh Coil Pro',
-    subtitle: '1000mAh · Carga rápida',
-    notes: ['Menta', 'Cereza', 'Café'],
-    price: '$15.800',
-    priceValue: 15800,
-    accent: 'violet',
-    category: 'vapes',
-    styles: ['intenso'],
-  },
-  {
-    id: 'esencia-ambar-oud',
-    brand: 'Essence Lab',
-    name: 'Esencia Ámbar & Oud 30ml',
-    subtitle: 'Para difusor y ambientador',
-    notes: ['Ámbar', 'Oud', 'Vainilla'],
-    price: '$4.200',
-    priceValue: 4200,
-    accent: 'violet',
-    category: 'esencias',
-    styles: ['nocturno', 'intenso'],
-    rating: 4.5,
-    ratingCount: 128,
-    accords: ['Ambarado', 'Amaderado', 'Cálido'],
-    fragranceNotes: {
-      top: ['Ámbar'],
-      heart: ['Oud'],
-      base: ['Vainilla'],
-    },
-    mood: ['Acogedor', 'Envolvente', 'Nocturno'],
-  },
-  {
-    id: 'esencia-citrica-bergamota',
-    brand: 'Essence Lab',
-    name: 'Esencia Cítrica Bergamota 30ml',
-    subtitle: 'Para difusor y ambientador',
-    notes: ['Bergamota', 'Limón', 'Menta'],
-    price: '$3.600',
-    priceValue: 3600,
-    accent: 'cyan',
-    category: 'esencias',
-    styles: ['fresco', 'citrico'],
-    rating: 4.3,
-    ratingCount: 96,
-    accords: ['Cítrico', 'Fresco', 'Herbal'],
-    fragranceNotes: {
-      top: ['Bergamota', 'Limón'],
-      heart: ['Menta'],
-      base: ['Almizcle Blanco'],
-    },
-    mood: ['Energizante', 'Limpio', 'Liviano'],
-  },
-  {
-    id: 'esencia-vainilla-tonka',
-    brand: 'Essence Lab',
-    name: 'Esencia Vainilla Tonka 30ml',
-    subtitle: 'Para difusor y ambientador',
-    notes: ['Vainilla', 'Haba Tonka', 'Caramelo'],
-    price: '$3.900',
-    priceValue: 3900,
-    badge: 'Favorito',
-    accent: 'teal',
-    category: 'esencias',
-    styles: ['dulce', 'elegante'],
-    rating: 4.8,
-    ratingCount: 204,
-    accords: ['Gourmand', 'Dulce', 'Cálido'],
-    fragranceNotes: {
-      top: ['Vainilla'],
-      heart: ['Haba Tonka'],
-      base: ['Caramelo'],
-    },
-    mood: ['Reconfortante', 'Dulce', 'Hogareño'],
-  },
-];
+import { API_BASE_URL } from '../../core/config/api.config';
+import type { Product, ProductCategory, ScentStyle } from './product.model';
+
+export type ProductsSortField = 'name' | 'brand' | 'priceValue' | 'rating' | 'year' | 'createdAt' | 'featured';
+
+export interface ProductsQuery {
+  readonly term?: string;
+  readonly category?: ProductCategory;
+  readonly styles?: readonly ScentStyle[];
+  readonly sort?: ProductsSortField;
+  readonly order?: 'asc' | 'desc';
+  readonly limit?: number;
+}
+
+interface ProductsApiResponse {
+  readonly data: Product[];
+}
 
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
-  getAll(): readonly Product[] {
-    return CATALOG;
+  private readonly baseUrl = `${API_BASE_URL}/products`;
+
+  private readonly featuredResource = httpResource<Product[]>(() => `${this.baseUrl}/featured`, {
+    defaultValue: [],
+  });
+
+  readonly featured = this.featuredResource.value;
+  readonly featuredLoading = this.featuredResource.isLoading;
+
+  list(query: () => ProductsQuery | undefined) {
+    return httpResource<Product[]>(
+      () => {
+        const value = query();
+        if (!value) return undefined;
+        return { url: this.baseUrl, params: this.toParams(value) };
+      },
+      { defaultValue: [], parse: (raw) => (raw as ProductsApiResponse).data },
+    );
   }
 
-  getFeatured(): readonly Product[] {
-    return CATALOG.filter((product) => product.featured);
+  byId(id: Signal<string>) {
+    return httpResource<Product>(() => (id() ? `${this.baseUrl}/${id()}` : undefined));
   }
 
-  getById(id: string): Product | undefined {
-    return CATALOG.find((product) => product.id === id);
+  private toParams(query: ProductsQuery): Record<string, string | number> {
+    const params: Record<string, string | number> = { limit: query.limit ?? 100 };
+    if (query.term) params['term'] = query.term;
+    if (query.category) params['category'] = query.category;
+    if (query.styles && query.styles.length > 0) params['styles'] = query.styles.join(',');
+    if (query.sort) params['sort'] = query.sort;
+    if (query.order) params['order'] = query.order;
+    return params;
   }
 }

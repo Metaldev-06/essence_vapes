@@ -10,4 +10,5 @@ import type { Product } from '../../../../data/product.model';
 })
 export class ProductsGrid {
   readonly products = input.required<readonly Product[]>();
+  readonly isLoading = input(false);
 }

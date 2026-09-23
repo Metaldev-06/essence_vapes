@@ -1,6 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, debounced, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ProductsService } from '../../data/products.service';
+import { ProductsService, type ProductsQuery, type ProductsSortField } from '../../data/products.service';
 import type { ProductCategory, ScentStyle, SortOption } from '../../data/product.model';
 import { ProductsHeader } from './components/products-header/products-header';
 import { ProductsFilters, type FilterOption } from './components/products-filters/products-filters';
@@ -15,8 +15,6 @@ import { ProductsGrid } from './components/products-grid/products-grid';
 export default class Products {
   private readonly route = inject(ActivatedRoute);
   private readonly productsService = inject(ProductsService);
-
-  private readonly allProducts = this.productsService.getAll();
 
   protected readonly categories: readonly FilterOption<ProductCategory | 'todos'>[] = [
     { id: 'todos', label: 'Todos' },
@@ -38,34 +36,12 @@ export default class Products {
   protected readonly sortBy = signal<SortOption>('destacados');
   protected readonly activeStyles = signal<ReadonlySet<ScentStyle>>(this.readInitialStyles());
 
-  protected readonly filteredProducts = computed(() => {
-    const query = this.search().trim().toLowerCase();
-    const category = this.activeCategory();
-    const styles = this.activeStyles();
+  private readonly debouncedSearch = debounced(this.search, 300);
 
-    const filtered = this.allProducts.filter((product) => {
-      const matchesCategory = category === 'todos' || product.category === category;
-      const matchesStyles = styles.size === 0 || product.styles.some((style) => styles.has(style));
-      const matchesQuery =
-        query.length === 0 ||
-        product.name.toLowerCase().includes(query) ||
-        product.brand.toLowerCase().includes(query);
-      return matchesCategory && matchesStyles && matchesQuery;
-    });
+  private readonly productsResource = this.productsService.list(() => this.buildQuery());
 
-    return [...filtered].sort((a, b) => {
-      switch (this.sortBy()) {
-        case 'precio-asc':
-          return a.priceValue - b.priceValue;
-        case 'precio-desc':
-          return b.priceValue - a.priceValue;
-        case 'nombre':
-          return a.name.localeCompare(b.name);
-        default:
-          return Number(b.featured ?? false) - Number(a.featured ?? false);
-      }
-    });
-  });
+  protected readonly filteredProducts = this.productsResource.value;
+  protected readonly isLoading = this.productsResource.isLoading;
 
   protected toggleStyle(style: ScentStyle): void {
     this.activeStyles.update((current) => {
@@ -81,6 +57,33 @@ export default class Products {
 
   protected clearStyles(): void {
     this.activeStyles.set(new Set());
+  }
+
+  private buildQuery(): ProductsQuery {
+    const term = this.debouncedSearch.value().trim();
+    const category = this.activeCategory();
+    const styles = this.activeStyles();
+
+    return {
+      term: term.length > 0 ? term : undefined,
+      category: category === 'todos' ? undefined : category,
+      styles: styles.size > 0 ? Array.from(styles) : undefined,
+      limit: 100,
+      ...this.sortParams(this.sortBy()),
+    };
+  }
+
+  private sortParams(sort: SortOption): { sort: ProductsSortField; order: 'asc' | 'desc' } {
+    switch (sort) {
+      case 'precio-asc':
+        return { sort: 'priceValue', order: 'asc' };
+      case 'precio-desc':
+        return { sort: 'priceValue', order: 'desc' };
+      case 'nombre':
+        return { sort: 'name', order: 'asc' };
+      default:
+        return { sort: 'featured', order: 'desc' };
+    }
   }
 
   private readInitialCategory(): ProductCategory | 'todos' {

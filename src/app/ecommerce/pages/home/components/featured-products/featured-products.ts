@@ -12,5 +12,5 @@ import { ProductCard } from '../../../../shared/product-card/product-card';
 export class FeaturedProducts {
   private readonly productsService = inject(ProductsService);
 
-  protected readonly products = this.productsService.getFeatured();
+  protected readonly products = this.productsService.featured;
 }

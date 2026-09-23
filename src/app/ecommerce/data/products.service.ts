@@ -4,7 +4,8 @@ import { httpResource } from '@angular/common/http';
 import { API_BASE_URL } from '../../core/config/api.config';
 import type { Product, ProductCategory, ScentStyle } from './product.model';
 
-export type ProductsSortField = 'name' | 'brand' | 'priceValue' | 'rating' | 'year' | 'createdAt' | 'featured';
+export type ProductsSortField =
+  'name' | 'brand' | 'priceValue' | 'rating' | 'year' | 'createdAt' | 'featured';
 
 export interface ProductsQuery {
   readonly term?: string;
@@ -13,11 +14,28 @@ export interface ProductsQuery {
   readonly sort?: ProductsSortField;
   readonly order?: 'asc' | 'desc';
   readonly limit?: number;
+  readonly offset?: number;
 }
 
-interface ProductsApiResponse {
-  readonly data: Product[];
+export interface ProductsPagination {
+  readonly total: number;
+  readonly pages: number;
+  readonly current: number;
+  readonly limit: number;
+  readonly offset: number;
 }
+
+export interface ProductsPage {
+  readonly data: Product[];
+  readonly pagination: ProductsPagination;
+}
+
+const EMPTY_PAGE: ProductsPage = {
+  data: [],
+  pagination: { total: 0, pages: 0, current: 1, limit: 0, offset: 0 },
+};
+
+export const PRODUCTS_PAGE_SIZE = 12;
 
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
@@ -31,13 +49,13 @@ export class ProductsService {
   readonly featuredLoading = this.featuredResource.isLoading;
 
   list(query: () => ProductsQuery | undefined) {
-    return httpResource<Product[]>(
+    return httpResource<ProductsPage>(
       () => {
         const value = query();
         if (!value) return undefined;
         return { url: this.baseUrl, params: this.toParams(value) };
       },
-      { defaultValue: [], parse: (raw) => (raw as ProductsApiResponse).data },
+      { defaultValue: EMPTY_PAGE },
     );
   }
 
@@ -46,7 +64,10 @@ export class ProductsService {
   }
 
   private toParams(query: ProductsQuery): Record<string, string | number> {
-    const params: Record<string, string | number> = { limit: query.limit ?? 100 };
+    const params: Record<string, string | number> = {
+      limit: query.limit ?? PRODUCTS_PAGE_SIZE,
+      offset: query.offset ?? 0,
+    };
     if (query.term) params['term'] = query.term;
     if (query.category) params['category'] = query.category;
     if (query.styles && query.styles.length > 0) params['styles'] = query.styles.join(',');

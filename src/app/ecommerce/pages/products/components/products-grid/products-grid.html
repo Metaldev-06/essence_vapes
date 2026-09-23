@@ -4,6 +4,14 @@
       <app-product-card [product]="product" />
     }
   </div>
+
+  @if (hasMore()) {
+    <div #sentinel class="products-sentinel" aria-hidden="true"></div>
+  }
+
+  @if (isLoading()) {
+    <p class="products-loading-more" role="status">Cargando más fragancias…</p>
+  }
 } @else if (!isLoading()) {
   <div class="products-empty" role="status">
     <p class="products-empty-title">No encontramos fragancias con esos filtros</p>

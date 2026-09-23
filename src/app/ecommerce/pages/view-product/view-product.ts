@@ -54,7 +54,7 @@ export default class ViewProduct {
     }
     return this.relatedResource
       .value()
-      .filter((item) => item.id !== current.id)
+      .data.filter((item) => item.id !== current.id)
       .slice(0, 4);
   });
 

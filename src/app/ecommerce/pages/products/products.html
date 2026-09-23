@@ -1,4 +1,4 @@
-<app-products-header [count]="filteredProducts().length" />
+<app-products-header [count]="total()" />
 
 <section class="section products-body">
   <div class="container">
@@ -13,6 +13,11 @@
       (clearStyles)="clearStyles()"
     />
 
-    <app-products-grid [products]="filteredProducts()" [isLoading]="isLoading()" />
+    <app-products-grid
+      [products]="items()"
+      [isLoading]="isLoading()"
+      [hasMore]="hasMore()"
+      (loadMore)="loadMore()"
+    />
   </div>
 </section>

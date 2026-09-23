@@ -1,7 +1,12 @@
-import { Component, computed, debounced, inject, signal } from '@angular/core';
+import { Component, computed, debounced, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ProductsService, type ProductsQuery, type ProductsSortField } from '../../data/products.service';
-import type { ProductCategory, ScentStyle, SortOption } from '../../data/product.model';
+import {
+  ProductsService,
+  PRODUCTS_PAGE_SIZE,
+  type ProductsQuery,
+  type ProductsSortField,
+} from '../../data/products.service';
+import type { Product, ProductCategory, ScentStyle, SortOption } from '../../data/product.model';
 import { ProductsHeader } from './components/products-header/products-header';
 import { ProductsFilters, type FilterOption } from './components/products-filters/products-filters';
 import { ProductsGrid } from './components/products-grid/products-grid';
@@ -37,11 +42,45 @@ export default class Products {
   protected readonly activeStyles = signal<ReadonlySet<ScentStyle>>(this.readInitialStyles());
 
   private readonly debouncedSearch = debounced(this.search, 300);
+  private readonly offset = signal(0);
 
-  private readonly productsResource = this.productsService.list(() => this.buildQuery());
+  private readonly productsResource = this.productsService.list(() => ({
+    ...this.buildFilters(),
+    limit: PRODUCTS_PAGE_SIZE,
+    offset: this.offset(),
+  }));
 
-  protected readonly filteredProducts = this.productsResource.value;
+  protected readonly items = signal<Product[]>([]);
+  protected readonly total = signal(0);
+
   protected readonly isLoading = this.productsResource.isLoading;
+  protected readonly hasMore = computed(() => this.items().length < this.total());
+
+  constructor() {
+    // Reacts only to filter changes (not to `offset`) and resets pagination back to page one.
+    effect(() => {
+      this.buildFilters();
+      untracked(() => {
+        this.offset.set(0);
+        this.items.set([]);
+      });
+    });
+
+    // Reacts to each resolved page and appends it, unless it's a fresh first page.
+    effect(() => {
+      const page = this.productsResource.value();
+      const isFirstPage = untracked(() => this.offset()) === 0;
+      this.items.set(isFirstPage ? page.data : [...untracked(() => this.items()), ...page.data]);
+      this.total.set(page.pagination.total);
+    });
+  }
+
+  protected loadMore(): void {
+    if (!this.hasMore() || this.isLoading()) {
+      return;
+    }
+    this.offset.update((value) => value + PRODUCTS_PAGE_SIZE);
+  }
 
   protected toggleStyle(style: ScentStyle): void {
     this.activeStyles.update((current) => {
@@ -59,7 +98,7 @@ export default class Products {
     this.activeStyles.set(new Set());
   }
 
-  private buildQuery(): ProductsQuery {
+  private buildFilters(): ProductsQuery {
     const term = this.debouncedSearch.value().trim();
     const category = this.activeCategory();
     const styles = this.activeStyles();
@@ -68,7 +107,6 @@ export default class Products {
       term: term.length > 0 ? term : undefined,
       category: category === 'todos' ? undefined : category,
       styles: styles.size > 0 ? Array.from(styles) : undefined,
-      limit: 100,
       ...this.sortParams(this.sortBy()),
     };
   }

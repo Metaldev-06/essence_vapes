@@ -1,0 +1,99 @@
+<article class="cart-line" [class.invalid]="!line().isValid" [style.--accent-color]="accentVar()">
+  <a
+    [routerLink]="['/productos', line().product.id]"
+    class="cart-line-visual"
+    [attr.aria-label]="'Ver ' + line().product.name"
+  >
+    <svg class="cart-line-bottle" viewBox="0 0 100 180" aria-hidden="true">
+      <rect x="38" y="8" width="24" height="14" rx="4" class="cart-line-bottle-cap" />
+      <rect x="14" y="26" width="72" height="146" rx="16" class="cart-line-bottle-body" />
+      <rect x="24" y="66" width="52" height="66" rx="6" class="cart-line-bottle-label" />
+    </svg>
+  </a>
+
+  <div class="cart-line-info">
+    <a [routerLink]="['/productos', line().product.id]" class="cart-line-name">
+      <span class="cart-line-brand">{{ line().product.brand }}</span>
+      {{ line().product.name }}
+    </a>
+    <span class="cart-line-unit-price">{{ line().product.price }} c/u</span>
+
+    @if (!line().isValid) {
+      <p class="cart-line-warning" role="alert">
+        @if (line().availableStock === 0) {
+          Sin stock disponible - lo quitaremos antes de continuar al pago.
+        } @else {
+          Solo quedan {{ line().availableStock }} unidades - ajustá la cantidad o lo quitaremos
+          antes de continuar al pago.
+        }
+      </p>
+    } @else if (lowStock()) {
+      <p class="cart-line-hint">
+        ¡Quedan pocas unidades! ({{ line().availableStock }} disponibles)
+      </p>
+    }
+  </div>
+
+  <div class="cart-line-controls">
+    <div
+      class="quantity-stepper"
+      role="group"
+      [attr.aria-label]="'Cantidad de ' + line().product.name"
+    >
+      <button type="button" (click)="decrease()" aria-label="Restar cantidad">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path d="M5 12h14" />
+        </svg>
+      </button>
+      <span aria-live="polite">{{ line().quantity }}</span>
+      <button
+        type="button"
+        (click)="increase()"
+        [disabled]="!canIncrease()"
+        aria-label="Sumar cantidad"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
+    </div>
+
+    <span class="cart-line-subtotal">{{ subtotal() }}</span>
+
+    <button
+      type="button"
+      class="cart-line-remove"
+      (click)="remove()"
+      [attr.aria-label]="'Quitar ' + line().product.name + ' del carrito'"
+    >
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"
+        />
+      </svg>
+    </button>
+  </div>
+</article>

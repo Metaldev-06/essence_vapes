@@ -29,12 +29,19 @@ export class FavoritesService {
   readonly ids = computed(() => new Set(this.productsSignal().map((product) => product.id)));
 
   constructor() {
-    // Reruns only when isAuthenticated() actually flips - on startup session-restore, on
-    // login/register, and on logout - never on every change-detection pass.
+    // Angular can re-run an effect more than once for what is logically the same
+    // authenticated state (its scheduler doesn't guarantee exactly-once-per-transition), so
+    // this tracks whether the CURRENT state has already been reacted to - otherwise every
+    // extra re-run while still logged in would re-fetch the list for no reason.
+    let hasSeenAuthenticated = false;
+
     effect(() => {
-      if (this.authService.isAuthenticated()) {
+      const authenticated = this.authService.isAuthenticated();
+      if (authenticated && !hasSeenAuthenticated) {
+        hasSeenAuthenticated = true;
         void this.refresh();
-      } else {
+      } else if (!authenticated && hasSeenAuthenticated) {
+        hasSeenAuthenticated = false;
         this.productsSignal.set([]);
       }
     });

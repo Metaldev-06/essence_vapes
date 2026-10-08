@@ -1,5 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CartService } from '../../../core/cart/cart.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
 import { ACCENT_VARS } from '../../data/accent';
 import type { Product } from '../../data/product.model';
@@ -12,6 +13,7 @@ import type { Product } from '../../data/product.model';
 })
 export class ProductCard {
   private readonly favoritesService = inject(FavoritesService);
+  private readonly cartService = inject(CartService);
 
   readonly product = input.required<Product>();
 
@@ -21,7 +23,17 @@ export class ProductCard {
     this.favoritesService.isFavorite(this.product().id),
   );
 
+  protected readonly canAddToCart = computed(() => {
+    const product = this.product();
+    return product.isActive && this.cartService.getQuantity(product.id) < product.stock;
+  });
+
   protected toggleFavorite(): void {
     void this.favoritesService.toggle(this.product().id);
+  }
+
+  protected addToCart(): void {
+    if (!this.canAddToCart()) return;
+    void this.cartService.add(this.product(), 1);
   }
 }

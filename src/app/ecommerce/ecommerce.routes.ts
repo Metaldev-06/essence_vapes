@@ -72,6 +72,14 @@ export const ecommerceRoutes: Routes = [
           description: 'Tus fragancias favoritas, tu perfil de gustos y filtros por ocasión.',
         },
       },
+      {
+        path: 'carrito',
+        loadComponent: () => import('./pages/cart/cart'),
+        title: 'Carrito | Essence Vapes',
+        data: {
+          description: 'Revisá tu carrito de compras antes de continuar al pago.',
+        },
+      },
     ],
   },
 ];

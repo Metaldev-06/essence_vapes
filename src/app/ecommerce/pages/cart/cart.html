@@ -1,0 +1,80 @@
+<section class="cart-page section">
+  <div class="container">
+    <div class="cart-header">
+      <span class="section-label">Tu carrito</span>
+      <h1 class="section-title">Carrito de compras</h1>
+    </div>
+
+    @if (!authService.isAuthenticated() && !authService.isRestoring()) {
+      <div class="cart-guest-banner">
+        <span>Iniciá sesión para guardar tu carrito y no perderlo si cerrás la pestaña.</span>
+        <a
+          [routerLink]="'/auth/login'"
+          [queryParams]="{ returnUrl: '/carrito' }"
+          class="btn btn-sm btn-ghost"
+        >
+          Iniciar sesión
+        </a>
+      </div>
+    }
+
+    @if (cartService.lines().length === 0) {
+      <div class="cart-empty">
+        <p class="cart-empty-title">Tu carrito está vacío</p>
+        <p class="cart-empty-desc">Explorá el catálogo y agregá las fragancias que te gustan.</p>
+        <a [routerLink]="'/productos'" class="btn btn-primary">Ver productos</a>
+      </div>
+    } @else {
+      <div class="cart-layout">
+        <div class="cart-lines">
+          @for (line of cartService.lines(); track line.productId) {
+            <app-cart-line [line]="line" />
+          }
+        </div>
+
+        <aside class="cart-summary">
+          <h2 class="cart-summary-title">Resumen</h2>
+          <div class="cart-summary-row">
+            <span>Productos ({{ cartService.itemCount() }})</span>
+            <span>{{ subtotalLabel() }}</span>
+          </div>
+          <p class="cart-summary-note">El envío se calcula en el siguiente paso.</p>
+
+          @if (removedLines(); as removed) {
+            <div class="cart-notice cart-notice-danger" role="alert">
+              <p>Quitamos estos productos porque ya no tienen stock suficiente:</p>
+              <ul>
+                @for (line of removed; track line.productId) {
+                  <li>
+                    {{ line.product.name }}
+                    @if (line.availableStock > 0) {
+                      (quedaban {{ line.availableStock }})
+                    } @else {
+                      (sin stock)
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (checkoutReady()) {
+            <div class="cart-notice cart-notice-success" role="status">
+              Tu carrito está listo. Todavía estamos construyendo el pago online - muy pronto vas a
+              poder completar tu compra acá.
+            </div>
+          }
+
+          <button
+            type="button"
+            class="btn btn-primary cart-checkout"
+            [disabled]="checking()"
+            (click)="checkout()"
+          >
+            {{ checking() ? 'Verificando stock...' : 'Continuar al pago' }}
+          </button>
+        </aside>
+      </div>
+    }
+  </div>
+</section>

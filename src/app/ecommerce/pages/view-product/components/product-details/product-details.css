@@ -176,6 +176,26 @@
   flex-wrap: wrap;
 }
 
+.product-details-cart:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.product-details-cart-error {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-danger);
+}
+
+.product-details-stock-hint {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
 .quantity-stepper {
   display: flex;
   align-items: center;

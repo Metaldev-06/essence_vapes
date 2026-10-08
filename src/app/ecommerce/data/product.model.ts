@@ -60,6 +60,8 @@ export interface Product {
   readonly category: ProductCategory;
   readonly styles: readonly ScentStyle[];
   readonly featured?: boolean;
+  readonly stock: number;
+  readonly isActive: boolean;
 
   /** Extended profile - only curated for perfumes/decants/esencias (not applicable to vapes). */
   readonly year?: number;

@@ -4,11 +4,15 @@
     class="cart-line-visual"
     [attr.aria-label]="'Ver ' + line().product.name"
   >
-    <svg class="cart-line-bottle" viewBox="0 0 100 180" aria-hidden="true">
-      <rect x="38" y="8" width="24" height="14" rx="4" class="cart-line-bottle-cap" />
-      <rect x="14" y="26" width="72" height="146" rx="16" class="cart-line-bottle-body" />
-      <rect x="24" y="66" width="52" height="66" rx="6" class="cart-line-bottle-label" />
-    </svg>
+    @if (coverImage(); as cover) {
+      <img [ngSrc]="cover.url" [alt]="line().product.name" fill class="cart-line-photo" />
+    } @else {
+      <svg class="cart-line-bottle" viewBox="0 0 100 180" aria-hidden="true">
+        <rect x="38" y="8" width="24" height="14" rx="4" class="cart-line-bottle-cap" />
+        <rect x="14" y="26" width="72" height="146" rx="16" class="cart-line-bottle-body" />
+        <rect x="24" y="66" width="52" height="66" rx="6" class="cart-line-bottle-label" />
+      </svg>
+    }
   </a>
 
   <div class="cart-line-info">

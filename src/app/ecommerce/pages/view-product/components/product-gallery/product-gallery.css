@@ -7,14 +7,22 @@
   min-height: 440px;
   border-radius: 24px;
   border: 1px solid var(--color-border-subtle);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--accent-color) 18%, var(--color-surface-elevated)), var(--color-surface-elevated));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--accent-color) 18%, var(--color-surface-elevated)),
+    var(--color-surface-elevated)
+  );
 }
 
 .product-gallery-glow {
   position: absolute;
   inset: -20%;
   pointer-events: none;
-  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent-color) 45%, transparent), transparent 65%);
+  background: radial-gradient(
+    circle at 50% 40%,
+    color-mix(in srgb, var(--accent-color) 45%, transparent),
+    transparent 65%
+  );
   filter: blur(70px);
 }
 
@@ -23,6 +31,11 @@
   width: 160px;
   height: 288px;
   filter: drop-shadow(0 20px 40px color-mix(in srgb, var(--accent-color) 40%, transparent));
+}
+
+.product-gallery-photo {
+  object-fit: contain;
+  padding: 32px;
 }
 
 .product-gallery-bottle-cap {
@@ -71,7 +84,11 @@
   background: color-mix(in srgb, var(--color-bg) 55%, transparent);
   border: 1px solid var(--color-border-subtle);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .product-gallery-favorite:hover {

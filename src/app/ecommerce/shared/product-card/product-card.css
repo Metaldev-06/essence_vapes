@@ -32,12 +32,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 220px;
   padding: 28px 0 16px;
   background: linear-gradient(
     160deg,
     color-mix(in srgb, var(--accent-color) 16%, var(--color-surface-elevated)),
     var(--color-surface-elevated)
   );
+}
+
+.product-card-photo-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.product-card-photo {
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px color-mix(in srgb, var(--accent-color) 35%, transparent));
 }
 
 .product-bottle {

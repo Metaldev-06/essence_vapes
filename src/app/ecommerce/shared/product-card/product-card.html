@@ -6,11 +6,17 @@
   ></a>
 
   <div class="product-card-visual">
-    <svg class="product-bottle" viewBox="0 0 100 180" aria-hidden="true">
-      <rect x="38" y="8" width="24" height="14" rx="4" class="product-bottle-cap" />
-      <rect x="14" y="26" width="72" height="146" rx="16" class="product-bottle-body" />
-      <rect x="24" y="66" width="52" height="66" rx="6" class="product-bottle-label" />
-    </svg>
+    @if (coverImage(); as cover) {
+      <div class="product-card-photo-frame">
+        <img [ngSrc]="cover.url" [alt]="product().name" fill class="product-card-photo" />
+      </div>
+    } @else {
+      <svg class="product-bottle" viewBox="0 0 100 180" aria-hidden="true">
+        <rect x="38" y="8" width="24" height="14" rx="4" class="product-bottle-cap" />
+        <rect x="14" y="26" width="72" height="146" rx="16" class="product-bottle-body" />
+        <rect x="24" y="66" width="52" height="66" rx="6" class="product-bottle-label" />
+      </svg>
+    }
     @if (product().badge) {
       <span class="product-card-badge">{{ product().badge }}</span>
     }

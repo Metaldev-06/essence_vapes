@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../../../../core/cart/cart.service';
@@ -7,7 +8,7 @@ import type { CartLine as CartLineModel } from '../../../../../core/cart/cart.mo
 
 @Component({
   selector: 'app-cart-line',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   templateUrl: './cart-line.html',
   styleUrl: './cart-line.css',
 })
@@ -17,6 +18,9 @@ export class CartLine {
   readonly line = input.required<CartLineModel>();
 
   protected readonly accentVar = computed(() => ACCENT_VARS[this.line().product.accent]);
+
+  /** First uploaded photo, if any - falls back to the decorative SVG bottle otherwise. */
+  protected readonly coverImage = computed(() => this.line().product.images[0]);
   protected readonly subtotal = computed(() =>
     formatPrice(this.line().product.priceValue * this.line().quantity),
   );

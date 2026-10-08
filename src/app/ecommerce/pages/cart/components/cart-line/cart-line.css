@@ -14,11 +14,13 @@
 }
 
 .cart-line-visual {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 76px;
   border-radius: 12px;
+  overflow: hidden;
   background: linear-gradient(
     160deg,
     color-mix(in srgb, var(--accent-color) 16%, var(--color-surface-elevated)),
@@ -29,6 +31,11 @@
 .cart-line-bottle {
   width: 32px;
   height: 58px;
+}
+
+.cart-line-photo {
+  object-fit: contain;
+  padding: 8px;
 }
 
 .cart-line-bottle-cap {

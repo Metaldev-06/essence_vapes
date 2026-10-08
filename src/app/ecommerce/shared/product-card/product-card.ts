@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
@@ -7,7 +8,7 @@ import type { Product } from '../../data/product.model';
 
 @Component({
   selector: 'app-product-card',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   templateUrl: './product-card.html',
   styleUrl: './product-card.css',
 })
@@ -18,6 +19,9 @@ export class ProductCard {
   readonly product = input.required<Product>();
 
   protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);
+
+  /** First uploaded photo, if any - falls back to the decorative SVG bottle otherwise. */
+  protected readonly coverImage = computed(() => this.product().images[0]);
 
   protected readonly isFavorite = computed(() =>
     this.favoritesService.isFavorite(this.product().id),

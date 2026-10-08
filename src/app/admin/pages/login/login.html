@@ -1,0 +1,45 @@
+<div class="admin-login-page">
+  <div class="admin-login-card card">
+    <span class="admin-login-tag">Essence Vapes · Admin</span>
+    <h1 class="admin-login-title">Panel de administración</h1>
+    <p class="admin-login-subtitle">Ingresá con tu cuenta de administrador.</p>
+
+    <form class="admin-login-form" novalidate (submit)="onSubmit($event)">
+      <div class="form-field">
+        <label for="admin-login-email">Email</label>
+        <input
+          id="admin-login-email"
+          type="email"
+          autocomplete="email"
+          [formField]="loginForm.email"
+          [class.invalid]="loginForm.email().touched() && loginForm.email().invalid()"
+        />
+        @if (loginForm.email().touched() && loginForm.email().invalid()) {
+          <span class="form-error">{{ loginForm.email().errors()[0]?.message }}</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="admin-login-password">Contraseña</label>
+        <input
+          id="admin-login-password"
+          type="password"
+          autocomplete="current-password"
+          [formField]="loginForm.password"
+          [class.invalid]="loginForm.password().touched() && loginForm.password().invalid()"
+        />
+        @if (loginForm.password().touched() && loginForm.password().invalid()) {
+          <span class="form-error">{{ loginForm.password().errors()[0]?.message }}</span>
+        }
+      </div>
+
+      @if (error()) {
+        <p class="admin-login-error" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" class="btn btn-primary admin-login-submit" [disabled]="submitting()">
+        {{ submitting() ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+    </form>
+  </div>
+</div>

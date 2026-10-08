@@ -13,13 +13,14 @@ import {
 } from '@angular/router';
 
 import { routes } from './app.routes';
+import { adminAuthInterceptor } from './admin/data/admin-auth.interceptor';
 import { authInterceptor } from './core/auth/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, adminAuthInterceptor])),
     provideRouter(
       routes,
       withViewTransitions(),

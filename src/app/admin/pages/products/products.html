@@ -1,0 +1,140 @@
+<div class="admin-products">
+  <div class="admin-products-header">
+    <div>
+      <h1 class="admin-products-title">Productos</h1>
+      <p class="admin-products-subtitle">
+        {{ total() }} productos en el catálogo (incluye inactivos).
+      </p>
+    </div>
+    <a [routerLink]="'/admin/productos/nuevo'" class="btn btn-primary">+ Nuevo producto</a>
+  </div>
+
+  <div class="admin-products-filters">
+    <label class="admin-products-search">
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+      </svg>
+      <span class="sr-only">Buscar por marca o nombre</span>
+      <input
+        type="search"
+        placeholder="Buscar por marca o nombre..."
+        [value]="search()"
+        (input)="onSearchInput($event)"
+      />
+    </label>
+
+    <div class="admin-products-chips" role="group" aria-label="Filtrar por categoría">
+      @for (option of categories; track option.id) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="category() === option.id"
+          [attr.aria-pressed]="category() === option.id"
+          (click)="category.set(option.id)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="admin-products-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="admin-products-table-wrap">
+    <table class="admin-products-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Estado</th>
+          <th><span class="sr-only">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (isLoading() && items().length === 0) {
+          <tr>
+            <td colspan="6" class="admin-products-status">Cargando productos...</td>
+          </tr>
+        } @else if (items().length === 0) {
+          <tr>
+            <td colspan="6" class="admin-products-status">
+              No encontramos productos con esos filtros.
+            </td>
+          </tr>
+        } @else {
+          @for (product of items(); track product.id) {
+            <tr>
+              <td>
+                <span class="admin-products-name">{{ product.brand }} · {{ product.name }}</span>
+                <span class="admin-products-id">{{ product.id }}</span>
+              </td>
+              <td>{{ product.category }}</td>
+              <td>{{ product.price }}</td>
+              <td
+                [class.stock-low]="product.stock > 0 && product.stock <= 5"
+                [class.stock-out]="product.stock === 0"
+              >
+                {{ product.stock }}
+              </td>
+              <td>
+                <span class="status-badge" [class.active]="product.isActive">
+                  {{ product.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="admin-products-actions">
+                <a [routerLink]="['/admin/productos', product.id, 'editar']" class="action-link"
+                  >Editar</a
+                >
+                <button
+                  type="button"
+                  class="action-link action-link-danger"
+                  [disabled]="deletingId() === product.id"
+                  (click)="remove(product)"
+                >
+                  {{ deletingId() === product.id ? 'Eliminando...' : 'Eliminar' }}
+                </button>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (total() > 0) {
+    <div class="admin-products-pagination">
+      <span>Página {{ page() }} de {{ pageCount() }}</span>
+      <div class="admin-products-pagination-buttons">
+        <button
+          type="button"
+          class="btn btn-sm btn-ghost"
+          [disabled]="!hasPrev()"
+          (click)="prevPage()"
+        >
+          Anterior
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm btn-ghost"
+          [disabled]="!hasNext()"
+          (click)="nextPage()"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  }
+</div>

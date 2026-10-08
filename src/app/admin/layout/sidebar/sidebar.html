@@ -1,0 +1,63 @@
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <a [routerLink]="'/admin'">
+      EssenceVapes
+      <span class="sidebar-brand-tag">Admin</span>
+    </a>
+  </div>
+
+  <nav class="sidebar-nav" aria-label="Navegación del panel">
+    <a
+      [routerLink]="'/admin'"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+      Dashboard
+    </a>
+    <a [routerLink]="'/admin/productos'" routerLinkActive="active">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 8l9-4 9 4-9 4-9-4Z" />
+        <path d="M3 8v9l9 4 9-4V8" />
+        <path d="M12 12v9" />
+      </svg>
+      Productos
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-admin">
+      <span class="sidebar-admin-avatar" aria-hidden="true">{{ adminInitial() }}</span>
+      <div class="sidebar-admin-info">
+        <span class="sidebar-admin-name">{{ adminAuthService.user()?.fullName }}</span>
+        <span class="sidebar-admin-email">{{ adminAuthService.user()?.email }}</span>
+      </div>
+    </div>
+    <button type="button" class="sidebar-logout" (click)="logout()">Cerrar sesión</button>
+  </div>
+</aside>

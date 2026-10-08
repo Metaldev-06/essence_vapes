@@ -46,6 +46,12 @@ export interface OccasionRatings {
   readonly deporte: number;
 }
 
+/** A single Cloudinary asset - `publicId` is what the delete endpoints key off. */
+export interface MediaAsset {
+  readonly url: string;
+  readonly publicId: string;
+}
+
 export interface Product {
   readonly id: string;
   readonly brand: string;
@@ -55,6 +61,7 @@ export interface Product {
   readonly price: string;
   readonly priceValue: number;
   readonly oldPrice?: string;
+  readonly oldPriceValue?: number;
   readonly badge?: string;
   readonly accent: AccentKey;
   readonly category: ProductCategory;
@@ -62,6 +69,8 @@ export interface Product {
   readonly featured?: boolean;
   readonly stock: number;
   readonly isActive: boolean;
+  readonly images: readonly MediaAsset[];
+  readonly videos: readonly MediaAsset[];
 
   /** Extended profile - only curated for perfumes/decants/esencias (not applicable to vapes). */
   readonly year?: number;

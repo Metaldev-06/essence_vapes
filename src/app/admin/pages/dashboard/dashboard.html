@@ -1,0 +1,55 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Hola, {{ adminAuthService.user()?.fullName }}</h1>
+    <p class="dashboard-subtitle">Resumen general del catálogo.</p>
+  </div>
+
+  @if (isLoading()) {
+    <p class="dashboard-loading" role="status">Cargando estadísticas...</p>
+  } @else if (error()) {
+    <p class="dashboard-error" role="alert">{{ error() }}</p>
+  } @else {
+    <div class="stat-row">
+      <div class="stat-tile">
+        <span class="stat-tile-label">Productos totales</span>
+        <span class="stat-tile-value">{{ total() }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-tile-label">Activos</span>
+        <span class="stat-tile-value">{{ activeCount() }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-tile-label">Destacados</span>
+        <span class="stat-tile-value">{{ featuredCount() }}</span>
+      </div>
+      <div class="stat-tile" [class.stat-tile-danger]="outOfStockCount() > 0">
+        <span class="stat-tile-label">Sin stock</span>
+        <span class="stat-tile-value">{{ outOfStockCount() }}</span>
+      </div>
+    </div>
+
+    <div class="dashboard-section">
+      <div class="dashboard-section-header">
+        <h2 class="dashboard-section-title">Stock bajo (5 unidades o menos)</h2>
+        <a [routerLink]="'/admin/productos'" class="dashboard-section-link"
+          >Ver todos los productos</a
+        >
+      </div>
+
+      @if (lowStock().length === 0) {
+        <p class="dashboard-empty">Ningún producto con stock bajo por ahora.</p>
+      } @else {
+        <ul class="low-stock-list">
+          @for (product of lowStock(); track product.id) {
+            <li class="low-stock-item">
+              <a [routerLink]="['/admin/productos', product.id, 'editar']">
+                <span class="low-stock-name">{{ product.brand }} · {{ product.name }}</span>
+                <span class="low-stock-amount">{{ product.stock }} unidades</span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>

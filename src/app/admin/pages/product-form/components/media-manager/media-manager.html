@@ -1,0 +1,79 @@
+<div class="media-manager">
+  <div class="media-section">
+    <div class="media-section-header">
+      <h3>Imágenes</h3>
+      <span class="media-count">{{ images().length }} / {{ maxImages }}</span>
+    </div>
+
+    <div class="media-grid">
+      @for (image of images(); track image.publicId) {
+        <div class="media-thumb">
+          <img [src]="image.url" alt="" />
+          <button
+            type="button"
+            class="media-remove"
+            [disabled]="removingPublicId() === image.publicId"
+            (click)="removeImage(image.publicId)"
+            aria-label="Quitar imagen"
+          >
+            ×
+          </button>
+        </div>
+      }
+      @if (images().length < maxImages) {
+        <label class="media-add" [class.disabled]="uploadingImages()">
+          <span>{{ uploadingImages() ? 'Subiendo...' : '+ Agregar' }}</span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            hidden
+            [disabled]="uploadingImages()"
+            (change)="onImagesSelected($event)"
+          />
+        </label>
+      }
+    </div>
+  </div>
+
+  <div class="media-section">
+    <div class="media-section-header">
+      <h3>Videos</h3>
+      <span class="media-count">{{ videos().length }} / {{ maxVideos }}</span>
+    </div>
+
+    <div class="media-grid">
+      @for (video of videos(); track video.publicId) {
+        <div class="media-thumb media-thumb-video">
+          <video [src]="video.url" controls muted></video>
+          <button
+            type="button"
+            class="media-remove"
+            [disabled]="removingPublicId() === video.publicId"
+            (click)="removeVideo(video.publicId)"
+            aria-label="Quitar video"
+          >
+            ×
+          </button>
+        </div>
+      }
+      @if (videos().length < maxVideos) {
+        <label class="media-add" [class.disabled]="uploadingVideos()">
+          <span>{{ uploadingVideos() ? 'Subiendo...' : '+ Agregar' }}</span>
+          <input
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime"
+            multiple
+            hidden
+            [disabled]="uploadingVideos()"
+            (change)="onVideosSelected($event)"
+          />
+        </label>
+      }
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="media-error" role="alert">{{ error() }}</p>
+  }
+</div>

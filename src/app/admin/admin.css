@@ -1,0 +1,23 @@
+.admin-shell {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  padding: 36px 40px;
+}
+
+@media (max-width: 860px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+
+  .admin-main {
+    padding: 24px 20px;
+  }
+}

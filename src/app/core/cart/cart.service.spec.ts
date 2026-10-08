@@ -26,6 +26,8 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     styles: ['intenso'],
     stock: 25,
     isActive: true,
+    images: [],
+    videos: [],
     ...overrides,
   };
 }

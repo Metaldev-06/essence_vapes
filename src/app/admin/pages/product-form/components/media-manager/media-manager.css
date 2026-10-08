@@ -1,0 +1,116 @@
+.media-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.media-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.media-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.media-section-header h3 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.media-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 110px);
+  gap: 12px;
+}
+
+.media-thumb {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.media-thumb img,
+.media-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  border: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+}
+
+.media-remove:hover {
+  color: var(--color-danger);
+}
+
+.media-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.media-remove:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.media-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px dashed var(--color-border-subtle);
+  cursor: pointer;
+  text-align: center;
+}
+
+.media-add:hover {
+  color: var(--color-accent);
+  border-color: var(--color-border-accent);
+}
+
+.media-add.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.media-error {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-danger);
+}

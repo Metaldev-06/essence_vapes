@@ -19,6 +19,11 @@ const TOKEN_STORAGE_KEY = 'essence-vapes-token';
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  // Exact text the backend sends for a genuinely wrong email/password (see the backend's
+  // HashPassword helper and login flow). Reused client-side so the admin-rejection path below
+  // reads identically - no wording difference a user could use to tell the two cases apart.
+  private static readonly INVALID_CREDENTIALS_MESSAGE = 'Las credenciales no son válidas';
+
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/auth`;
 
@@ -73,14 +78,15 @@ export class AuthService {
     this.clearStoredToken();
   }
 
-  /** Accepts a freshly issued session, but only for non-admin users. */
+  /**
+   * Accepts a freshly issued session, but only for non-admin users. The rejection message is
+   * deliberately identical to the backend's own "wrong credentials" text (see `login`'s catch
+   * block) - a user must never be able to tell "wrong password" apart from "this is actually an
+   * admin account".
+   */
   private admitCustomerSession(session: AuthSession): AuthResult {
     if (session.user.role !== 'regular') {
-      return {
-        success: false,
-        message:
-          'Este acceso es solo para clientes. Si sos administrador/a, ingresá desde el panel de administración.',
-      };
+      return { success: false, message: AuthService.INVALID_CREDENTIALS_MESSAGE };
     }
 
     this.tokenSignal.set(session.token);

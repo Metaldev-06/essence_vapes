@@ -93,4 +93,49 @@ describe('AuthService', () => {
 
     httpMock.verify();
   });
+
+  it('rejects an admin login with the exact same message as wrong credentials', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+
+    const service = TestBed.inject(AuthService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    const adminLogin = service.login({ email: 'admin@test.com', password: 'whatever' });
+    const adminReq = httpMock.expectOne(`${API_BASE_URL}/auth/login`);
+    adminReq.flush({
+      user: {
+        id: 'admin1',
+        email: 'admin@test.com',
+        fullName: 'Admin',
+        role: 'admin',
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+      token: 'admin-token',
+    });
+    const adminResult = await adminLogin;
+
+    const wrongPasswordLogin = service.login({ email: 'cliente@test.com', password: 'nope' });
+    const wrongPasswordReq = httpMock.expectOne(`${API_BASE_URL}/auth/login`);
+    wrongPasswordReq.flush(
+      { message: 'Las credenciales no son válidas', error: 'Unauthorized', statusCode: 401 },
+      { status: 401, statusText: 'Unauthorized' },
+    );
+    const wrongPasswordResult = await wrongPasswordLogin;
+
+    expect(adminResult.success).toBe(false);
+    expect(wrongPasswordResult.success).toBe(false);
+    // The whole point: no wording difference a user could use to infer the account is an admin.
+    expect(adminResult.message).toBe(wrongPasswordResult.message);
+    expect(service.isAuthenticated()).toBe(false);
+    expect(service.token()).toBeNull();
+
+    httpMock.verify();
+  });
 });

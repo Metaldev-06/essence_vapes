@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { guestOnlyGuard } from '../core/auth/guest-only.guard';
 import { Ecommerce } from './ecommerce';
 
 export const ecommerceRoutes: Routes = [
@@ -20,7 +21,8 @@ export const ecommerceRoutes: Routes = [
         loadComponent: () => import('./pages/products/products'),
         title: 'Productos | Essence Vapes',
         data: {
-          description: 'Explorá el catálogo completo de perfumes, decants, vapes y esencias de Essence Vapes.',
+          description:
+            'Explorá el catálogo completo de perfumes, decants, vapes y esencias de Essence Vapes.',
         },
       },
       {
@@ -36,7 +38,28 @@ export const ecommerceRoutes: Routes = [
         loadComponent: () => import('./pages/contact/contact'),
         title: 'Contacto | Essence Vapes',
         data: {
-          description: '¿Dudas sobre un pedido, una fragancia o un envío? Escribinos, te respondemos a la brevedad.',
+          description:
+            '¿Dudas sobre un pedido, una fragancia o un envío? Escribinos, te respondemos a la brevedad.',
+        },
+      },
+      {
+        path: 'auth/login',
+        loadComponent: () => import('./pages/auth/login/login'),
+        canActivate: [guestOnlyGuard],
+        title: 'Iniciar sesión | Essence Vapes',
+        data: {
+          description:
+            'Iniciá sesión en tu cuenta de Essence Vapes para ver tus pedidos y favoritos.',
+        },
+      },
+      {
+        path: 'auth/register',
+        loadComponent: () => import('./pages/auth/register/register'),
+        canActivate: [guestOnlyGuard],
+        title: 'Crear cuenta | Essence Vapes',
+        data: {
+          description:
+            'Creá tu cuenta de Essence Vapes para guardar favoritos y agilizar tus compras.',
         },
       },
     ],

@@ -1,0 +1,51 @@
+<section class="section auth-page">
+  <div class="container">
+    <div class="auth-card card">
+      <h1 class="auth-title">Iniciá sesión</h1>
+      <p class="auth-subtitle">Accedé para ver tus pedidos y favoritos.</p>
+
+      <form class="auth-form" novalidate (submit)="onSubmit($event)">
+        <div class="form-field">
+          <label for="login-email">Email</label>
+          <input
+            id="login-email"
+            type="email"
+            autocomplete="email"
+            [formField]="loginForm.email"
+            [class.invalid]="loginForm.email().touched() && loginForm.email().invalid()"
+          />
+          @if (loginForm.email().touched() && loginForm.email().invalid()) {
+            <span class="form-error">{{ loginForm.email().errors()[0]?.message }}</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="login-password">Contraseña</label>
+          <input
+            id="login-password"
+            type="password"
+            autocomplete="current-password"
+            [formField]="loginForm.password"
+            [class.invalid]="loginForm.password().touched() && loginForm.password().invalid()"
+          />
+          @if (loginForm.password().touched() && loginForm.password().invalid()) {
+            <span class="form-error">{{ loginForm.password().errors()[0]?.message }}</span>
+          }
+        </div>
+
+        @if (error()) {
+          <p class="auth-form-error" role="alert">{{ error() }}</p>
+        }
+
+        <button type="submit" class="btn btn-primary auth-submit" [disabled]="submitting()">
+          {{ submitting() ? 'Ingresando...' : 'Iniciar sesión' }}
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        ¿No tenés cuenta?
+        <a [routerLink]="'/auth/register'" [queryParams]="{ returnUrl }">Creá una</a>
+      </p>
+    </div>
+  </div>
+</section>

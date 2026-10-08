@@ -1,0 +1,85 @@
+<section class="section auth-page">
+  <div class="container">
+    <div class="auth-card card">
+      <h1 class="auth-title">Creá tu cuenta</h1>
+      <p class="auth-subtitle">Sumate para guardar tus favoritos y agilizar tus compras.</p>
+
+      <form class="auth-form" novalidate (submit)="onSubmit($event)">
+        <div class="form-field">
+          <label for="register-name">Nombre completo</label>
+          <input
+            id="register-name"
+            type="text"
+            autocomplete="name"
+            [formField]="registerForm.fullName"
+            [class.invalid]="registerForm.fullName().touched() && registerForm.fullName().invalid()"
+          />
+          @if (registerForm.fullName().touched() && registerForm.fullName().invalid()) {
+            <span class="form-error">{{ registerForm.fullName().errors()[0]?.message }}</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="register-email">Email</label>
+          <input
+            id="register-email"
+            type="email"
+            autocomplete="email"
+            [formField]="registerForm.email"
+            [class.invalid]="registerForm.email().touched() && registerForm.email().invalid()"
+          />
+          @if (registerForm.email().touched() && registerForm.email().invalid()) {
+            <span class="form-error">{{ registerForm.email().errors()[0]?.message }}</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="register-password">Contraseña</label>
+          <input
+            id="register-password"
+            type="password"
+            autocomplete="new-password"
+            [formField]="registerForm.password"
+            [class.invalid]="registerForm.password().touched() && registerForm.password().invalid()"
+          />
+          @if (registerForm.password().touched() && registerForm.password().invalid()) {
+            <span class="form-error">{{ registerForm.password().errors()[0]?.message }}</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="register-confirm">Repetí la contraseña</label>
+          <input
+            id="register-confirm"
+            type="password"
+            autocomplete="new-password"
+            [formField]="registerForm.confirmPassword"
+            [class.invalid]="
+              registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()
+            "
+          />
+          @if (
+            registerForm.confirmPassword().touched() && registerForm.confirmPassword().invalid()
+          ) {
+            <span class="form-error">{{
+              registerForm.confirmPassword().errors()[0]?.message
+            }}</span>
+          }
+        </div>
+
+        @if (error()) {
+          <p class="auth-form-error" role="alert">{{ error() }}</p>
+        }
+
+        <button type="submit" class="btn btn-primary auth-submit" [disabled]="submitting()">
+          {{ submitting() ? 'Creando cuenta...' : 'Crear cuenta' }}
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        ¿Ya tenés cuenta?
+        <a [routerLink]="'/auth/login'" [queryParams]="{ returnUrl }">Iniciá sesión</a>
+      </p>
+    </div>
+  </div>
+</section>

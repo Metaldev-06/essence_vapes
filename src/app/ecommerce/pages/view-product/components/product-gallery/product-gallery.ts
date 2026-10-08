@@ -1,5 +1,5 @@
 import { NgOptimizedImage } from '@angular/common';
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { FavoritesService } from '../../../../../core/favorites/favorites.service';
 import { ACCENT_VARS } from '../../../../data/accent';
 import type { Product } from '../../../../data/product.model';
@@ -17,14 +17,24 @@ export class ProductGallery {
 
   protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);
 
-  /** First uploaded photo, if any - falls back to the decorative SVG bottle otherwise. */
-  protected readonly coverImage = computed(() => this.product().images[0]);
-
   protected readonly isFavorite = computed(() =>
     this.favoritesService.isFavorite(this.product().id),
   );
 
+  /** Resets to the first photo whenever the product changes (e.g. navigating via "related products"). */
+  protected readonly activeImageIndex = linkedSignal(() => {
+    this.product();
+    return 0;
+  });
+
+  /** Currently shown photo, if the product has any - falls back to the decorative SVG bottle otherwise. */
+  protected readonly activeImage = computed(() => this.product().images[this.activeImageIndex()]);
+
   protected toggleFavorite(): void {
     void this.favoritesService.toggle(this.product().id);
+  }
+
+  protected selectImage(index: number): void {
+    this.activeImageIndex.set(index);
   }
 }

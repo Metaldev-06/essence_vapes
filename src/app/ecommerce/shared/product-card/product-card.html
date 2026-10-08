@@ -11,15 +11,71 @@
         <img [ngSrc]="cover.url" [alt]="product().name" fill class="product-card-photo" />
       </div>
     } @else {
+      <!-- Placeholder silhouette, shaped after the product type. -->
       <svg class="product-bottle" viewBox="0 0 100 180" aria-hidden="true">
-        <rect x="38" y="8" width="24" height="14" rx="4" class="product-bottle-cap" />
-        <rect x="14" y="26" width="72" height="146" rx="16" class="product-bottle-body" />
-        <rect x="24" y="66" width="52" height="66" rx="6" class="product-bottle-label" />
+        @switch (product().category) {
+          @case ('decants') {
+            <rect x="42" y="6" width="16" height="12" rx="3" class="product-bottle-cap" />
+            <rect x="46" y="18" width="8" height="8" class="product-bottle-cap" />
+            <rect x="32" y="26" width="36" height="146" rx="14" class="product-bottle-body" />
+            <rect x="38" y="78" width="24" height="56" rx="4" class="product-bottle-label" />
+          }
+          @case ('vapes') {
+            <rect x="40" y="6" width="20" height="26" rx="6" class="product-bottle-cap" />
+            <rect x="28" y="30" width="44" height="142" rx="18" class="product-bottle-body" />
+            <rect x="38" y="52" width="24" height="44" rx="6" class="product-bottle-label" />
+            <circle cx="50" cy="128" r="7" class="product-bottle-label" />
+          }
+          @case ('esencias') {
+            <rect x="44" y="4" width="12" height="22" rx="6" class="product-bottle-cap" />
+            <rect x="36" y="24" width="28" height="18" rx="4" class="product-bottle-cap" />
+            <rect x="20" y="42" width="60" height="130" rx="20" class="product-bottle-body" />
+            <rect x="30" y="80" width="40" height="52" rx="6" class="product-bottle-label" />
+          }
+          @default {
+            <rect x="38" y="8" width="24" height="14" rx="4" class="product-bottle-cap" />
+            <rect x="14" y="26" width="72" height="146" rx="16" class="product-bottle-body" />
+            <rect x="24" y="66" width="52" height="66" rx="6" class="product-bottle-label" />
+          }
+        }
       </svg>
     }
-    @if (product().badge) {
-      <span class="product-card-badge">{{ product().badge }}</span>
-    }
+
+    <div class="product-card-tags">
+      <span class="product-card-category" [class]="'product-card-category--' + product().category">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          @switch (product().category) {
+            @case ('decants') {
+              <path d="M10 2h4M12 2v3M9 5h6v15a3 3 0 0 1-6 0z" />
+            }
+            @case ('vapes') {
+              <path d="M10 2h4v4h-4zM8 6h8v14a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z" />
+              <path d="M12 12v3" />
+            }
+            @case ('esencias') {
+              <path d="M12 3s-6 6.5-6 11a6 6 0 0 0 12 0c0-4.5-6-11-6-11z" />
+            }
+            @default {
+              <path d="M10 2h4v4h-4zM7 6h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+            }
+          }
+        </svg>
+        {{ categoryLabel() }}
+      </span>
+      @if (product().badge) {
+        <span class="product-card-badge">{{ product().badge }}</span>
+      }
+    </div>
 
     <button
       type="button"

@@ -74,10 +74,50 @@
   stroke-width: 0.75;
 }
 
-.product-card-badge {
+.product-card-tags {
   position: absolute;
   top: 14px;
   left: 14px;
+  right: 54px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Category tag: colour lives in the icon/border so the white text keeps AA contrast. */
+.product-card-category {
+  --category-color: var(--color-aurora-violet);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--category-color) 60%, transparent);
+
+  svg {
+    color: var(--category-color);
+    flex-shrink: 0;
+  }
+}
+
+.product-card-category--decants {
+  --category-color: var(--color-aurora-cyan);
+}
+
+.product-card-category--vapes {
+  --category-color: var(--color-aurora-emerald);
+}
+
+.product-card-category--esencias {
+  --category-color: #fbbf24;
+}
+
+.product-card-badge {
   padding: 4px 10px;
   border-radius: var(--radius-full);
   font-size: 10.5px;

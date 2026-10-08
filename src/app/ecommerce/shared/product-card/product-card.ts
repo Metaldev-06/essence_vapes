@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
 import { ACCENT_VARS } from '../../data/accent';
-import type { Product } from '../../data/product.model';
+import { CATEGORY_SINGULAR_LABELS, type Product } from '../../data/product.model';
 
 @Component({
   selector: 'app-product-card',
@@ -19,6 +19,8 @@ export class ProductCard {
   readonly product = input.required<Product>();
 
   protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);
+
+  protected readonly categoryLabel = computed(() => CATEGORY_SINGULAR_LABELS[this.product().category]);
 
   /** First uploaded photo, if any - falls back to the decorative SVG bottle otherwise. */
   protected readonly coverImage = computed(() => this.product().images[0]);

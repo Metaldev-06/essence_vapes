@@ -7,6 +7,14 @@ export const CATEGORY_LABELS: Record<ProductCategory, string> = {
   esencias: 'Esencias',
 };
 
+/** Singular form, for labelling a single product (e.g. the category tag on a card). */
+export const CATEGORY_SINGULAR_LABELS: Record<ProductCategory, string> = {
+  perfumes: 'Perfume',
+  decants: 'Decant',
+  vapes: 'Vape',
+  esencias: 'Esencia',
+};
+
 export type ScentStyle = 'fresco' | 'dulce' | 'intenso' | 'elegante' | 'nocturno' | 'citrico';
 
 export type AccentKey = 'violet' | 'cyan' | 'emerald' | 'teal';

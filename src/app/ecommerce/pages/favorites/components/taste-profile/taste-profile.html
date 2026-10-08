@@ -1,0 +1,50 @@
+@if (hasFavorites()) {
+  <div class="taste-profile">
+    <h2 class="taste-profile-title">Tu perfil de fragancias</h2>
+    <p class="taste-profile-subtitle">Según tus {{ products().length }} favoritos.</p>
+
+    @if (accordStats().length > 0) {
+      <div class="taste-profile-section">
+        <span class="taste-profile-section-label">Tus acordes favoritos</span>
+        <div
+          class="taste-bars"
+          role="img"
+          [attr.aria-label]="'Acordes más frecuentes en tus favoritos'"
+        >
+          @for (stat of accordStats(); track stat.label) {
+            <div
+              class="taste-bar-row"
+              [attr.title]="
+                stat.label + ': ' + stat.count + ' de ' + products().length + ' favoritos'
+              "
+            >
+              <span class="taste-bar-label">{{ stat.label }}</span>
+              <div class="taste-bar-track">
+                <div class="taste-bar-fill" [style.width.%]="stat.pct"></div>
+              </div>
+              <span class="taste-bar-value">{{ stat.count }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (styleStats().length > 0) {
+      <div class="taste-profile-section">
+        <span class="taste-profile-section-label">Tus estilos</span>
+        <div class="taste-profile-chips">
+          @for (stat of styleStats(); track stat.id) {
+            <span
+              class="taste-chip"
+              [attr.title]="stat.count + ' de ' + products().length + ' favoritos'"
+            >
+              <span aria-hidden="true">{{ stat.emoji }}</span>
+              {{ stat.label }}
+              <span class="taste-chip-count">{{ stat.count }}</span>
+            </span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

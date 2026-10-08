@@ -1,4 +1,5 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
+import { FavoritesService } from '../../../../../core/favorites/favorites.service';
 import { ACCENT_VARS } from '../../../../data/accent';
 import type { Product } from '../../../../data/product.model';
 
@@ -9,13 +10,17 @@ import type { Product } from '../../../../data/product.model';
   styleUrl: './product-gallery.css',
 })
 export class ProductGallery {
+  private readonly favoritesService = inject(FavoritesService);
+
   readonly product = input.required<Product>();
 
   protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);
 
-  protected readonly isFavorite = signal(false);
+  protected readonly isFavorite = computed(() =>
+    this.favoritesService.isFavorite(this.product().id),
+  );
 
   protected toggleFavorite(): void {
-    this.isFavorite.update((value) => !value);
+    void this.favoritesService.toggle(this.product().id);
   }
 }

@@ -1,0 +1,63 @@
+<section class="favorites-page section">
+  <div class="container">
+    <div class="favorites-header">
+      <span class="section-label">Tu espacio</span>
+      <h1 class="section-title">Mis favoritos</h1>
+      <p class="section-subtitle">
+        Guardá las fragancias que te gustan y descubrí tu propio perfil de gustos.
+      </p>
+    </div>
+
+    @if (favoritesService.isLoading() && !hasAnyFavorites()) {
+      <p class="favorites-loading" role="status">Cargando tus favoritos...</p>
+    } @else if (!hasAnyFavorites()) {
+      <div class="favorites-empty">
+        <span class="favorites-empty-icon" aria-hidden="true">
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+            />
+          </svg>
+        </span>
+        <p class="favorites-empty-title">Todavía no tenés favoritos</p>
+        <p class="favorites-empty-desc">
+          Tocá el corazón en cualquier fragancia para guardarla acá y armar tu perfil de gustos.
+        </p>
+        <a [routerLink]="'/productos'" class="btn btn-primary">Explorar productos</a>
+      </div>
+    } @else {
+      <div class="favorites-layout">
+        <app-taste-profile [products]="favoritesService.products()" />
+        <app-favorites-filters
+          [products]="favoritesService.products()"
+          [(activeFilters)]="activeFilters"
+        />
+      </div>
+
+      @if (filteredProducts().length > 0) {
+        <div class="favorites-grid">
+          @for (product of filteredProducts(); track product.id) {
+            <app-product-card [product]="product" />
+          }
+        </div>
+      } @else {
+        <div class="favorites-empty">
+          <p class="favorites-empty-title">Ningún favorito coincide con estos filtros</p>
+          <p class="favorites-empty-desc">Probá con otra combinación o limpiá los filtros.</p>
+          <button type="button" class="btn btn-ghost" (click)="clearFilters()">
+            Limpiar filtros
+          </button>
+        </div>
+      }
+    }
+  </div>
+</section>

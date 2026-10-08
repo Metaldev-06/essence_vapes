@@ -1,0 +1,119 @@
+.taste-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 28px;
+  border-radius: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.taste-profile-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+.taste-profile-subtitle {
+  margin-top: -14px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.taste-profile-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taste-profile-section-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.taste-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.taste-bar-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 28px;
+  align-items: center;
+  gap: 10px;
+}
+
+.taste-bar-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taste-bar-track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+
+.taste-bar-fill {
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  border-radius: 0 4px 4px 0;
+  background: var(--color-accent);
+}
+
+.taste-bar-value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.taste-profile-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.taste-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.taste-chip-count {
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+}
+
+@media (max-width: 640px) {
+  .taste-profile {
+    padding: 22px;
+  }
+
+  .taste-bar-row {
+    grid-template-columns: 90px 1fr 24px;
+  }
+}

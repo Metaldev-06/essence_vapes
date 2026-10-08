@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authOnlyGuard } from '../core/auth/auth-only.guard';
 import { guestOnlyGuard } from '../core/auth/guest-only.guard';
 import { Ecommerce } from './ecommerce';
 
@@ -60,6 +61,15 @@ export const ecommerceRoutes: Routes = [
         data: {
           description:
             'Creá tu cuenta de Essence Vapes para guardar favoritos y agilizar tus compras.',
+        },
+      },
+      {
+        path: 'favoritos',
+        loadComponent: () => import('./pages/favorites/favorites'),
+        canActivate: [authOnlyGuard],
+        title: 'Mis favoritos | Essence Vapes',
+        data: {
+          description: 'Tus fragancias favoritas, tu perfil de gustos y filtros por ocasión.',
         },
       },
     ],

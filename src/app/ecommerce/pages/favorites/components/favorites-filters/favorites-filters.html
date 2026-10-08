@@ -1,0 +1,48 @@
+<div class="favorites-filters">
+  <div class="favorites-filters-header">
+    <h2 class="favorites-filters-title">Filtrá por momento, estación u ocasión</h2>
+    @if (hasActiveFilters()) {
+      <button type="button" class="favorites-filters-clear" (click)="clear()">
+        Limpiar filtros
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          aria-hidden="true"
+        >
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+    }
+  </div>
+
+  @for (groupView of groups(); track groupView.group) {
+    <div class="favorites-filters-group">
+      <span class="favorites-filters-group-label">{{ groupView.label }}</span>
+      <div
+        class="favorites-filters-pills"
+        role="group"
+        [attr.aria-label]="'Filtrar por ' + groupView.label"
+      >
+        @for (card of groupView.cards; track card.id) {
+          <button
+            type="button"
+            class="favorite-filter-pill"
+            [class.active]="activeFilters().has(card.id)"
+            [class.empty]="card.count === 0"
+            [attr.aria-pressed]="activeFilters().has(card.id)"
+            [disabled]="card.count === 0"
+            (click)="toggle(card.id)"
+          >
+            <span aria-hidden="true">{{ card.emoji }}</span>
+            {{ card.label }}
+            <span class="favorite-filter-pill-count">{{ card.count }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

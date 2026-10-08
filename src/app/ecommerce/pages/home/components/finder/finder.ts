@@ -12,7 +12,7 @@ import type { ScentStyle } from '../../../../data/product.model';
 export class Finder {
   protected readonly styles = SCENT_STYLE_OPTIONS;
 
-  protected readonly selected = signal<ReadonlySet<ScentStyle>>(new Set(['fresco', 'intenso', 'nocturno']));
+  protected readonly selected = signal<ReadonlySet<ScentStyle>>(new Set());
 
   protected readonly selectedCount = computed(() => this.selected().size);
 

@@ -28,7 +28,7 @@
     </div>
 
     <div class="finder-footer">
-      <p class="finder-footer-hint">
+      <p class="finder-footer-hint" role="status">
         @if (selectedCount() > 0) {
           {{ selectedCount() }} estilo{{ selectedCount() === 1 ? '' : 's' }} seleccionado{{
             selectedCount() === 1 ? '' : 's'
@@ -37,9 +37,13 @@
           Elegí al menos un estilo para ver recomendaciones
         }
       </p>
-      <a [routerLink]="'/productos'" [queryParams]="{ styles: selectedParam() }" class="btn btn-primary">
-        Ver mis recomendaciones →
-      </a>
+      @if (selectedCount() > 0) {
+        <a [routerLink]="'/productos'" [queryParams]="{ styles: selectedParam() }" class="btn btn-primary">
+          Ver mis recomendaciones →
+        </a>
+      } @else {
+        <button type="button" class="btn btn-primary finder-cta-disabled" disabled>Ver mis recomendaciones →</button>
+      }
     </div>
   </div>
 </section>

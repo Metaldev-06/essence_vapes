@@ -1,0 +1,118 @@
+:host {
+  display: inline-flex;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toggle.has-label {
+  padding: 4px 2px;
+}
+
+.toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.toggle.busy {
+  cursor: progress;
+}
+
+.toggle-track {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  border: 1px solid color-mix(in srgb, var(--color-text-primary) 22%, transparent);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 40%);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.toggle.on .toggle-track {
+  background: var(--gradient-primary);
+  border-color: transparent;
+}
+
+.toggle.on .toggle-thumb {
+  transform: translateX(18px);
+  background: #ffffff;
+}
+
+.toggle.busy .toggle-thumb {
+  animation: toggle-pulse 0.9s ease-in-out infinite;
+}
+
+.toggle:not(:disabled):hover .toggle-track {
+  border-color: var(--color-border-accent);
+}
+
+.toggle:focus-visible {
+  outline: none;
+}
+
+.toggle:focus-visible .toggle-track {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggle-label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.toggle-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+@keyframes toggle-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-track,
+  .toggle-thumb {
+    transition: none;
+  }
+
+  .toggle.busy .toggle-thumb {
+    animation: none;
+  }
+}

@@ -1,0 +1,25 @@
+<button
+  type="button"
+  role="switch"
+  class="toggle"
+  [class.on]="checked()"
+  [class.busy]="busy()"
+  [class.has-label]="label()"
+  [attr.aria-checked]="checked()"
+  [attr.aria-label]="label() ? null : ariaLabel()"
+  [attr.aria-busy]="busy() || null"
+  [disabled]="disabled()"
+  (click)="toggle()"
+>
+  <span class="toggle-track" aria-hidden="true">
+    <span class="toggle-thumb"></span>
+  </span>
+  @if (label()) {
+    <span class="toggle-text">
+      <span class="toggle-label">{{ label() }}</span>
+      @if (hint()) {
+        <span class="toggle-hint">{{ hint() }}</span>
+      }
+    </span>
+  }
+</button>

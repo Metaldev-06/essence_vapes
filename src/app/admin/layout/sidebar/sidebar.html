@@ -1,15 +1,20 @@
 <aside class="sidebar">
   <div class="sidebar-brand">
     <a [routerLink]="'/admin'">
-      EssenceVapes
-      <span class="sidebar-brand-tag">Admin</span>
+      <span class="sidebar-brand-mark" aria-hidden="true">EV</span>
+      <span class="sidebar-brand-text">
+        EssenceVapes
+        <span class="sidebar-brand-tag">Panel admin</span>
+      </span>
     </a>
   </div>
 
   <nav class="sidebar-nav" aria-label="Navegación del panel">
+    <span class="sidebar-nav-heading">Gestión</span>
     <a
       [routerLink]="'/admin'"
       routerLinkActive="active"
+      ariaCurrentWhenActive="page"
       [routerLinkActiveOptions]="{ exact: true }"
     >
       <svg
@@ -30,7 +35,7 @@
       </svg>
       Dashboard
     </a>
-    <a [routerLink]="'/admin/productos'" routerLinkActive="active">
+    <a [routerLink]="'/admin/productos'" routerLinkActive="active" ariaCurrentWhenActive="page">
       <svg
         width="17"
         height="17"
@@ -48,6 +53,37 @@
       </svg>
       Productos
     </a>
+    <a href="/" target="_blank" rel="noopener" class="sidebar-nav-external">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5Z" />
+      </svg>
+      Ver tienda
+      <span class="sr-only">(se abre en una pestaña nueva)</span>
+      <svg
+        class="sidebar-nav-external-icon"
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+      </svg>
+    </a>
   </nav>
 
   <div class="sidebar-footer">
@@ -58,6 +94,21 @@
         <span class="sidebar-admin-email">{{ adminAuthService.user()?.email }}</span>
       </div>
     </div>
-    <button type="button" class="sidebar-logout" (click)="logout()">Cerrar sesión</button>
+    <button type="button" class="sidebar-logout" (click)="logout()">
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+      </svg>
+      <span class="sidebar-logout-text">Cerrar sesión</span>
+    </button>
   </div>
 </aside>

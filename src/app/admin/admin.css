@@ -9,7 +9,7 @@
 .admin-main {
   flex: 1;
   min-width: 0;
-  padding: 36px 40px;
+  padding: 36px 44px 56px;
 }
 
 @media (max-width: 860px) {
@@ -18,6 +18,6 @@
   }
 
   .admin-main {
-    padding: 24px 20px;
+    padding: 22px 16px 40px;
   }
 }

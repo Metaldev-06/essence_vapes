@@ -6,16 +6,41 @@ import { extractErrorMessage } from '../../data/extract-error-message';
 import type { AdminProductInput } from '../../data/admin-product.model';
 import { ProductsAdminService } from '../../data/products-admin.service';
 import { SCENT_STYLE_OPTIONS } from '../../../ecommerce/data/scent-styles';
-import type {
-  AccentKey,
-  Gender,
-  Longevity,
-  Product,
-  ProductCategory,
-  ScentStyle,
-  Sillage,
+import { ACCENT_VARS } from '../../../ecommerce/data/accent';
+import {
+  CATEGORY_LABELS,
+  type AccentKey,
+  type Gender,
+  type Longevity,
+  type Product,
+  type ProductCategory,
+  type ScentStyle,
+  type Sillage,
 } from '../../../ecommerce/data/product.model';
 import { MediaManager } from './components/media-manager/media-manager';
+import { ToggleSwitch } from '../../shared/toggle-switch/toggle-switch';
+
+const SAVED_MESSAGE_DURATION_MS = 4000;
+
+const ACCENT_LABELS: Record<AccentKey, string> = {
+  violet: 'Violeta',
+  cyan: 'Cian',
+  emerald: 'Esmeralda',
+  teal: 'Verde agua',
+};
+
+const GENDER_LABELS: Record<Gender, string> = {
+  masculino: 'Masculino',
+  femenino: 'Femenino',
+  unisex: 'Unisex',
+};
+
+const SILLAGE_LABELS: Record<Sillage, string> = {
+  intimo: 'Íntimo',
+  moderado: 'Moderado',
+  fuerte: 'Fuerte',
+  enorme: 'Enorme',
+};
 
 interface ProductFormModel {
   brand: string;
@@ -258,7 +283,7 @@ const productSchema = schema<ProductFormModel>((path) => {
 /** Create AND edit share this one form - `id` coming from the route is the only difference. */
 @Component({
   selector: 'app-admin-product-form',
-  imports: [FormField, RouterLink, MediaManager],
+  imports: [FormField, RouterLink, MediaManager, ToggleSwitch],
   templateUrl: './product-form.html',
   styleUrl: './product-form.css',
 })
@@ -268,6 +293,11 @@ export default class ProductForm {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly styleOptions = SCENT_STYLE_OPTIONS;
+  protected readonly categoryLabels = CATEGORY_LABELS;
+  protected readonly accentLabels = ACCENT_LABELS;
+  protected readonly accentVars = ACCENT_VARS;
+  protected readonly genderLabels = GENDER_LABELS;
+  protected readonly sillageLabels = SILLAGE_LABELS;
   protected readonly categoryOptions: readonly ProductCategory[] = [
     'perfumes',
     'decants',
@@ -301,6 +331,8 @@ export default class ProductForm {
   protected readonly isSaving = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly loadedProduct = signal<Product | null>(null);
+  protected readonly savedMessage = signal<string | null>(null);
+  private savedTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected readonly pageTitle = computed(() =>
     this.isEditMode ? 'Editar producto' : 'Nuevo producto',
@@ -332,9 +364,12 @@ export default class ProductForm {
     event.preventDefault();
     this.productForm().markAsTouched();
     if (!this.productForm().valid() || this.selectedStyles().size === 0) {
-      if (this.selectedStyles().size === 0) {
-        this.error.set('Elegí al menos un estilo olfativo');
-      }
+      this.error.set(
+        this.selectedStyles().size === 0 && this.productForm().valid()
+          ? 'Elegí al menos un estilo olfativo'
+          : 'Revisá los campos marcados en rojo antes de guardar.',
+      );
+      this.focusFirstInvalidField();
       return;
     }
 
@@ -346,6 +381,7 @@ export default class ProductForm {
       if (this.isEditMode && this.productId) {
         const updated = await this.productsAdminService.update(this.productId, payload);
         this.loadedProduct.set(updated);
+        this.showSaved('Cambios guardados');
       } else {
         const created = await this.productsAdminService.create(payload);
         // Media can only be attached once the product exists - send them straight to edit mode.
@@ -357,6 +393,19 @@ export default class ProductForm {
     } finally {
       this.isSaving.set(false);
     }
+  }
+
+  private showSaved(message: string): void {
+    clearTimeout(this.savedTimer);
+    this.savedMessage.set(message);
+    this.savedTimer = setTimeout(() => this.savedMessage.set(null), SAVED_MESSAGE_DURATION_MS);
+  }
+
+  /** Moves focus to the first field flagged invalid so a long form doesn't fail silently off-screen. */
+  private focusFirstInvalidField(): void {
+    queueMicrotask(() => {
+      document.querySelector<HTMLElement>('.product-form .invalid')?.focus();
+    });
   }
 
   private async loadProduct(id: string): Promise<void> {

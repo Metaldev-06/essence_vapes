@@ -1,55 +1,179 @@
 <div class="dashboard">
-  <div class="dashboard-header">
-    <h1 class="dashboard-title">Hola, {{ adminAuthService.user()?.fullName }}</h1>
-    <p class="dashboard-subtitle">Resumen general del catálogo.</p>
-  </div>
+  <header class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Hola{{ firstName() ? ', ' + firstName() : '' }} 👋</h1>
+      <p class="dashboard-subtitle">Así está tu catálogo hoy.</p>
+    </div>
+    <div class="dashboard-actions">
+      <a href="/" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">
+        Ver tienda <span class="sr-only">(se abre en una pestaña nueva)</span>
+      </a>
+      <a [routerLink]="'/admin/productos/nuevo'" class="btn btn-sm btn-primary">
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Nuevo producto
+      </a>
+    </div>
+  </header>
 
   @if (isLoading()) {
-    <p class="dashboard-loading" role="status">Cargando estadísticas...</p>
+    <div class="stat-row" aria-busy="true">
+      <span class="sr-only" role="status">Cargando estadísticas...</span>
+      @for (tile of skeletonTiles; track tile) {
+        <div class="stat-tile stat-tile-skeleton" aria-hidden="true">
+          <span class="skeleton-block skeleton-icon"></span>
+          <span class="skeleton-block skeleton-value"></span>
+          <span class="skeleton-block skeleton-label"></span>
+        </div>
+      }
+    </div>
   } @else if (error()) {
-    <p class="dashboard-error" role="alert">{{ error() }}</p>
+    <div class="dashboard-error" role="alert">
+      <span>{{ error() }}</span>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="retry()">Reintentar</button>
+    </div>
   } @else {
     <div class="stat-row">
-      <div class="stat-tile">
-        <span class="stat-tile-label">Productos totales</span>
+      <a class="stat-tile" [routerLink]="'/admin/productos'">
+        <span class="stat-tile-icon" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 8l9-4 9 4-9 4-9-4Z" />
+            <path d="M3 8v9l9 4 9-4V8" />
+            <path d="M12 12v9" />
+          </svg>
+        </span>
         <span class="stat-tile-value">{{ total() }}</span>
+        <span class="stat-tile-label">Productos en total</span>
+      </a>
+
+      <div class="stat-tile stat-tile-visible">
+        <span class="stat-tile-icon" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </span>
+        <span class="stat-tile-value">{{ visibleCount() }}</span>
+        <span class="stat-tile-label">
+          Visibles en la tienda
+          @if (hiddenCount() > 0) {
+            <span class="stat-tile-meta">· {{ hiddenCount() }} ocultos</span>
+          }
+        </span>
       </div>
-      <div class="stat-tile">
-        <span class="stat-tile-label">Activos</span>
-        <span class="stat-tile-value">{{ activeCount() }}</span>
-      </div>
-      <div class="stat-tile">
-        <span class="stat-tile-label">Destacados</span>
+
+      <div class="stat-tile stat-tile-featured">
+        <span class="stat-tile-icon" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.6 6.8L12 17.1 5.8 20.5l1.6-6.8L2.2 9l6.9-.7L12 2Z"
+            />
+          </svg>
+        </span>
         <span class="stat-tile-value">{{ featuredCount() }}</span>
+        <span class="stat-tile-label">Destacados en la home</span>
       </div>
+
       <div class="stat-tile" [class.stat-tile-danger]="outOfStockCount() > 0">
-        <span class="stat-tile-label">Sin stock</span>
+        <span class="stat-tile-icon" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+            <path d="M12 9v4M12 17h.01" />
+          </svg>
+        </span>
         <span class="stat-tile-value">{{ outOfStockCount() }}</span>
+        <span class="stat-tile-label">Sin stock</span>
       </div>
     </div>
 
-    <div class="dashboard-section">
+    <section class="dashboard-section" aria-labelledby="attention-title">
       <div class="dashboard-section-header">
-        <h2 class="dashboard-section-title">Stock bajo (5 unidades o menos)</h2>
-        <a [routerLink]="'/admin/productos'" class="dashboard-section-link"
-          >Ver todos los productos</a
-        >
+        <div>
+          <h2 id="attention-title" class="dashboard-section-title">Necesitan reposición</h2>
+          <p class="dashboard-section-hint">
+            Productos sin stock o con {{ lowStockThreshold }} unidades o menos.
+          </p>
+        </div>
+        <a [routerLink]="'/admin/productos'" class="dashboard-section-link">
+          Ver todos los productos →
+        </a>
       </div>
 
-      @if (lowStock().length === 0) {
-        <p class="dashboard-empty">Ningún producto con stock bajo por ahora.</p>
+      @if (needsAttention().length === 0) {
+        <div class="dashboard-empty">
+          <span class="dashboard-empty-icon" aria-hidden="true">✓</span>
+          Todo en orden: ningún producto con stock bajo.
+        </div>
       } @else {
-        <ul class="low-stock-list">
-          @for (product of lowStock(); track product.id) {
-            <li class="low-stock-item">
-              <a [routerLink]="['/admin/productos', product.id, 'editar']">
-                <span class="low-stock-name">{{ product.brand }} · {{ product.name }}</span>
-                <span class="low-stock-amount">{{ product.stock }} unidades</span>
+        <ul class="attention-list">
+          @for (product of needsAttention(); track product.id) {
+            <li>
+              <a class="attention-item" [routerLink]="['/admin/productos', product.id, 'editar']">
+                <span class="attention-thumb">
+                  @if (product.images[0]; as image) {
+                    <img [ngSrc]="image.url" alt="" width="40" height="40" />
+                  } @else {
+                    <span aria-hidden="true">{{ product.brand.charAt(0) }}</span>
+                  }
+                </span>
+                <span class="attention-info">
+                  <span class="attention-name">{{ product.name }}</span>
+                  <span class="attention-brand">{{ product.brand }}</span>
+                </span>
+                <span class="stock-pill" [class.stock-pill-out]="product.stock === 0">
+                  {{ product.stock === 0 ? 'Sin stock' : product.stock + ' u.' }}
+                </span>
+                <span class="attention-cta">Editar</span>
               </a>
             </li>
           }
         </ul>
       }
-    </div>
+    </section>
   }
 </div>

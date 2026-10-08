@@ -1,0 +1,13 @@
+<div class="toast-region" role="status" aria-live="polite">
+  @if (toast(); as currentToast) {
+    <div class="toast" [class.toast-error]="currentToast.tone === 'error'">
+      <span class="toast-icon" aria-hidden="true">{{
+        currentToast.tone === 'error' ? '!' : '✓'
+      }}</span>
+      <span class="toast-message">{{ currentToast.message }}</span>
+      <button type="button" class="toast-close" aria-label="Cerrar aviso" (click)="dismissed.emit()">
+        ×
+      </button>
+    </div>
+  }
+</div>

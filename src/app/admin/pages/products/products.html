@@ -1,13 +1,28 @@
 <div class="admin-products">
-  <div class="admin-products-header">
+  <header class="admin-products-header">
     <div>
       <h1 class="admin-products-title">Productos</h1>
       <p class="admin-products-subtitle">
-        {{ total() }} productos en el catálogo (incluye inactivos).
+        {{ total() }} {{ total() === 1 ? 'producto' : 'productos' }} en el catálogo. Los ocultos no
+        aparecen en la tienda.
       </p>
     </div>
-    <a [routerLink]="'/admin/productos/nuevo'" class="btn btn-primary">+ Nuevo producto</a>
-  </div>
+    <a [routerLink]="'/admin/productos/nuevo'" class="btn btn-primary">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Nuevo producto
+    </a>
+  </header>
 
   <div class="admin-products-filters">
     <label class="admin-products-search">
@@ -51,61 +66,181 @@
     <p class="admin-products-error" role="alert">{{ error() }}</p>
   }
 
-  <div class="admin-products-table-wrap">
+  <div class="admin-products-table-wrap" [attr.aria-busy]="isLoading()">
     <table class="admin-products-table">
+      <caption class="sr-only">
+        Listado de productos
+      </caption>
       <thead>
         <tr>
-          <th>Producto</th>
-          <th>Categoría</th>
-          <th>Precio</th>
-          <th>Stock</th>
-          <th>Estado</th>
-          <th><span class="sr-only">Acciones</span></th>
+          <th scope="col">Producto</th>
+          <th scope="col">Categoría</th>
+          <th scope="col">Precio</th>
+          <th scope="col">Stock</th>
+          <th scope="col">Visible</th>
+          <th scope="col"><span class="sr-only">Acciones</span></th>
         </tr>
       </thead>
       <tbody>
         @if (isLoading() && items().length === 0) {
-          <tr>
-            <td colspan="6" class="admin-products-status">Cargando productos...</td>
-          </tr>
+          @for (row of skeletonRows; track row) {
+            <tr class="skeleton-row" aria-hidden="true">
+              <td>
+                <div class="product-cell">
+                  <span class="skeleton-block skeleton-thumb"></span>
+                  <span class="product-cell-info">
+                    <span class="skeleton-block skeleton-line"></span>
+                    <span class="skeleton-block skeleton-line short"></span>
+                  </span>
+                </div>
+              </td>
+              <td><span class="skeleton-block skeleton-pill"></span></td>
+              <td><span class="skeleton-block skeleton-line short"></span></td>
+              <td><span class="skeleton-block skeleton-line short"></span></td>
+              <td><span class="skeleton-block skeleton-switch"></span></td>
+              <td></td>
+            </tr>
+          }
         } @else if (items().length === 0) {
-          <tr>
-            <td colspan="6" class="admin-products-status">
-              No encontramos productos con esos filtros.
+          <tr class="empty-row">
+            <td colspan="6">
+              <div class="admin-products-empty">
+                <p class="admin-products-empty-title">No encontramos productos</p>
+                @if (hasFilters()) {
+                  <p>Probá con otra búsqueda o categoría.</p>
+                  <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">
+                    Limpiar filtros
+                  </button>
+                } @else {
+                  <p>Todavía no cargaste ningún producto.</p>
+                  <a [routerLink]="'/admin/productos/nuevo'" class="btn btn-sm btn-primary"
+                    >Crear el primero</a
+                  >
+                }
+              </div>
             </td>
           </tr>
         } @else {
           @for (product of items(); track product.id) {
-            <tr>
-              <td>
-                <span class="admin-products-name">{{ product.brand }} · {{ product.name }}</span>
-                <span class="admin-products-id">{{ product.id }}</span>
+            <tr [class.is-hidden]="!product.isActive">
+              <td class="cell-product">
+                <div class="product-cell">
+                  <span class="product-thumb">
+                    @if (product.images[0]; as image) {
+                      <img [ngSrc]="image.url" alt="" width="44" height="44" />
+                    } @else {
+                      <span aria-hidden="true">{{ product.brand.charAt(0) }}</span>
+                    }
+                  </span>
+                  <span class="product-cell-info">
+                    <a
+                      class="product-cell-name"
+                      [routerLink]="['/admin/productos', product.id, 'editar']"
+                      >{{ product.name }}</a
+                    >
+                    <span class="product-cell-brand">
+                      {{ product.brand }}
+                      @if (product.featured) {
+                        <span class="featured-tag">★ Destacado</span>
+                      }
+                    </span>
+                  </span>
+                </div>
               </td>
-              <td>{{ product.category }}</td>
-              <td>{{ product.price }}</td>
-              <td
-                [class.stock-low]="product.stock > 0 && product.stock <= 5"
-                [class.stock-out]="product.stock === 0"
-              >
-                {{ product.stock }}
+              <td class="cell-category" data-label="Categoría">
+                <span class="category-pill">{{ categoryLabels[product.category] }}</span>
               </td>
-              <td>
-                <span class="status-badge" [class.active]="product.isActive">
-                  {{ product.isActive ? 'Activo' : 'Inactivo' }}
+              <td class="cell-price" data-label="Precio">{{ product.price }}</td>
+              <td class="cell-stock" data-label="Stock">
+                @if (product.stock === 0) {
+                  <span class="stock-indicator stock-out">Sin stock</span>
+                } @else if (product.stock <= lowStockThreshold) {
+                  <span class="stock-indicator stock-low">{{ product.stock }} · bajo</span>
+                } @else {
+                  <span class="stock-indicator">{{ product.stock }}</span>
+                }
+              </td>
+              <td class="cell-visible" data-label="Visible">
+                <app-toggle-switch
+                  [checked]="product.isActive"
+                  (checkedChange)="setVisibility(product, $event)"
+                  [busy]="togglingIds().has(product.id)"
+                  [ariaLabel]="'Visible en la tienda: ' + product.name"
+                />
+                <span class="visibility-text" aria-hidden="true">
+                  {{ product.isActive ? 'Visible' : 'Oculto' }}
                 </span>
               </td>
-              <td class="admin-products-actions">
-                <a [routerLink]="['/admin/productos', product.id, 'editar']" class="action-link"
-                  >Editar</a
-                >
-                <button
-                  type="button"
-                  class="action-link action-link-danger"
-                  [disabled]="deletingId() === product.id"
-                  (click)="remove(product)"
-                >
-                  {{ deletingId() === product.id ? 'Eliminando...' : 'Eliminar' }}
-                </button>
+              <td class="cell-actions">
+                <div class="row-actions">
+                  <a
+                    class="icon-button"
+                    [routerLink]="['/admin/productos', product.id, 'editar']"
+                    [attr.aria-label]="'Editar ' + product.name"
+                    title="Editar"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                  </a>
+                  <a
+                    class="icon-button"
+                    [href]="'/productos/' + product.id"
+                    target="_blank"
+                    rel="noopener"
+                    [attr.aria-label]="'Ver ' + product.name + ' en la tienda (pestaña nueva)'"
+                    title="Ver en la tienda"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"
+                      />
+                    </svg>
+                  </a>
+                  <button
+                    type="button"
+                    class="icon-button icon-button-danger"
+                    [disabled]="deletingId() === product.id"
+                    [attr.aria-label]="'Eliminar ' + product.name"
+                    title="Eliminar"
+                    (click)="remove(product)"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                    </svg>
+                  </button>
+                </div>
               </td>
             </tr>
           }
@@ -114,8 +249,8 @@
     </table>
   </div>
 
-  @if (total() > 0) {
-    <div class="admin-products-pagination">
+  @if (pageCount() > 1) {
+    <nav class="admin-products-pagination" aria-label="Paginación">
       <span>Página {{ page() }} de {{ pageCount() }}</span>
       <div class="admin-products-pagination-buttons">
         <button
@@ -124,7 +259,7 @@
           [disabled]="!hasPrev()"
           (click)="prevPage()"
         >
-          Anterior
+          ← Anterior
         </button>
         <button
           type="button"
@@ -132,9 +267,11 @@
           [disabled]="!hasNext()"
           (click)="nextPage()"
         >
-          Siguiente
+          Siguiente →
         </button>
       </div>
-    </div>
+    </nav>
   }
+
+  <app-toast [toast]="toast()" (dismissed)="dismissToast()" />
 </div>

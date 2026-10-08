@@ -20,8 +20,11 @@
   <div class="defer-placeholder defer-placeholder--decants"></div>
 }
 
-@defer (on viewport) {
-  <app-finder />
-} @placeholder (minimum 100ms) {
-  <div class="defer-placeholder defer-placeholder--finder"></div>
-}
+<!-- The anchor lives outside @defer so "#finder" links work before the section has rendered. -->
+<div id="finder">
+  @defer (on viewport) {
+    <app-finder />
+  } @placeholder (minimum 100ms) {
+    <div class="defer-placeholder defer-placeholder--finder"></div>
+  }
+</div>

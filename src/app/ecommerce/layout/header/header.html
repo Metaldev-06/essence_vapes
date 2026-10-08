@@ -1,19 +1,42 @@
 <header class="header__container">
   <div class="header__content">
-    <a [routerLink]="'/'">EssenceVapes</a>
+    <a class="header__brand" [routerLink]="'/'" (click)="closeNav()">EssenceVapes</a>
 
-    <ul class="header__nav">
-      <li>
-        <a [routerLink]="'/'" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-          >Inicio</a
-        >
-      </li>
-      <li><a [routerLink]="'/productos'" routerLinkActive="active">Productos</a></li>
-      <li><a [routerLink]="'/contacto'" routerLinkActive="active">Contacto</a></li>
-    </ul>
+    <nav class="header__nav-wrapper" aria-label="Principal">
+      <ul id="header-nav" class="header__nav" [class.is-open]="navOpen()">
+        <li>
+          <a
+            [routerLink]="'/'"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            (click)="closeNav()"
+            >Inicio</a
+          >
+        </li>
+        <li>
+          <a [routerLink]="'/productos'" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="closeNav()"
+            >Productos</a
+          >
+        </li>
+        <li>
+          <a [routerLink]="'/contacto'" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="closeNav()"
+            >Contacto</a
+          >
+        </li>
+        @if (!authService.isRestoring() && !authService.isAuthenticated()) {
+          <!-- On very narrow screens the login button moves from the bar into the menu. -->
+          <li class="header__nav-login">
+            <a [routerLink]="'/auth/login'" [queryParams]="{ returnUrl: router.url }" (click)="closeNav()"
+              >Iniciar sesión</a
+            >
+          </li>
+        }
+      </ul>
+    </nav>
 
     <div class="user__actions">
-      <a class="icon-btn cart-trigger" [routerLink]="'/carrito'" aria-label="Carrito de compras">
+      <a class="icon-btn cart-trigger" [routerLink]="'/carrito'" aria-label="Carrito de compras" (click)="closeNav()">
         <svg
           width="18"
           height="18"
@@ -81,13 +104,39 @@
         </div>
       } @else {
         <a
-          class="btn btn-sm btn-ghost"
+          class="btn btn-sm btn-ghost login-link"
           [routerLink]="'/auth/login'"
           [queryParams]="{ returnUrl: router.url }"
         >
           Iniciar sesión
         </a>
       }
+
+      <button
+        type="button"
+        class="icon-btn nav-toggle"
+        aria-controls="header-nav"
+        [attr.aria-expanded]="navOpen()"
+        [attr.aria-label]="navOpen() ? 'Cerrar menú' : 'Abrir menú'"
+        (click)="toggleNav()"
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          @if (navOpen()) {
+            <path d="M18 6 6 18M6 6l12 12" />
+          } @else {
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          }
+        </svg>
+      </button>
     </div>
   </div>
 </header>

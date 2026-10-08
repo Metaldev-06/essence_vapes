@@ -46,6 +46,11 @@
   --header-height: 60px;
 }
 
+/* Keep in-page anchor targets clear of the fixed header. */
+html {
+  scroll-padding-top: var(--header-height);
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);

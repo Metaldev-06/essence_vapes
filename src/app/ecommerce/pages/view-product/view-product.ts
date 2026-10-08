@@ -8,6 +8,7 @@ import { FragranceProfile } from './components/fragrance-profile/fragrance-profi
 import { UsageGuide } from './components/usage-guide/usage-guide';
 import { ProductPerformance } from './components/product-performance/product-performance';
 import { RelatedProducts } from './components/related-products/related-products';
+import { ProductViewSkeleton } from './components/product-view-skeleton/product-view-skeleton';
 
 @Component({
   selector: 'app-view-product',
@@ -19,6 +20,7 @@ import { RelatedProducts } from './components/related-products/related-products'
     UsageGuide,
     ProductPerformance,
     RelatedProducts,
+    ProductViewSkeleton,
   ],
   templateUrl: './view-product.html',
   styleUrl: './view-product.css',
@@ -30,7 +32,11 @@ export default class ViewProduct {
   readonly id = input('');
 
   private readonly productResource = this.productsService.byId(this.id);
-  protected readonly product = this.productResource.value;
+  /** `value()` throws while the resource is in an error state (e.g. 404), so guard it with `hasValue()`. */
+  protected readonly product = computed(() =>
+    this.productResource.hasValue() ? this.productResource.value() : undefined,
+  );
+  protected readonly isLoading = this.productResource.isLoading;
 
   private readonly relatedResource = this.productsService.list(() => {
     const current = this.product();

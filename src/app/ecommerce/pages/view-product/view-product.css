@@ -27,6 +27,15 @@
   max-width: 16rem;
 }
 
+.view-product-loading-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .view-product-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -1,4 +1,11 @@
-@if (product(); as currentProduct) {
+@if (isLoading()) {
+  <section class="view-product" aria-busy="true">
+    <div class="container">
+      <span class="view-product-loading-label" role="status">Cargando fragancia...</span>
+      <app-product-view-skeleton />
+    </div>
+  </section>
+} @else if (product(); as currentProduct) {
   <section class="view-product">
     <div class="container">
       <nav class="breadcrumb" aria-label="Ruta de navegación">

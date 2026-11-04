@@ -27,7 +27,7 @@
     } @else {
       <div class="cart-layout">
         <div class="cart-lines">
-          @for (line of cartService.lines(); track line.productId) {
+          @for (line of cartService.lines(); track line.productId + '::' + line.variantId) {
             <app-cart-line [line]="line" />
           }
         </div>
@@ -44,7 +44,7 @@
             <div class="cart-notice cart-notice-danger" role="alert">
               <p>Quitamos estos productos porque ya no tienen stock suficiente:</p>
               <ul>
-                @for (line of removed; track line.productId) {
+                @for (line of removed; track line.productId + '::' + line.variantId) {
                   <li>
                     {{ line.product.name }}
                     @if (line.availableStock > 0) {

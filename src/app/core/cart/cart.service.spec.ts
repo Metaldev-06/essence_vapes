@@ -28,6 +28,8 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     isActive: true,
     images: [],
     videos: [],
+    variantId: 'base',
+    variants: [],
     ...overrides,
   };
 }
@@ -36,6 +38,7 @@ function backendItem(overrides: Partial<BackendCartItem> = {}): BackendCartItem 
   const product = overrides.product ?? makeProduct();
   return {
     productId: product?.id ?? 'sauvage-elixir',
+    variantId: product?.variantId ?? 'base',
     product,
     quantity: 1,
     availableStock: product?.stock ?? 25,

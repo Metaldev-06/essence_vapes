@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { API_BASE_URL } from '../config/api.config';
-import type { Product } from '../../ecommerce/data/product.model';
+import { BASE_VARIANT_ID, type Product } from '../../ecommerce/data/product.model';
 import { AuthService } from '../auth/auth.service';
 import type {
   BackendCartItem,
@@ -66,25 +66,35 @@ export class CartService {
     });
   }
 
-  getQuantity(productId: string): number {
-    return this.linesSignal().find((line) => line.productId === productId)?.quantity ?? 0;
+  getQuantity(productId: string, variantId: string = BASE_VARIANT_ID): number {
+    return (
+      this.linesSignal().find(
+        (line) => line.productId === productId && line.variantId === variantId,
+      )?.quantity ?? 0
+    );
   }
 
   async add(product: Product, quantityToAdd = 1): Promise<CartMutationResult> {
-    const nextQuantity = this.getQuantity(product.id) + quantityToAdd;
+    const variantId = product.variantId ?? BASE_VARIANT_ID;
+    const nextQuantity = this.getQuantity(product.id, variantId) + quantityToAdd;
     return this.setQuantity(product, nextQuantity);
   }
 
   async setQuantity(product: Product, quantity: number): Promise<CartMutationResult> {
+    const variantId = product.variantId ?? BASE_VARIANT_ID;
+
     if (quantity <= 0) {
-      await this.remove(product.id);
+      await this.remove(product.id, variantId);
       return { success: true };
     }
 
     if (this.authService.isAuthenticated()) {
       try {
         const item = await firstValueFrom(
-          this.http.put<BackendCartItem>(`${this.baseUrl}/items/${product.id}`, { quantity }),
+          this.http.put<BackendCartItem>(`${this.baseUrl}/items/${product.id}`, {
+            quantity,
+            variantId,
+          }),
         );
         this.upsertLocal(this.fromBackendItem(item));
         return { success: true };
@@ -107,6 +117,7 @@ export class CartService {
 
     this.upsertLocal({
       productId: product.id,
+      variantId,
       product,
       quantity,
       availableStock: product.stock,
@@ -115,13 +126,17 @@ export class CartService {
     return { success: true };
   }
 
-  async remove(productId: string): Promise<void> {
-    this.linesSignal.update((lines) => lines.filter((line) => line.productId !== productId));
+  async remove(productId: string, variantId: string = BASE_VARIANT_ID): Promise<void> {
+    this.linesSignal.update((lines) =>
+      lines.filter((line) => !(line.productId === productId && line.variantId === variantId)),
+    );
     this.persist();
 
     if (this.authService.isAuthenticated()) {
       try {
-        await firstValueFrom(this.http.delete(`${this.baseUrl}/items/${productId}`));
+        await firstValueFrom(
+          this.http.delete(`${this.baseUrl}/items/${productId}`, { params: { variantId } }),
+        );
       } catch {
         /* Best-effort; the next revalidation reconciles with the backend. */
       }
@@ -218,6 +233,7 @@ export class CartService {
             firstValueFrom(
               this.http.put<BackendCartItem>(`${this.baseUrl}/items/${line.productId}`, {
                 quantity: line.quantity,
+                variantId: line.variantId,
               }),
             ).catch(() => null),
           ),
@@ -239,16 +255,18 @@ export class CartService {
     const lines = this.linesSignal();
     if (lines.length === 0) return;
 
-    const ids = lines.map((line) => line.productId);
+    const pairs = lines.map((line) => `${line.productId}::${line.variantId}`);
     const stocks = await firstValueFrom(
       this.http.get<ProductStockInfo[]>(`${this.productsBaseUrl}/stock`, {
-        params: { ids: ids.join(',') },
+        params: { ids: pairs.join(',') },
       }),
     );
-    const stockById = new Map(stocks.map((info) => [info.id, info]));
+    const stockByKey = new Map(
+      stocks.map((info) => [`${info.id}::${info.variantId}`, info]),
+    );
     this.linesSignal.update((current) =>
       current.map((line) => {
-        const info = stockById.get(line.productId);
+        const info = stockByKey.get(`${line.productId}::${line.variantId}`);
         const availableStock = info?.isActive ? info.stock : 0;
         return { ...line, availableStock, isValid: availableStock >= line.quantity };
       }),
@@ -259,7 +277,9 @@ export class CartService {
     if (!line) return;
 
     this.linesSignal.update((lines) => {
-      const index = lines.findIndex((existing) => existing.productId === line.productId);
+      const index = lines.findIndex(
+        (existing) => existing.productId === line.productId && existing.variantId === line.variantId,
+      );
       if (index === -1) return [...lines, line];
       const next = [...lines];
       next[index] = line;
@@ -278,6 +298,7 @@ export class CartService {
     if (!item.product) return null;
     return {
       productId: item.productId,
+      variantId: item.variantId,
       product: item.product,
       quantity: item.quantity,
       availableStock: item.availableStock,
@@ -298,7 +319,12 @@ export class CartService {
       const raw = sessionStorage.getItem(CART_STORAGE_KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? (parsed as CartLine[]) : [];
+      if (!Array.isArray(parsed)) return [];
+      // Defensive default for carts persisted before variants existed.
+      return (parsed as CartLine[]).map((line) => ({
+        ...line,
+        variantId: line.variantId ?? BASE_VARIANT_ID,
+      }));
     } catch {
       return [];
     }

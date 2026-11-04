@@ -45,6 +45,7 @@ export class CartLine {
   }
 
   protected remove(): void {
-    void this.cartService.remove(this.line().productId);
+    const line = this.line();
+    void this.cartService.remove(line.productId, line.variantId);
   }
 }

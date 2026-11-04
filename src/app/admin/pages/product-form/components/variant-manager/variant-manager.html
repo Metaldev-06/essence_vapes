@@ -1,0 +1,116 @@
+<div class="variant-manager">
+  <p class="variant-manager-hint">
+    La variante base (etiqueta, precio y stock) se edita arriba, en "Precio y stock". Acá se
+    agregan variantes extra (ej. otros ml), cada una con su propio precio, stock e imagen.
+  </p>
+
+  @if (extraVariants().length > 0) {
+    <ul class="variant-list">
+      @for (variant of extraVariants(); track variant.id) {
+        <li class="variant-row">
+          <div class="variant-row-fields">
+            <label class="variant-field">
+              <span>Etiqueta</span>
+              <input type="text" #labelInput [value]="variant.label ?? ''" />
+            </label>
+            <label class="variant-field">
+              <span>Precio</span>
+              <input type="number" min="0" #priceInput [value]="variant.priceValue" />
+            </label>
+            <label class="variant-field">
+              <span>Stock</span>
+              <input type="number" min="0" #stockInput [value]="variant.stock" />
+            </label>
+            <div class="variant-row-actions">
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                [disabled]="savingId() === variant.id"
+                (click)="saveVariant(variant.id, labelInput.value, priceInput.value, stockInput.value)"
+              >
+                {{ savingId() === variant.id ? 'Guardando...' : 'Guardar' }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-ghost"
+                [disabled]="savingId() === variant.id"
+                (click)="removeVariant(variant.id)"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+
+          <div class="variant-row-images">
+            @for (image of variant.images; track image.publicId) {
+              <div class="variant-image-thumb">
+                <img [src]="image.url" alt="" />
+                <button
+                  type="button"
+                  class="media-remove"
+                  [disabled]="uploadingId() === variant.id"
+                  (click)="removeVariantImage(variant.id, image.publicId)"
+                  aria-label="Quitar imagen de la variante"
+                >
+                  ×
+                </button>
+              </div>
+            }
+            @if (variant.images.length < maxImages) {
+              <label class="media-add variant-image-add" [class.disabled]="uploadingId() === variant.id">
+                <span>{{ uploadingId() === variant.id ? 'Subiendo...' : '+ Imagen' }}</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  hidden
+                  [disabled]="uploadingId() === variant.id"
+                  (change)="onVariantImageSelected(variant.id, $event)"
+                />
+              </label>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="variant-manager-empty">Todavía no agregaste variantes extra.</p>
+  }
+
+  @if (isAdding()) {
+    <div class="variant-add-form">
+      <label class="variant-field">
+        <span>Etiqueta</span>
+        <input type="text" #newLabel placeholder="Ej: 10ml" />
+      </label>
+      <label class="variant-field">
+        <span>Precio</span>
+        <input type="number" min="0" #newPrice />
+      </label>
+      <label class="variant-field">
+        <span>Stock</span>
+        <input type="number" min="0" #newStock value="0" />
+      </label>
+      <div class="variant-row-actions">
+        <button
+          type="button"
+          class="btn btn-sm btn-primary"
+          [disabled]="savingNew()"
+          (click)="addVariant(newLabel.value, newPrice.value, newStock.value)"
+        >
+          {{ savingNew() ? 'Agregando...' : 'Agregar' }}
+        </button>
+        <button type="button" class="btn btn-sm btn-ghost" (click)="isAdding.set(false)">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  } @else {
+    <button type="button" class="btn btn-sm btn-ghost" (click)="isAdding.set(true)">
+      + Agregar variante
+    </button>
+  }
+
+  @if (error()) {
+    <p class="variant-error" role="alert">{{ error() }}</p>
+  }
+</div>

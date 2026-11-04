@@ -18,6 +18,7 @@ import {
   type Sillage,
 } from '../../../ecommerce/data/product.model';
 import { MediaManager } from './components/media-manager/media-manager';
+import { VariantManager } from './components/variant-manager/variant-manager';
 import { ToggleSwitch } from '../../shared/toggle-switch/toggle-switch';
 
 const SAVED_MESSAGE_DURATION_MS = 4000;
@@ -46,6 +47,7 @@ interface ProductFormModel {
   brand: string;
   name: string;
   subtitle: string;
+  variantLabel: string;
   notesText: string;
   priceValue: number | null;
   oldPriceValue: number | null;
@@ -86,6 +88,7 @@ function emptyModel(): ProductFormModel {
     brand: '',
     name: '',
     subtitle: '',
+    variantLabel: '',
     notesText: '',
     priceValue: null,
     oldPriceValue: null,
@@ -138,6 +141,7 @@ function modelFromProduct(product: Product): ProductFormModel {
     brand: product.brand,
     name: product.name,
     subtitle: product.subtitle,
+    variantLabel: product.variantLabel ?? '',
     notesText: joinList(product.notes),
     priceValue: product.priceValue,
     oldPriceValue: product.oldPriceValue ?? null,
@@ -189,6 +193,7 @@ function buildPayload(model: ProductFormModel, styles: ReadonlySet<ScentStyle>):
     isActive: model.isActive,
   };
 
+  if (model.variantLabel.trim()) payload.variantLabel = model.variantLabel.trim();
   if (model.oldPriceValue) payload.oldPriceValue = model.oldPriceValue;
   if (model.badge.trim()) payload.badge = model.badge.trim();
   if (model.year) payload.year = model.year;
@@ -283,7 +288,7 @@ const productSchema = schema<ProductFormModel>((path) => {
 /** Create AND edit share this one form - `id` coming from the route is the only difference. */
 @Component({
   selector: 'app-admin-product-form',
-  imports: [FormField, RouterLink, MediaManager, ToggleSwitch],
+  imports: [FormField, RouterLink, MediaManager, VariantManager, ToggleSwitch],
   templateUrl: './product-form.html',
   styleUrl: './product-form.css',
 })
@@ -356,7 +361,8 @@ export default class ProductForm {
     });
   }
 
-  protected onMediaChanged(product: Product): void {
+  /** Media/variant managers refresh themselves against the backend; this just syncs the local copy. */
+  protected onProductChanged(product: Product): void {
     this.loadedProduct.set(product);
   }
 

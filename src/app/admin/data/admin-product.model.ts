@@ -20,6 +20,7 @@ export interface AdminProductInput {
   brand: string;
   name: string;
   subtitle: string;
+  variantLabel?: string;
   notes: string[];
   priceValue: number;
   oldPriceValue?: number;
@@ -43,4 +44,12 @@ export interface AdminProductInput {
   longevity?: Longevity;
   stock?: number;
   isActive?: boolean;
+}
+
+/** Write payload for the variant-specific endpoints - mirrors the backend's Create/UpdateVariantDto. */
+export interface AdminVariantInput {
+  label: string;
+  priceValue: number;
+  stock?: number;
+  sortOrder?: number;
 }

@@ -1,8 +1,8 @@
-import { Component, computed, effect, inject, input } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ProductsService } from '../../data/products.service';
-import { CATEGORY_LABELS } from '../../data/product.model';
+import { CATEGORY_LABELS, type Product } from '../../data/product.model';
 import { ProductGallery } from './components/product-gallery/product-gallery';
 import { ProductDetails } from './components/product-details/product-details';
 import { FragranceProfile } from './components/fragrance-profile/fragrance-profile';
@@ -31,6 +31,8 @@ export default class ViewProduct {
   private readonly titleService = inject(Title);
 
   readonly id = input('');
+  /** Which variant to preselect, from `?variant=` - e.g. coming from a catalog card. */
+  readonly variant = input('');
 
   protected readonly categoryLabels = CATEGORY_LABELS;
 
@@ -40,6 +42,24 @@ export default class ViewProduct {
     this.productResource.hasValue() ? this.productResource.value() : undefined,
   );
   protected readonly isLoading = this.productResource.isLoading;
+
+  /** Two-way bound with `ProductDetails`, so switching a pill there also swaps the gallery photo. */
+  protected readonly selectedVariantId = signal('');
+
+  /**
+   * Same product, with `images` swapped for the selected variant's own, if it has any. Kept as a
+   * `computed()` (not a plain method call from the template) so its reference stays stable across
+   * change-detection runs - `ProductGallery` resets its active photo index whenever this changes.
+   */
+  protected readonly effectiveProduct = computed<Product | undefined>(() => {
+    const product = this.product();
+    if (!product) return undefined;
+    const variant = product.variants.find(
+      (candidate) => candidate.id === this.selectedVariantId(),
+    );
+    if (!variant || variant.images.length === 0) return product;
+    return { ...product, images: variant.images };
+  });
 
   private readonly relatedResource = this.productsService.list(() => {
     const current = this.product();
@@ -71,6 +91,16 @@ export default class ViewProduct {
     effect(() => {
       const product = this.product();
       this.titleService.setTitle(product ? `${product.name} | Essence Vapes` : 'Producto | Essence Vapes');
+    });
+
+    // Seeds the selected variant from the `?variant=` query param once the product loads, falling
+    // back to its base variant when that id doesn't (or no longer) match one of its variants.
+    effect(() => {
+      const product = this.product();
+      if (!product) return;
+      const requested = this.variant();
+      const valid = product.variants.some((candidate) => candidate.id === requested);
+      this.selectedVariantId.set(valid ? requested : product.variantId);
     });
   }
 }

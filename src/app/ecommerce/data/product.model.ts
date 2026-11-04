@@ -60,6 +60,19 @@ export interface MediaAsset {
   readonly publicId: string;
 }
 
+/** The id used for a product's own (implicit) variant - never a real `ProductVariant` row. */
+export const BASE_VARIANT_ID = 'base';
+
+/** One size/variant option of a product (e.g. "5ml", "10ml"), as listed inside `Product.variants`. */
+export interface VariantSummary {
+  readonly id: string;
+  readonly label: string | null;
+  readonly priceValue: number;
+  readonly price: string;
+  readonly stock: number;
+  readonly images: readonly MediaAsset[];
+}
+
 export interface Product {
   readonly id: string;
   readonly brand: string;
@@ -79,6 +92,16 @@ export interface Product {
   readonly isActive: boolean;
   readonly images: readonly MediaAsset[];
   readonly videos: readonly MediaAsset[];
+
+  /**
+   * Which variant this particular response describes - `'base'` unless this came from the
+   * exploded storefront catalog/cart, where it points at one specific `ProductVariant`. All of
+   * `price`/`priceValue`/`stock`/`images` above already reflect that variant.
+   */
+  readonly variantId: string;
+  readonly variantLabel?: string | null;
+  /** Every variant this product has (always includes the base one first). */
+  readonly variants: readonly VariantSummary[];
 
   /** Extended profile - only curated for perfumes/decants/esencias (not applicable to vapes). */
   readonly year?: number;

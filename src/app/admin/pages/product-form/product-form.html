@@ -176,6 +176,22 @@
         </div>
 
         <div class="form-field">
+          <label for="pf-variant-label"
+            >Etiqueta de variante <span class="form-optional">(opcional, ej: "5ml")</span></label
+          >
+          <input
+            id="pf-variant-label"
+            type="text"
+            placeholder="5ml"
+            [formField]="productForm.variantLabel"
+          />
+          <span class="form-section-hint">
+            Identifica el precio/stock de arriba cuando agregues más variantes abajo (ej. otros
+            ml). Si el producto no tiene variantes extra, podés dejarlo vacío.
+          </span>
+        </div>
+
+        <div class="form-field">
           <label for="pf-badge"
             >Badge <span class="form-optional">(opcional, ej: "Nuevo", "Top ventas")</span></label
           >
@@ -453,7 +469,20 @@
           [productId]="product.id"
           [images]="product.images"
           [videos]="product.videos"
-          (mediaChanged)="onMediaChanged($event)"
+          (mediaChanged)="onProductChanged($event)"
+        />
+      </div>
+
+      <div class="form-section">
+        <h2 class="form-section-title">Variantes</h2>
+        <p class="form-section-hint">
+          Cada variante extra tiene su propio precio, stock e imagen, y aparece como una card
+          independiente en el catálogo.
+        </p>
+        <app-variant-manager
+          [productId]="product.id"
+          [variants]="product.variants"
+          (variantsChanged)="onProductChanged($event)"
         />
       </div>
     }

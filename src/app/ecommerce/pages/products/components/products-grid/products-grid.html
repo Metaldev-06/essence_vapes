@@ -6,7 +6,7 @@
   </div>
 } @else if (products().length > 0) {
   <div class="products-catalog-grid">
-    @for (product of products(); track product.id) {
+    @for (product of products(); track product.id + '::' + product.variantId) {
       <app-product-card [product]="product" />
     }
     @if (showTrailingSkeleton()) {

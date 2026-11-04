@@ -35,8 +35,8 @@
       </nav>
 
       <div class="view-product-layout">
-        <app-product-gallery [product]="currentProduct" />
-        <app-product-details [product]="currentProduct" />
+        <app-product-gallery [product]="effectiveProduct() ?? currentProduct" />
+        <app-product-details [product]="currentProduct" [(selectedVariantId)]="selectedVariantId" />
       </div>
     </div>
   </section>

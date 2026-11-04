@@ -31,7 +31,10 @@ export class ProductCard {
 
   protected readonly canAddToCart = computed(() => {
     const product = this.product();
-    return product.isActive && this.cartService.getQuantity(product.id) < product.stock;
+    return (
+      product.isActive &&
+      this.cartService.getQuantity(product.id, product.variantId) < product.stock
+    );
   });
 
   protected toggleFavorite(): void {

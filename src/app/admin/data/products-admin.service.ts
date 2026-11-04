@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { API_BASE_URL } from '../../core/config/api.config';
 import { IS_ADMIN_REQUEST } from '../../core/auth/admin-request.context';
 import type { Product, ProductCategory } from '../../ecommerce/data/product.model';
-import type { AdminProductInput } from './admin-product.model';
+import type { AdminProductInput, AdminVariantInput } from './admin-product.model';
 
 const ADMIN_CONTEXT = new HttpContext().set(IS_ADMIN_REQUEST, true);
 
@@ -108,6 +108,65 @@ export class ProductsAdminService {
         params: { publicId },
         context: ADMIN_CONTEXT,
       }),
+    );
+  }
+
+  addVariant(productId: string, input: AdminVariantInput): Promise<Product> {
+    return firstValueFrom(
+      this.http.post<Product>(`${this.baseUrl}/${productId}/variants`, input, {
+        context: ADMIN_CONTEXT,
+      }),
+    );
+  }
+
+  updateVariant(
+    productId: string,
+    variantId: string,
+    input: Partial<AdminVariantInput>,
+  ): Promise<Product> {
+    return firstValueFrom(
+      this.http.patch<Product>(
+        `${this.baseUrl}/${productId}/variants/${variantId}`,
+        input,
+        { context: ADMIN_CONTEXT },
+      ),
+    );
+  }
+
+  removeVariant(productId: string, variantId: string): Promise<Product> {
+    return firstValueFrom(
+      this.http.delete<Product>(`${this.baseUrl}/${productId}/variants/${variantId}`, {
+        context: ADMIN_CONTEXT,
+      }),
+    );
+  }
+
+  uploadVariantImages(
+    productId: string,
+    variantId: string,
+    files: File[],
+  ): Promise<Product> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    return firstValueFrom(
+      this.http.post<Product>(
+        `${this.baseUrl}/${productId}/variants/${variantId}/images`,
+        formData,
+        { context: ADMIN_CONTEXT },
+      ),
+    );
+  }
+
+  removeVariantImage(
+    productId: string,
+    variantId: string,
+    publicId: string,
+  ): Promise<Product> {
+    return firstValueFrom(
+      this.http.delete<Product>(
+        `${this.baseUrl}/${productId}/variants/${variantId}/images`,
+        { params: { publicId }, context: ADMIN_CONTEXT },
+      ),
     );
   }
 }

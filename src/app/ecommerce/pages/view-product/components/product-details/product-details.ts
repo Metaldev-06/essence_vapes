@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, model, signal } from '@angular/core';
 import { CartService } from '../../../../../core/cart/cart.service';
 import { CATEGORY_LABELS, type Gender, type Product } from '../../../../data/product.model';
 
@@ -18,6 +18,8 @@ export class ProductDetails {
   private readonly cartService = inject(CartService);
 
   readonly product = input.required<Product>();
+  /** Two-way bound with the parent page, so switching a pill can also update the gallery photo. */
+  readonly selectedVariantId = model<string>('');
 
   protected readonly categoryLabel = computed(() => CATEGORY_LABELS[this.product().category]);
 
@@ -48,19 +50,56 @@ export class ProductDetails {
     return `Una composición que combina ${list}.`;
   });
 
+  protected readonly showVariantPicker = computed(() => this.product().variants.length > 1);
+
+  protected readonly activeVariant = computed(() => {
+    const product = this.product();
+    return (
+      product.variants.find((variant) => variant.id === this.selectedVariantId()) ??
+      product.variants[0]
+    );
+  });
+
+  /** The product as seen by the cart/stock logic below - price/stock/images of the chosen variant. */
+  protected readonly activeProduct = computed<Product>(() => {
+    const product = this.product();
+    const variant = this.activeVariant();
+    return {
+      ...product,
+      variantId: variant.id,
+      variantLabel: variant.label,
+      priceValue: variant.priceValue,
+      price: variant.price,
+      stock: variant.stock,
+      images: variant.images,
+    };
+  });
+
   protected readonly quantity = signal(1);
 
   protected readonly inCartQuantity = computed(() =>
-    this.cartService.getQuantity(this.product().id),
+    this.cartService.getQuantity(this.product().id, this.activeVariant().id),
   );
   protected readonly remainingStock = computed(() =>
-    Math.max(0, this.product().stock - this.inCartQuantity()),
+    Math.max(0, this.activeProduct().stock - this.inCartQuantity()),
   );
   protected readonly isOutOfStock = computed(
     () => !this.product().isActive || this.remainingStock() === 0,
   );
   protected readonly cartError = signal<string | null>(null);
   protected readonly adding = signal(false);
+
+  constructor() {
+    // A quantity valid for one size might exceed another's stock, so reset on every switch.
+    effect(() => {
+      this.activeVariant();
+      this.quantity.set(1);
+    });
+  }
+
+  protected selectVariant(variantId: string): void {
+    this.selectedVariantId.set(variantId);
+  }
 
   protected decreaseQuantity(): void {
     this.quantity.update((value) => Math.max(1, value - 1));
@@ -76,7 +115,7 @@ export class ProductDetails {
     this.adding.set(true);
     this.cartError.set(null);
     const quantityToAdd = Math.min(this.quantity(), this.remainingStock());
-    const result = await this.cartService.add(this.product(), quantityToAdd);
+    const result = await this.cartService.add(this.activeProduct(), quantityToAdd);
     this.adding.set(false);
 
     if (result.success) {

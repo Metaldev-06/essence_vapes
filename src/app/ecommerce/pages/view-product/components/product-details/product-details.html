@@ -59,13 +59,33 @@
     </div>
   }
 
+  @if (showVariantPicker()) {
+    <div class="variant-picker" role="group" aria-label="Elegí la variante">
+      @for (variant of product().variants; track variant.id) {
+        <button
+          type="button"
+          class="variant-pill"
+          [class.active]="variant.id === activeVariant().id"
+          [disabled]="variant.stock === 0"
+          [attr.aria-pressed]="variant.id === activeVariant().id"
+          (click)="selectVariant(variant.id)"
+        >
+          {{ variant.label ?? 'Única' }}
+          @if (variant.stock === 0) {
+            <span class="variant-pill-out">sin stock</span>
+          }
+        </button>
+      }
+    </div>
+  }
+
   <div class="product-details-price">
-    @if (product().oldPrice) {
-      <span class="product-details-price-old">{{ product().oldPrice }}</span>
+    @if (activeProduct().oldPrice) {
+      <span class="product-details-price-old">{{ activeProduct().oldPrice }}</span>
     } @else {
       <span class="product-details-price-from">desde</span>
     }
-    <span class="product-details-price-amount">{{ product().price }}</span>
+    <span class="product-details-price-amount">{{ activeProduct().price }}</span>
   </div>
 
   @if (product().accords; as accords) {

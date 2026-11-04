@@ -19,6 +19,9 @@
     <a [routerLink]="['/productos', line().product.id]" class="cart-line-name">
       <span class="cart-line-brand">{{ line().product.brand }}</span>
       {{ line().product.name }}
+      @if (line().product.variantLabel) {
+        <span class="cart-line-variant-label">{{ line().product.variantLabel }}</span>
+      }
     </a>
     <span class="cart-line-unit-price">{{ line().product.price }} c/u</span>
 

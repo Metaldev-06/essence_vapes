@@ -1,30 +1,121 @@
 .view-product {
-  padding-block: 40px 88px;
+  /* The header is fixed, so offset the content by its height. */
+  padding-block: calc(var(--header-height) + 32px) 88px;
 }
 
 .breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin-bottom: 28px;
-  font-size: 12.5px;
-  color: var(--color-text-muted);
 }
 
-.breadcrumb a {
-  color: var(--color-text-muted);
+.breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 14px;
+  list-style: none;
+  font-size: 13px;
+  line-height: 1.4;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
 }
 
-.breadcrumb a:hover {
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* Chevron separator between crumbs */
+.breadcrumb-item + .breadcrumb-item::before {
+  content: '';
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-inline: 6px 4px;
+  border-top: 1.5px solid var(--color-text-muted);
+  border-right: 1.5px solid var(--color-text-muted);
+  transform: rotate(45deg);
+}
+
+.breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: var(--color-text-primary);
+  background-color: rgb(255 255 255 / 6%);
+}
+
+.breadcrumb-link:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
   color: var(--color-text-primary);
 }
 
+.breadcrumb-home {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
 .breadcrumb-current {
-  color: var(--color-text-secondary);
+  display: block;
+  max-width: 18rem;
+  padding: 4px 6px;
   overflow: hidden;
+  font-weight: 600;
+  color: var(--color-accent);
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 16rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breadcrumb-link {
+    transition: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .view-product {
+    padding-top: calc(var(--header-height) + 20px);
+  }
+
+  .breadcrumb-list {
+    font-size: 12.5px;
+    padding-inline: 10px;
+  }
+
+  /* Keep only the home icon on small screens to save room */
+  .breadcrumb-home + span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .breadcrumb-current {
+    max-width: 11rem;
+  }
 }
 
 .view-product-loading-label {

@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ProductsService } from '../../data/products.service';
+import { CATEGORY_LABELS } from '../../data/product.model';
 import { ProductGallery } from './components/product-gallery/product-gallery';
 import { ProductDetails } from './components/product-details/product-details';
 import { FragranceProfile } from './components/fragrance-profile/fragrance-profile';
@@ -30,6 +31,8 @@ export default class ViewProduct {
   private readonly titleService = inject(Title);
 
   readonly id = input('');
+
+  protected readonly categoryLabels = CATEGORY_LABELS;
 
   private readonly productResource = this.productsService.byId(this.id);
   /** `value()` throws while the resource is in an error state (e.g. 404), so guard it with `hasValue()`. */

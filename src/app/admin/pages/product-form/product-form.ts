@@ -3,7 +3,11 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormField, form, max, min, required, schema } from '@angular/forms/signals';
 
 import { extractErrorMessage } from '../../data/extract-error-message';
-import type { AdminProductInput } from '../../data/admin-product.model';
+import type {
+  AdminProductInput,
+  AiProductCandidate,
+  AiProductSuggestion,
+} from '../../data/admin-product.model';
 import { ProductsAdminService } from '../../data/products-admin.service';
 import { SCENT_STYLE_OPTIONS } from '../../../ecommerce/data/scent-styles';
 import { ACCENT_VARS } from '../../../ecommerce/data/accent';
@@ -127,6 +131,55 @@ function emptyModel(): ProductFormModel {
 
 function joinList(values: readonly string[] | undefined): string {
   return (values ?? []).join(', ');
+}
+
+/**
+ * Only overwrites fields the AI actually returned - leaves anything it left out (or that
+ * doesn't map to a real product field, e.g. `fuentes`/`datosNoConfirmados`) untouched.
+ */
+function applyAiSuggestion(
+  current: ProductFormModel,
+  suggestion: AiProductSuggestion,
+): ProductFormModel {
+  const next = { ...current };
+
+  if (suggestion.subtitle) next.subtitle = suggestion.subtitle;
+  if (suggestion.notes?.length) next.notesText = joinList(suggestion.notes);
+  if (suggestion.accords?.length) next.accordsText = joinList(suggestion.accords);
+  if (suggestion.mood?.length) next.moodText = joinList(suggestion.mood);
+  if (suggestion.fragranceNotes) {
+    next.topText = joinList(suggestion.fragranceNotes.top);
+    next.heartText = joinList(suggestion.fragranceNotes.heart);
+    next.baseText = joinList(suggestion.fragranceNotes.base);
+  }
+  if (suggestion.year) next.year = suggestion.year;
+  if (suggestion.origin) next.origin = suggestion.origin;
+  if (suggestion.gender) next.gender = suggestion.gender;
+  if (suggestion.sillage) next.sillage = suggestion.sillage;
+  if (suggestion.longevity) next.longevity = suggestion.longevity;
+  if (suggestion.rating != null) next.rating = suggestion.rating;
+  if (suggestion.ratingCount != null) next.ratingCount = suggestion.ratingCount;
+
+  if (suggestion.seasonUsage) {
+    next.seasonPrimavera = suggestion.seasonUsage.primavera;
+    next.seasonVerano = suggestion.seasonUsage.verano;
+    next.seasonOtono = suggestion.seasonUsage.otono;
+    next.seasonInvierno = suggestion.seasonUsage.invierno;
+  }
+  if (suggestion.dayUsage) {
+    next.dayDia = suggestion.dayUsage.dia;
+    next.dayNoche = suggestion.dayUsage.noche;
+  }
+  if (suggestion.occasions) {
+    next.occTrabajo = suggestion.occasions.trabajo;
+    next.occRomantico = suggestion.occasions.romantico;
+    next.occSocial = suggestion.occasions.social;
+    next.occCasual = suggestion.occasions.casual;
+    next.occFormal = suggestion.occasions.formal;
+    next.occDeporte = suggestion.occasions.deporte;
+  }
+
+  return next;
 }
 
 function parseList(text: string): string[] {
@@ -339,6 +392,15 @@ export default class ProductForm {
   protected readonly savedMessage = signal<string | null>(null);
   private savedTimer: ReturnType<typeof setTimeout> | undefined;
 
+  protected readonly isAiLoading = signal(false);
+  protected readonly aiError = signal<string | null>(null);
+  protected readonly aiSources = signal<readonly string[]>([]);
+  protected readonly aiUnconfirmed = signal<readonly string[]>([]);
+  protected readonly aiCandidates = signal<readonly AiProductCandidate[]>([]);
+  protected readonly canAiLookup = computed(
+    () => this.model().brand.trim().length > 0 && this.model().name.trim().length > 0,
+  );
+
   protected readonly pageTitle = computed(() =>
     this.isEditMode ? 'Editar producto' : 'Nuevo producto',
   );
@@ -347,6 +409,46 @@ export default class ProductForm {
     if (this.productId) {
       void this.loadProduct(this.productId);
     }
+  }
+
+  /**
+   * Looks up brand+name on the web (DeepSeek + web search) and prefills the rest of the form.
+   * If the AI finds more than one edition under that same name (e.g. "Donna" vs "Uomo"), it
+   * comes back as `ambiguous` instead: show the candidates and wait for `selectAiCandidate`.
+   */
+  protected async onAiLookup(): Promise<void> {
+    const { brand, name } = this.model();
+    if (!brand.trim() || !name.trim()) {
+      this.aiError.set('Completá marca y nombre antes de autocompletar.');
+      return;
+    }
+
+    this.isAiLoading.set(true);
+    this.aiError.set(null);
+    this.aiSources.set([]);
+    this.aiUnconfirmed.set([]);
+    this.aiCandidates.set([]);
+    try {
+      const result = await this.productsAdminService.aiLookup(brand.trim(), name.trim());
+      if (result.status === 'ambiguous') {
+        this.aiCandidates.set(result.candidates);
+        return;
+      }
+      this.model.update((current) => applyAiSuggestion(current, result.suggestion));
+      this.aiSources.set(result.suggestion.fuentes);
+      this.aiUnconfirmed.set(result.suggestion.datosNoConfirmados);
+    } catch (error) {
+      this.aiError.set(extractErrorMessage(error));
+    } finally {
+      this.isAiLoading.set(false);
+    }
+  }
+
+  /** Admin picked which edition they meant - lock brand/name to the exact one and look it up. */
+  protected async selectAiCandidate(candidate: AiProductCandidate): Promise<void> {
+    this.aiCandidates.set([]);
+    this.model.update((current) => ({ ...current, brand: candidate.brand, name: candidate.name }));
+    await this.onAiLookup();
   }
 
   protected toggleStyle(style: ScentStyle): void {

@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { API_BASE_URL } from '../../core/config/api.config';
 import { IS_ADMIN_REQUEST } from '../../core/auth/admin-request.context';
 import type { Product, ProductCategory } from '../../ecommerce/data/product.model';
-import type { AdminProductInput, AdminVariantInput } from './admin-product.model';
+import type { AdminProductInput, AdminVariantInput, AiLookupResult } from './admin-product.model';
 
 const ADMIN_CONTEXT = new HttpContext().set(IS_ADMIN_REQUEST, true);
 
@@ -63,6 +63,21 @@ export class ProductsAdminService {
 
   create(input: AdminProductInput): Promise<Product> {
     return firstValueFrom(this.http.post<Product>(this.baseUrl, input, { context: ADMIN_CONTEXT }));
+  }
+
+  /**
+   * Busca en la web (DeepSeek + web_search/web_fetch) y sugiere datos para precargar el form.
+   * Puede volver `status: 'ambiguous'` (ej. "Donna" vs "Uomo") en vez de una sugerencia: en ese
+   * caso hay que volver a llamarla con el brand/name exacto de la candidata elegida.
+   */
+  aiLookup(brand: string, name: string): Promise<AiLookupResult> {
+    return firstValueFrom(
+      this.http.post<AiLookupResult>(
+        `${this.baseUrl}/ai-lookup`,
+        { brand, name },
+        { context: ADMIN_CONTEXT },
+      ),
+    );
   }
 
   update(id: string, input: Partial<AdminProductInput>): Promise<Product> {

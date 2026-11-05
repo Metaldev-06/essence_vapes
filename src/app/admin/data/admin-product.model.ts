@@ -53,3 +53,39 @@ export interface AdminVariantInput {
   stock?: number;
   sortOrder?: number;
 }
+
+/**
+ * Mirrors the backend's FragranceAiSuggestion. Only facts about the fragrance the AI can
+ * plausibly know - price, stock, category, accent, images stay out and must be filled in
+ * manually. `sources`/`unconfirmed` are review metadata, never written into the product.
+ */
+export interface AiProductSuggestion {
+  subtitle?: string;
+  notes?: string[];
+  accords?: string[];
+  fragranceNotes?: FragranceNotes;
+  mood?: string[];
+  year?: number;
+  origin?: string;
+  gender?: Gender;
+  sillage?: Sillage;
+  longevity?: Longevity;
+  rating?: number;
+  ratingCount?: number;
+  seasonUsage?: SeasonUsage;
+  dayUsage?: DayUsage;
+  occasions?: OccasionRatings;
+  fuentes: string[];
+  datosNoConfirmados: string[];
+}
+
+/** One candidate edition to disambiguate (e.g. "Donna" vs "Uomo") before fetching the ficha. */
+export interface AiProductCandidate {
+  label: string;
+  brand: string;
+  name: string;
+}
+
+export type AiLookupResult =
+  | { status: 'ambiguous'; candidates: AiProductCandidate[] }
+  | { status: 'ok'; suggestion: AiProductSuggestion };

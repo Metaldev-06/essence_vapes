@@ -80,6 +80,69 @@
           </div>
         </div>
 
+        <div class="ai-lookup">
+          <button
+            type="button"
+            class="btn btn-sm btn-ghost"
+            [disabled]="!canAiLookup() || isAiLoading()"
+            (click)="onAiLookup()"
+          >
+            {{ isAiLoading() ? 'Buscando...' : '✨ Autocompletar con IA' }}
+          </button>
+          <span class="form-section-hint">
+            Busca en la web especificaciones de "{{ productForm.brand().value() || 'marca' }}
+            {{ productForm.name().value() || 'producto' }}" y completa el resto del formulario.
+            Revisá los datos antes de guardar.
+          </span>
+
+          @if (aiError()) {
+            <p class="ai-lookup-error" role="alert">{{ aiError() }}</p>
+          }
+
+          @if (aiCandidates().length) {
+            <div class="ai-lookup-candidates" role="alert">
+              <p class="ai-lookup-candidates-title">
+                Encontré más de una versión con ese nombre. ¿Cuál es?
+              </p>
+              @for (candidate of aiCandidates(); track candidate.name) {
+                <button
+                  type="button"
+                  class="ai-candidate-btn"
+                  [disabled]="isAiLoading()"
+                  (click)="selectAiCandidate(candidate)"
+                >
+                  {{ candidate.label }}
+                </button>
+              }
+            </div>
+          }
+
+          @if (aiSources().length || aiUnconfirmed().length) {
+            <div class="ai-lookup-panel" role="status">
+              @if (aiSources().length) {
+                <details>
+                  <summary>Fuentes consultadas ({{ aiSources().length }})</summary>
+                  <ul>
+                    @for (source of aiSources(); track source) {
+                      <li><a [href]="source" target="_blank" rel="noopener">{{ source }}</a></li>
+                    }
+                  </ul>
+                </details>
+              }
+              @if (aiUnconfirmed().length) {
+                <details open>
+                  <summary>⚠️ Sin confirmar ({{ aiUnconfirmed().length }})</summary>
+                  <ul>
+                    @for (item of aiUnconfirmed(); track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                </details>
+              }
+            </div>
+          }
+        </div>
+
         <div class="form-field">
           <label for="pf-subtitle">Subtítulo</label>
           <input

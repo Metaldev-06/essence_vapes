@@ -1,6 +1,16 @@
 <header class="header__container">
   <div class="header__content">
-    <a class="header__brand" [routerLink]="'/'" (click)="closeNav()">EssenceVapes</a>
+    <a class="header__brand" [routerLink]="'/'" (click)="closeNav()">
+      <img
+        class="header__logo"
+        ngSrc="essence-vapes-logo.svg"
+        width="36"
+        height="36"
+        priority
+        alt=""
+      />
+      EssenceVapes
+    </a>
 
     <nav class="header__nav-wrapper" aria-label="Principal">
       <ul id="header-nav" class="header__nav" [class.is-open]="navOpen()">

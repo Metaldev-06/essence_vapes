@@ -198,6 +198,32 @@
   box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 3px var(--color-border-subtle);
 }
 
+.accent-color-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.accent-color-input {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  padding: 2px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.accent-color-input:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.accent-hex-input {
+  flex: 1;
+  font-family: var(--font-mono, monospace);
+  text-transform: lowercase;
+}
+
 .form-error {
   font-size: 12px;
   color: var(--color-danger);

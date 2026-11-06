@@ -1,7 +1,6 @@
 import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { FavoritesService } from '../../../../../core/favorites/favorites.service';
-import { ACCENT_VARS } from '../../../../data/accent';
 import type { Product } from '../../../../data/product.model';
 
 @Component({
@@ -14,8 +13,6 @@ export class ProductGallery {
   private readonly favoritesService = inject(FavoritesService);
 
   readonly product = input.required<Product>();
-
-  protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);
 
   protected readonly isFavorite = computed(() =>
     this.favoritesService.isFavorite(this.product().id),

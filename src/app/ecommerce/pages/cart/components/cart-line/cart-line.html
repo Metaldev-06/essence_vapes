@@ -1,4 +1,8 @@
-<article class="cart-line" [class.invalid]="!line().isValid" [style.--accent-color]="accentVar()">
+<article
+  class="cart-line"
+  [class.invalid]="!line().isValid"
+  [style.--accent-color]="line().product.accent"
+>
   <a
     [routerLink]="['/productos', line().product.id]"
     class="cart-line-visual"

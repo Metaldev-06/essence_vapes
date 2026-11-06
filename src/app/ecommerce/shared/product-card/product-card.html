@@ -1,4 +1,4 @@
-<article class="product-card" [style.--accent-color]="accentVar()">
+<article class="product-card" [style.--accent-color]="product().accent">
   <a
     [routerLink]="['/productos', product().id]"
     [queryParams]="product().variantId !== 'base' ? { variant: product().variantId } : {}"

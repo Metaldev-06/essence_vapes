@@ -17,8 +17,6 @@ export const CATEGORY_SINGULAR_LABELS: Record<ProductCategory, string> = {
 
 export type ScentStyle = 'fresco' | 'dulce' | 'intenso' | 'elegante' | 'nocturno' | 'citrico';
 
-export type AccentKey = 'violet' | 'cyan' | 'emerald' | 'teal';
-
 export type SortOption = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre';
 
 export type Gender = 'masculino' | 'femenino' | 'unisex';
@@ -100,7 +98,8 @@ export interface Product {
   readonly oldPrice?: string;
   readonly oldPriceValue?: number;
   readonly badge?: string;
-  readonly accent: AccentKey;
+  /** Hex color (e.g. "#8b5cf6"), chosen with a color picker in the admin panel. */
+  readonly accent: string;
   readonly category: ProductCategory;
   readonly styles: readonly ScentStyle[];
   readonly featured?: boolean;

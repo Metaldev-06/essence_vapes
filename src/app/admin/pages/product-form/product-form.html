@@ -176,22 +176,31 @@
           </div>
 
           <div class="form-field">
-            <label for="pf-accent" class="label-with-swatch">
+            <label for="pf-accent-hex" class="label-with-swatch">
               Color de acento
               @if (productForm.accent().value(); as accent) {
-                <span class="accent-swatch" [style.background]="accentVars[accent]"></span>
+                <span class="accent-swatch" [style.background]="accent"></span>
               }
             </label>
-            <select
-              id="pf-accent"
-              [formField]="productForm.accent"
-              [class.invalid]="productForm.accent().touched() && productForm.accent().invalid()"
-            >
-              <option value="" disabled>Elegí un color</option>
-              @for (option of accentOptions; track option) {
-                <option [value]="option">{{ accentLabels[option] }}</option>
-              }
-            </select>
+            <div class="accent-color-field">
+              <input
+                type="color"
+                id="pf-accent-swatch"
+                class="accent-color-input"
+                aria-label="Elegir color de acento con el selector de color"
+                [formField]="productForm.accent"
+              />
+              <input
+                type="text"
+                id="pf-accent-hex"
+                class="accent-hex-input"
+                placeholder="#8b5cf6"
+                spellcheck="false"
+                autocomplete="off"
+                [formField]="productForm.accent"
+                [class.invalid]="productForm.accent().touched() && productForm.accent().invalid()"
+              />
+            </div>
             @if (productForm.accent().touched() && productForm.accent().invalid()) {
               <span class="form-error">{{ productForm.accent().errors()[0]?.message }}</span>
             }

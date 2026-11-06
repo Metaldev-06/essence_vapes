@@ -1,5 +1,4 @@
 import { Component, computed, input } from '@angular/core';
-import { ACCENT_VARS } from '../../../../data/accent';
 import type { Product } from '../../../../data/product.model';
 
 interface Tier {
@@ -19,8 +18,6 @@ interface Tier {
 })
 export class FragranceProfile {
   readonly product = input.required<Product>();
-
-  protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);
 
   protected readonly isFlavor = computed(() => this.product().category === 'vapes');
 

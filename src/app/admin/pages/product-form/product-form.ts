@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormField, form, max, min, required, schema } from '@angular/forms/signals';
+import { FormField, form, max, min, pattern, required, schema } from '@angular/forms/signals';
 
 import { extractErrorMessage } from '../../data/extract-error-message';
 import type {
@@ -10,12 +10,10 @@ import type {
 } from '../../data/admin-product.model';
 import { ProductsAdminService } from '../../data/products-admin.service';
 import { SCENT_STYLE_OPTIONS } from '../../../ecommerce/data/scent-styles';
-import { ACCENT_VARS } from '../../../ecommerce/data/accent';
 import { findRestrictedVapePhrase } from '../../../ecommerce/data/vape-restricted-phrases';
 import {
   CATEGORY_LABELS,
   CONCENTRATION_LABELS,
-  type AccentKey,
   type FragranceConcentration,
   type Gender,
   type Longevity,
@@ -30,13 +28,7 @@ import { VariantManager } from './components/variant-manager/variant-manager';
 import { ToggleSwitch } from '../../shared/toggle-switch/toggle-switch';
 
 const SAVED_MESSAGE_DURATION_MS = 4000;
-
-const ACCENT_LABELS: Record<AccentKey, string> = {
-  violet: 'Violeta',
-  cyan: 'Cian',
-  emerald: 'Esmeralda',
-  teal: 'Verde agua',
-};
+const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
 const GENDER_LABELS: Record<Gender, string> = {
   masculino: 'Masculino',
@@ -60,7 +52,7 @@ interface ProductFormModel {
   priceValue: number | null;
   oldPriceValue: number | null;
   badge: string;
-  accent: AccentKey | '';
+  accent: string;
   category: ProductCategory | '';
   featured: boolean;
   year: number | null;
@@ -281,7 +273,7 @@ function buildPayload(model: ProductFormModel, styles: ReadonlySet<ScentStyle>):
     subtitle: model.subtitle.trim(),
     notes: parseList(model.notesText),
     priceValue: model.priceValue ?? 0,
-    accent: model.accent as AccentKey,
+    accent: model.accent,
     category: model.category as ProductCategory,
     styles: Array.from(styles),
     featured: model.featured,
@@ -390,6 +382,9 @@ const productSchema = schema<ProductFormModel>((path) => {
   min(path.priceValue, 1, { message: 'El precio debe ser mayor a 0' });
 
   required(path.accent, { message: 'Elegí un color de acento' });
+  pattern(path.accent, HEX_COLOR_PATTERN, {
+    message: 'El color debe tener formato hexadecimal (ej: #8b5cf6)',
+  });
   required(path.category, { message: 'Elegí una categoría' });
 
   min(path.stock, 0, { message: 'El stock no puede ser negativo' });
@@ -420,8 +415,6 @@ export default class ProductForm {
 
   protected readonly styleOptions = SCENT_STYLE_OPTIONS;
   protected readonly categoryLabels = CATEGORY_LABELS;
-  protected readonly accentLabels = ACCENT_LABELS;
-  protected readonly accentVars = ACCENT_VARS;
   protected readonly genderLabels = GENDER_LABELS;
   protected readonly sillageLabels = SILLAGE_LABELS;
   protected readonly categoryOptions: readonly ProductCategory[] = [
@@ -430,7 +423,6 @@ export default class ProductForm {
     'vapes',
     'esencias',
   ];
-  protected readonly accentOptions: readonly AccentKey[] = ['violet', 'cyan', 'emerald', 'teal'];
   protected readonly genderOptions: readonly Gender[] = ['masculino', 'femenino', 'unisex'];
   protected readonly sillageOptions: readonly Sillage[] = [
     'intimo',

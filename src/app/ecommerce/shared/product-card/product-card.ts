@@ -3,7 +3,6 @@ import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
-import { ACCENT_VARS } from '../../data/accent';
 import { CATEGORY_SINGULAR_LABELS, type Product } from '../../data/product.model';
 
 @Component({
@@ -17,8 +16,6 @@ export class ProductCard {
   private readonly cartService = inject(CartService);
 
   readonly product = input.required<Product>();
-
-  protected readonly accentVar = computed(() => ACCENT_VARS[this.product().accent]);
 
   protected readonly categoryLabel = computed(() => CATEGORY_SINGULAR_LABELS[this.product().category]);
 

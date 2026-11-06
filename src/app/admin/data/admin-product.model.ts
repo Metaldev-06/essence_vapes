@@ -1,5 +1,4 @@
 import type {
-  AccentKey,
   DayUsage,
   FragranceConcentration,
   FragranceNotes,
@@ -27,7 +26,7 @@ export interface AdminProductInput {
   priceValue: number;
   oldPriceValue?: number;
   badge?: string;
-  accent: AccentKey;
+  accent: string;
   category: ProductCategory;
   styles: ScentStyle[];
   featured?: boolean;

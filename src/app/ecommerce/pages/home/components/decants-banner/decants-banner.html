@@ -39,16 +39,15 @@
         </div>
 
         <div class="decant-sizes" role="group" aria-label="Tamaño de decant">
-          @for (size of sizes; track size.ml) {
+          @for (size of sizes; track size) {
             <button
               type="button"
               class="decant-size-card"
-              [class.active]="selectedSize() === size.ml"
-              [attr.aria-pressed]="selectedSize() === size.ml"
-              (click)="selectSize(size.ml)"
+              [class.active]="selectedSize() === size"
+              [attr.aria-pressed]="selectedSize() === size"
+              (click)="selectSize(size)"
             >
-              <span class="decant-size-ml">{{ size.ml }}</span>
-              <span class="decant-size-from">{{ size.from }}</span>
+              <span class="decant-size-ml">{{ size }}ml</span>
             </button>
           }
         </div>
@@ -72,7 +71,7 @@
           </li>
         </ul>
 
-        <a [routerLink]="'/productos'" [queryParams]="{ cat: 'decants' }" class="btn btn-primary">
+        <a [routerLink]="'/productos'" [queryParams]="queryParams()" class="btn btn-primary">
           Ver decants disponibles
         </a>
       </div>

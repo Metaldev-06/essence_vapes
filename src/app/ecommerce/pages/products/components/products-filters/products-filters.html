@@ -54,10 +54,10 @@
     @if (capacityOptions().length > 0) {
       <label class="products-capacity">
         <span class="sr-only">Filtrar por capacidad</span>
-        <select [value]="capacity()" (change)="onCapacityChange($event)">
-          <option value="todas">Todas las capacidades</option>
+        <select (change)="onCapacityChange($event)">
+          <option value="todas" [selected]="capacity() === 'todas'">Todas las capacidades</option>
           @for (option of capacityOptions(); track option) {
-            <option [value]="option">{{ option }}ml</option>
+            <option [value]="option" [selected]="capacity() === option">{{ option }}ml</option>
           }
         </select>
       </label>

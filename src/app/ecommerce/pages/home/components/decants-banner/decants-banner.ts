@@ -1,10 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
-interface DecantSize {
-  readonly ml: string;
-  readonly from: string;
-}
 
 @Component({
   selector: 'app-decants-banner',
@@ -13,15 +8,17 @@ interface DecantSize {
   styleUrl: './decants-banner.css',
 })
 export class DecantsBanner {
-  protected readonly sizes: readonly DecantSize[] = [
-    { ml: '2ml', from: 'desde $1.200' },
-    { ml: '5ml', from: 'desde $2.800' },
-    { ml: '10ml', from: 'desde $4.500' },
-  ];
+  protected readonly sizes: readonly number[] = [2, 5, 10];
 
-  protected readonly selectedSize = signal(this.sizes[0].ml);
+  protected readonly selectedSize = signal(this.sizes[0]);
 
-  protected selectSize(ml: string): void {
+  /** Matches the `?ml=` the products page's capacity filter reads on load. */
+  protected readonly queryParams = computed(() => ({
+    cat: 'decants',
+    ml: this.selectedSize(),
+  }));
+
+  protected selectSize(ml: number): void {
     this.selectedSize.set(ml);
   }
 }

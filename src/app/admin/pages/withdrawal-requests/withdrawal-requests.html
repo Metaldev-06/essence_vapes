@@ -1,0 +1,106 @@
+<div class="admin-withdrawals">
+  <header class="admin-withdrawals-header">
+    <div>
+      <h1 class="admin-withdrawals-title">Botón de arrepentimiento</h1>
+      <p class="admin-withdrawals-subtitle">
+        {{ total() }} {{ total() === 1 ? 'solicitud' : 'solicitudes' }} de arrepentimiento
+        (Disposición 954/2025).
+      </p>
+    </div>
+  </header>
+
+  <div class="admin-withdrawals-filters" role="group" aria-label="Filtrar por estado">
+    @for (option of statusOptions; track option.id) {
+      <button
+        type="button"
+        class="filter-chip"
+        [class.active]="status() === option.id"
+        [attr.aria-pressed]="status() === option.id"
+        (click)="status.set(option.id)"
+      >
+        {{ option.label }}
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="admin-withdrawals-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="admin-withdrawals-table-wrap" [attr.aria-busy]="isLoading()">
+    <table class="admin-withdrawals-table">
+      <caption class="sr-only">Listado de solicitudes de arrepentimiento</caption>
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Comprador</th>
+          <th scope="col">Producto</th>
+          <th scope="col">Recibida</th>
+          <th scope="col">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (items().length === 0) {
+          <tr class="empty-row">
+            <td colspan="5">
+              <p class="admin-withdrawals-empty">
+                {{ isLoading() ? 'Cargando...' : 'No hay solicitudes para este filtro.' }}
+              </p>
+            </td>
+          </tr>
+        } @else {
+          @for (record of items(); track record.id) {
+            <tr>
+              <td class="cell-code">
+                <span class="tracking-code">{{ record.trackingCode }}</span>
+                @if (record.orderReference) {
+                  <span class="order-reference">Pedido: {{ record.orderReference }}</span>
+                }
+              </td>
+              <td data-label="Comprador">
+                <span class="buyer-name">{{ record.buyerName }}</span>
+                <span class="buyer-email">{{ record.email }}</span>
+                @if (record.phone) {
+                  <span class="buyer-phone">{{ record.phone }}</span>
+                }
+              </td>
+              <td class="cell-product" data-label="Producto">
+                <p>{{ record.productDescription }}</p>
+                @if (record.comments) {
+                  <p class="comments">{{ record.comments }}</p>
+                }
+              </td>
+              <td data-label="Recibida">{{ record.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="cell-status" data-label="Estado">
+                <select
+                  [value]="record.status"
+                  [disabled]="updatingId() === record.id"
+                  (change)="changeStatus(record, $event)"
+                  [attr.aria-label]="'Estado de la solicitud ' + record.trackingCode"
+                >
+                  @for (value of statusValues; track value) {
+                    <option [value]="value">{{ statusLabels[value] }}</option>
+                  }
+                </select>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (pageCount() > 1) {
+    <nav class="admin-withdrawals-pagination" aria-label="Paginación">
+      <span>Página {{ page() }} de {{ pageCount() }}</span>
+      <div class="admin-withdrawals-pagination-buttons">
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasPrev()" (click)="prevPage()">
+          ← Anterior
+        </button>
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasNext()" (click)="nextPage()">
+          Siguiente →
+        </button>
+      </div>
+    </nav>
+  }
+</div>

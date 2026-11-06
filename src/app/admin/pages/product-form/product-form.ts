@@ -11,13 +11,17 @@ import type {
 import { ProductsAdminService } from '../../data/products-admin.service';
 import { SCENT_STYLE_OPTIONS } from '../../../ecommerce/data/scent-styles';
 import { ACCENT_VARS } from '../../../ecommerce/data/accent';
+import { findRestrictedVapePhrase } from '../../../ecommerce/data/vape-restricted-phrases';
 import {
   CATEGORY_LABELS,
+  CONCENTRATION_LABELS,
   type AccentKey,
+  type FragranceConcentration,
   type Gender,
   type Longevity,
   type Product,
   type ProductCategory,
+  type SaleAuthorizationStatus,
   type ScentStyle,
   type Sillage,
 } from '../../../ecommerce/data/product.model';
@@ -85,6 +89,23 @@ interface ProductFormModel {
   longevity: Longevity | '';
   stock: number | null;
   isActive: boolean;
+
+  // --- Transparencia de producto ---
+  countryOfOrigin: string;
+  concentration: FragranceConcentration | '';
+  netContentMl: number | null;
+  manufacturerOrImporter: string;
+  sanitaryRegistrationNumber: string;
+
+  // --- Decants ---
+  decantSourceDescription: string;
+  decantVolumeMl: number | null;
+  batchNumber: string;
+  sourceProductId: string;
+
+  // --- Vapes ---
+  saleAuthorizationStatus: SaleAuthorizationStatus | '';
+  saleAuthorizationCode: string;
 }
 
 function emptyModel(): ProductFormModel {
@@ -126,6 +147,17 @@ function emptyModel(): ProductFormModel {
     longevity: '',
     stock: 0,
     isActive: true,
+    countryOfOrigin: '',
+    concentration: '',
+    netContentMl: null,
+    manufacturerOrImporter: '',
+    sanitaryRegistrationNumber: '',
+    decantSourceDescription: '',
+    decantVolumeMl: null,
+    batchNumber: '',
+    sourceProductId: '',
+    saleAuthorizationStatus: '',
+    saleAuthorizationCode: '',
   };
 }
 
@@ -228,6 +260,17 @@ function modelFromProduct(product: Product): ProductFormModel {
     longevity: product.longevity ?? '',
     stock: product.stock,
     isActive: product.isActive,
+    countryOfOrigin: product.countryOfOrigin ?? '',
+    concentration: product.concentration ?? '',
+    netContentMl: product.netContentMl ?? null,
+    manufacturerOrImporter: product.manufacturerOrImporter ?? '',
+    sanitaryRegistrationNumber: product.sanitaryRegistrationNumber ?? '',
+    decantSourceDescription: product.decantSourceDescription ?? '',
+    decantVolumeMl: product.decantVolumeMl ?? null,
+    batchNumber: product.batchNumber ?? '',
+    sourceProductId: product.sourceProductId ?? '',
+    saleAuthorizationStatus: product.saleAuthorizationStatus ?? '',
+    saleAuthorizationCode: product.saleAuthorizationCode ?? '',
   };
 }
 
@@ -292,6 +335,31 @@ function buildPayload(model: ProductFormModel, styles: ReadonlySet<ScentStyle>):
 
   if (model.sillage) payload.sillage = model.sillage as Sillage;
   if (model.longevity) payload.longevity = model.longevity as Longevity;
+
+  if (model.countryOfOrigin.trim()) payload.countryOfOrigin = model.countryOfOrigin.trim();
+  if (model.concentration) payload.concentration = model.concentration as FragranceConcentration;
+  if (model.netContentMl) payload.netContentMl = model.netContentMl;
+  if (model.manufacturerOrImporter.trim())
+    payload.manufacturerOrImporter = model.manufacturerOrImporter.trim();
+  if (model.sanitaryRegistrationNumber.trim())
+    payload.sanitaryRegistrationNumber = model.sanitaryRegistrationNumber.trim();
+
+  if (model.category === 'decants') {
+    if (model.decantSourceDescription.trim())
+      payload.decantSourceDescription = model.decantSourceDescription.trim();
+    if (model.decantVolumeMl) payload.decantVolumeMl = model.decantVolumeMl;
+    if (model.batchNumber.trim()) payload.batchNumber = model.batchNumber.trim();
+    if (model.sourceProductId.trim()) payload.sourceProductId = model.sourceProductId.trim();
+  }
+
+  if (model.category === 'vapes') {
+    // El admin puede dejarlo en "no_verificado" (default real) o marcarlo según corresponda -
+    // nunca se asigna "autorizado" automáticamente en ningún punto del código.
+    if (model.saleAuthorizationStatus)
+      payload.saleAuthorizationStatus = model.saleAuthorizationStatus as SaleAuthorizationStatus;
+    if (model.saleAuthorizationCode.trim())
+      payload.saleAuthorizationCode = model.saleAuthorizationCode.trim();
+  }
 
   return payload;
 }
@@ -376,6 +444,24 @@ export default class ProductForm {
     '6-8h',
     '8-12h',
     '12h+',
+  ];
+  protected readonly concentrationLabels = CONCENTRATION_LABELS;
+  protected readonly concentrationOptions: readonly FragranceConcentration[] = [
+    'edt',
+    'edp',
+    'parfum',
+    'extrait',
+    'colonia',
+  ];
+  protected readonly saleAuthorizationStatusLabels: Record<SaleAuthorizationStatus, string> = {
+    no_verificado: 'Sin verificar (default - sin autorización comprobada)',
+    autorizado: 'Autorizado (solo si tenés el registro sanitario real en mano)',
+    rechazado: 'Rechazado',
+  };
+  protected readonly saleAuthorizationStatusOptions: readonly SaleAuthorizationStatus[] = [
+    'no_verificado',
+    'autorizado',
+    'rechazado',
   ];
 
   protected readonly productId = this.route.snapshot.paramMap.get('id');
@@ -479,6 +565,19 @@ export default class ProductForm {
       );
       this.focusFirstInvalidField();
       return;
+    }
+
+    if (this.model().category === 'vapes') {
+      const { name, subtitle, notesText } = this.model();
+      const restricted = findRestrictedVapePhrase(name, subtitle, notesText);
+      if (restricted) {
+        this.error.set(
+          `No se puede guardar: "${restricted}" es una frase restringida para productos vapes` +
+            ' (Ley 26.687). Revisá nombre, subtítulo y notas. El servidor va a rechazar esto' +
+            ' igual aunque se saltee este chequeo.',
+        );
+        return;
+      }
     }
 
     const payload = buildPayload(this.model(), this.selectedStyles());

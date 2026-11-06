@@ -62,4 +62,29 @@ export class SeoService {
     }
     link.setAttribute('href', url);
   }
+
+  /**
+   * Datos estructurados (Schema.org) específicos de la página actual - p. ej. Product+Offer en
+   * una ficha de producto, u Organization en la ficha del vendedor. Pasar `null` los quita (el
+   * componente que los seteó debe hacerlo en su `ngOnDestroy`/`DestroyRef`, para no dejar un
+   * JSON-LD de una página anterior visible en la siguiente). Nunca debe contener precios, stock
+   * ni valoraciones inventados - solo datos reales del recurso ya cargado.
+   */
+  setStructuredData(data: Record<string, unknown> | null): void {
+    const id = 'dynamic-structured-data';
+    let script = this.document.querySelector<HTMLScriptElement>(`script#${id}`);
+
+    if (!data) {
+      script?.remove();
+      return;
+    }
+
+    if (!script) {
+      script = this.document.createElement('script');
+      script.id = id;
+      script.type = 'application/ld+json';
+      this.document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(data);
+  }
 }

@@ -1,11 +1,13 @@
 import type {
   AccentKey,
   DayUsage,
+  FragranceConcentration,
   FragranceNotes,
   Gender,
   Longevity,
   OccasionRatings,
   ProductCategory,
+  SaleAuthorizationStatus,
   ScentStyle,
   SeasonUsage,
   Sillage,
@@ -44,6 +46,23 @@ export interface AdminProductInput {
   longevity?: Longevity;
   stock?: number;
   isActive?: boolean;
+
+  /** Transparencia de producto. */
+  countryOfOrigin?: string;
+  concentration?: FragranceConcentration;
+  netContentMl?: number;
+  manufacturerOrImporter?: string;
+  sanitaryRegistrationNumber?: string;
+
+  /** Solo category=decants. */
+  decantSourceDescription?: string;
+  decantVolumeMl?: number;
+  batchNumber?: string;
+  sourceProductId?: string;
+
+  /** Solo category=vapes - el admin nunca debería poder mandar "autorizado" sin un registro real. */
+  saleAuthorizationStatus?: SaleAuthorizationStatus;
+  saleAuthorizationCode?: string;
 }
 
 /** Write payload for the variant-specific endpoints - mirrors the backend's Create/UpdateVariantDto. */

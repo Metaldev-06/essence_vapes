@@ -1,6 +1,12 @@
 import { Component, computed, effect, inject, input, model, signal } from '@angular/core';
 import { CartService } from '../../../../../core/cart/cart.service';
-import { CATEGORY_LABELS, type Gender, type Product } from '../../../../data/product.model';
+import { AgeVerificationService } from '../../../../../core/age-verification/age-verification.service';
+import {
+  CATEGORY_LABELS,
+  CONCENTRATION_LABELS,
+  type Gender,
+  type Product,
+} from '../../../../data/product.model';
 
 const GENDER_LABELS: Record<Gender, string> = {
   masculino: 'Masculino',
@@ -16,12 +22,17 @@ const GENDER_LABELS: Record<Gender, string> = {
 })
 export class ProductDetails {
   private readonly cartService = inject(CartService);
+  protected readonly ageVerificationService = inject(AgeVerificationService);
 
   readonly product = input.required<Product>();
   /** Two-way bound with the parent page, so switching a pill can also update the gallery photo. */
   readonly selectedVariantId = model<string>('');
 
   protected readonly categoryLabel = computed(() => CATEGORY_LABELS[this.product().category]);
+  protected readonly concentrationLabel = computed(() => {
+    const concentration = this.product().concentration;
+    return concentration ? CONCENTRATION_LABELS[concentration] : undefined;
+  });
 
   protected readonly genderLabel = computed(() => {
     const gender = this.product().gender;
@@ -32,6 +43,27 @@ export class ProductDetails {
     const product = this.product();
     return Boolean(product.year || product.origin || product.gender);
   });
+
+  /** Datos regulatorios reales a mostrar - nunca inventados, solo lo que el admin completó. */
+  protected readonly hasRegulatoryInfo = computed(() => {
+    const product = this.product();
+    return Boolean(
+      product.countryOfOrigin ||
+        product.concentration ||
+        product.netContentMl ||
+        product.manufacturerOrImporter ||
+        product.sanitaryRegistrationNumber,
+    );
+  });
+
+  protected readonly isDecant = computed(() => this.product().category === 'decants');
+
+  /** Edad real (fecha de nacimiento, no un checkbox) - ver Ley 26.687 y Disposición ANMAT 2543/2026. */
+  protected readonly needsAgeVerification = computed(
+    () => this.product().requiresAgeVerification && !this.ageVerificationService.verified(),
+  );
+  protected readonly birthDate = signal('');
+  protected readonly ageError = signal<string | null>(null);
 
   protected readonly starFills = computed(() => {
     const rating = this.product().rating ?? 0;
@@ -101,6 +133,16 @@ export class ProductDetails {
     this.selectedVariantId.set(variantId);
   }
 
+  protected confirmAge(event: Event): void {
+    event.preventDefault();
+    const ok = this.ageVerificationService.verify(this.birthDate());
+    this.ageError.set(ok ? null : 'Tenés que ser mayor de 18 años para comprar este producto.');
+  }
+
+  protected onBirthDateInput(event: Event): void {
+    this.birthDate.set((event.target as HTMLInputElement).value);
+  }
+
   protected decreaseQuantity(): void {
     this.quantity.update((value) => Math.max(1, value - 1));
   }
@@ -110,7 +152,7 @@ export class ProductDetails {
   }
 
   protected async addToCart(): Promise<void> {
-    if (this.isOutOfStock() || this.adding()) return;
+    if (this.isOutOfStock() || this.adding() || this.needsAgeVerification()) return;
 
     this.adding.set(true);
     this.cartError.set(null);

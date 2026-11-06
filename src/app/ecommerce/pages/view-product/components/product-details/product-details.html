@@ -111,6 +111,54 @@
     <p class="product-details-desc">{{ description() }}</p>
   }
 
+  @if (isDecant()) {
+    <div class="product-details-decant-notice" role="note">
+      <strong>Es un decant:</strong> una fracción extraída de un perfume original, en un
+      recipiente distinto al de fábrica - no es el frasco original del fabricante.
+      @if (product().decantSourceDescription) {
+        {{ product().decantSourceDescription }}
+      }
+      @if (product().decantVolumeMl) {
+        Volumen: {{ product().decantVolumeMl }}ml.
+      }
+    </div>
+  }
+
+  @if (hasRegulatoryInfo()) {
+    <dl class="product-details-regulatory">
+      @if (product().netContentMl) {
+        <div><dt>Contenido neto</dt><dd>{{ product().netContentMl }}ml</dd></div>
+      }
+      @if (concentrationLabel()) {
+        <div><dt>Concentración</dt><dd>{{ concentrationLabel() }}</dd></div>
+      }
+      @if (product().countryOfOrigin) {
+        <div><dt>País de origen</dt><dd>{{ product().countryOfOrigin }}</dd></div>
+      }
+      @if (product().manufacturerOrImporter) {
+        <div><dt>Fabricante/importador</dt><dd>{{ product().manufacturerOrImporter }}</dd></div>
+      }
+      @if (product().sanitaryRegistrationNumber) {
+        <div><dt>Registro sanitario</dt><dd>{{ product().sanitaryRegistrationNumber }}</dd></div>
+      }
+    </dl>
+  }
+
+  @if (needsAgeVerification()) {
+    <form class="product-details-age-gate" novalidate (submit)="confirmAge($event)">
+      <p class="product-details-age-gate-title">Verificación de edad requerida</p>
+      <p class="product-details-age-gate-desc">
+        Este producto es para mayores de 18 años (Ley 26.687). Ingresá tu fecha de nacimiento
+        para continuar.
+      </p>
+      <label for="pd-birthdate" class="sr-only">Fecha de nacimiento</label>
+      <input id="pd-birthdate" type="date" [value]="birthDate()" (input)="onBirthDateInput($event)" required />
+      @if (ageError()) {
+        <p class="product-details-age-gate-error" role="alert">{{ ageError() }}</p>
+      }
+      <button type="submit" class="btn btn-sm btn-primary">Confirmar edad</button>
+    </form>
+  } @else {
   <div class="product-details-actions">
     @if (!isOutOfStock()) {
       <div class="quantity-stepper" role="group" aria-label="Cantidad">
@@ -171,6 +219,7 @@
     <p class="product-details-cart-error" role="alert">{{ cartError() }}</p>
   } @else if (!isOutOfStock() && remainingStock() <= 5) {
     <p class="product-details-stock-hint">¡Quedan {{ remainingStock() }} unidades!</p>
+  }
   }
 
   <ul class="product-details-trust">

@@ -1,0 +1,132 @@
+.admin-withdrawals {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-withdrawals-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.admin-withdrawals-subtitle {
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.admin-withdrawals-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-chip.active {
+  background: var(--gradient-primary);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.admin-withdrawals-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+
+.admin-withdrawals-table-wrap {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
+}
+
+.admin-withdrawals-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.admin-withdrawals-table th,
+.admin-withdrawals-table td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.admin-withdrawals-table th {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.tracking-code {
+  display: block;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.order-reference,
+.buyer-email,
+.buyer-phone,
+.comments {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.buyer-name {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.cell-product p {
+  margin: 0;
+}
+
+.cell-status select {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+  font-size: 13px;
+}
+
+.admin-withdrawals-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.admin-withdrawals-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.admin-withdrawals-pagination-buttons {
+  display: flex;
+  gap: 8px;
+}

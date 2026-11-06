@@ -30,6 +30,8 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     videos: [],
     variantId: 'base',
     variants: [],
+    saleAuthorizationStatus: 'no_verificado',
+    requiresAgeVerification: false,
     ...overrides,
   };
 }

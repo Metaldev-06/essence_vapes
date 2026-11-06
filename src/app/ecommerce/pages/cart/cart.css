@@ -91,6 +91,16 @@
   margin-top: -8px;
 }
 
+.cart-summary-terms {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.cart-summary-terms a {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
 .cart-notice {
   padding: 12px 14px;
   border-radius: 12px;

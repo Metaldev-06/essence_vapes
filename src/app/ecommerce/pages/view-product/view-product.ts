@@ -1,6 +1,7 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { SeoService } from '../../../core/seo/seo.service';
 import { ProductsService } from '../../data/products.service';
 import { CATEGORY_LABELS, type Product } from '../../data/product.model';
 import { ProductGallery } from './components/product-gallery/product-gallery';
@@ -29,6 +30,8 @@ import { ProductViewSkeleton } from './components/product-view-skeleton/product-
 export default class ViewProduct {
   private readonly productsService = inject(ProductsService);
   private readonly titleService = inject(Title);
+  private readonly seoService = inject(SeoService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly id = input('');
   /** Which variant to preselect, from `?variant=` - e.g. coming from a catalog card. */
@@ -102,5 +105,41 @@ export default class ViewProduct {
       const valid = product.variants.some((candidate) => candidate.id === requested);
       this.selectedVariantId.set(valid ? requested : product.variantId);
     });
+
+    // Schema.org Product+Offer con datos reales del recurso ya cargado - nunca precio, stock
+    // ni rating inventados. `null` mientras no haya producto limpia cualquier JSON-LD previo.
+    effect(() => {
+      const product = this.product();
+      this.seoService.setStructuredData(
+        product
+          ? {
+              '@context': 'https://schema.org',
+              '@type': 'Product',
+              name: product.name,
+              brand: { '@type': 'Brand', name: product.brand },
+              description: product.subtitle,
+              ...(product.rating
+                ? {
+                    aggregateRating: {
+                      '@type': 'AggregateRating',
+                      ratingValue: product.rating,
+                      reviewCount: product.ratingCount ?? 1,
+                    },
+                  }
+                : {}),
+              offers: {
+                '@type': 'Offer',
+                priceCurrency: 'ARS',
+                price: product.priceValue,
+                availability:
+                  product.isActive && product.stock > 0
+                    ? 'https://schema.org/InStock'
+                    : 'https://schema.org/OutOfStock',
+              },
+            }
+          : null,
+      );
+    });
+    this.destroyRef.onDestroy(() => this.seoService.setStructuredData(null));
   }
 }

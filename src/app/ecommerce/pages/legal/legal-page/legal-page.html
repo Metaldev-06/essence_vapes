@@ -1,0 +1,36 @@
+<section class="section legal-page">
+  <div class="container legal-container">
+    <div class="legal-header">
+      <span class="section-label">Información legal</span>
+      <h1 class="section-title">{{ content().title }}</h1>
+      @if (content().lastUpdated) {
+        <p class="legal-updated">Última actualización: {{ content().lastUpdated }}</p>
+      }
+      @if (content().intro) {
+        <p class="section-subtitle">{{ content().intro }}</p>
+      }
+    </div>
+
+    <div class="legal-body">
+      @for (section of content().sections; track section.heading) {
+        <section class="legal-section">
+          <h2>{{ section.heading }}</h2>
+          @for (paragraph of section.paragraphs ?? []; track $index) {
+            <p>{{ paragraph }}</p>
+          }
+          @if (section.list) {
+            <ul>
+              @for (item of section.list; track $index) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    </div>
+
+    @if (content().disclaimer) {
+      <p class="legal-disclaimer" role="note">{{ content().disclaimer }}</p>
+    }
+  </div>
+</section>

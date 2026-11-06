@@ -44,6 +44,28 @@
         }
       </ul>
     </nav>
+
+    <nav class="footer-nav" aria-label="Legales">
+      <span class="footer-nav-title">Legales</span>
+      <ul>
+        @for (link of legalLinks; track link.label) {
+          <li><a [routerLink]="link.routerLink">{{ link.label }}</a></li>
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="footer-seller container" aria-label="Identificación del vendedor">
+    @let legal = legalInfoService.info();
+    <p class="footer-seller-title">Datos del vendedor</p>
+    <p class="footer-seller-line">
+      {{ legal.businessName }} ({{ legal.legalName }}) · CUIT {{ legal.cuit }}
+    </p>
+    <p class="footer-seller-line">{{ legal.address }}, {{ legal.locality }}, {{ legal.province }}</p>
+    <p class="footer-seller-line">
+      {{ legal.supportEmail }} · WhatsApp {{ legal.whatsapp }} · {{ legal.businessHours }}
+    </p>
+    <a class="footer-seller-link" [routerLink]="'/legales/identificacion'">Ver ficha completa</a>
   </div>
 
   <div class="footer-bottom">

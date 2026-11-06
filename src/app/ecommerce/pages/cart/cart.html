@@ -36,9 +36,17 @@
           <h2 class="cart-summary-title">Resumen</h2>
           <div class="cart-summary-row">
             <span>Productos ({{ cartService.itemCount() }})</span>
-            <span>{{ subtotalLabel() }}</span>
+            <span>{{ subtotalLabel() }} ARS</span>
           </div>
-          <p class="cart-summary-note">El envío se calcula en el siguiente paso.</p>
+          <p class="cart-summary-note">
+            Precios en pesos argentinos (ARS). El costo de envío se informa en el siguiente paso,
+            antes de confirmar - nunca se agrega como cargo oculto después.
+          </p>
+          <p class="cart-summary-terms">
+            Al continuar, aceptás nuestros
+            <a [routerLink]="'/legales/terminos'">Términos y condiciones</a> y conocés tu
+            <a [routerLink]="'/legales/cambios-y-devoluciones'">derecho de arrepentimiento</a>.
+          </p>
 
           @if (removedLines(); as removed) {
             <div class="cart-notice cart-notice-danger" role="alert">

@@ -80,6 +80,51 @@ export const ecommerceRoutes: Routes = [
           description: 'Revisá tu carrito de compras antes de continuar al pago.',
         },
       },
+      {
+        path: 'arrepentimiento',
+        loadComponent: () => import('./pages/arrepentimiento/arrepentimiento'),
+        title: 'Botón de arrepentimiento | Essence Vapes',
+        data: {
+          description:
+            'Ejercé tu derecho de arrepentimiento de compra a distancia, sin necesidad de cuenta.',
+        },
+      },
+      {
+        path: 'legales/terminos',
+        loadComponent: () => import('./pages/legal/terms'),
+        title: 'Términos y condiciones | Essence Vapes',
+        data: { description: 'Términos y condiciones de compra en Essence Vapes.' },
+      },
+      {
+        path: 'legales/privacidad',
+        loadComponent: () => import('./pages/legal/privacy'),
+        title: 'Política de privacidad | Essence Vapes',
+        data: { description: 'Cómo tratamos tus datos personales en Essence Vapes.' },
+      },
+      {
+        path: 'legales/cookies',
+        loadComponent: () => import('./pages/legal/cookies'),
+        title: 'Política de cookies | Essence Vapes',
+        data: { description: 'Qué cookies y almacenamiento usamos en Essence Vapes.' },
+      },
+      {
+        path: 'legales/envios',
+        loadComponent: () => import('./pages/legal/shipping'),
+        title: 'Envíos y entregas | Essence Vapes',
+        data: { description: 'Cobertura, tiempos y condiciones de envío de Essence Vapes.' },
+      },
+      {
+        path: 'legales/cambios-y-devoluciones',
+        loadComponent: () => import('./pages/legal/returns'),
+        title: 'Cambios y devoluciones | Essence Vapes',
+        data: { description: 'Cómo gestionamos cambios, devoluciones y garantías.' },
+      },
+      {
+        path: 'legales/identificacion',
+        loadComponent: () => import('./pages/legal/seller-identity'),
+        title: 'Identificación del vendedor | Essence Vapes',
+        data: { description: 'Datos legales y comerciales del titular de Essence Vapes.' },
+      },
     ],
   },
 ];

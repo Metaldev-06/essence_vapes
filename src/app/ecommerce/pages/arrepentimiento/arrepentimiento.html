@@ -1,0 +1,181 @@
+<section class="section arrepentimiento-page">
+  <div class="container arrepentimiento-container">
+    <span class="section-label">Botón de arrepentimiento</span>
+    <h1 class="section-title">Botón de arrepentimiento</h1>
+    <p class="section-subtitle">
+      Tenés 10 días corridos desde que recibís tu pedido para arrepentirte de la compra, sin
+      dar motivo y sin necesidad de cuenta ni login (Código Civil y Comercial arts. 1110-1116;
+      Disposición 954/2025). Te confirmamos la recepción de tu solicitud al instante, con un
+      código de gestión.
+    </p>
+
+    <div class="arrepentimiento-tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="view() === 'form'"
+        [class.active]="view() === 'form'"
+        (click)="view.set('form')"
+      >
+        Hacer una solicitud
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="view() === 'lookup'"
+        [class.active]="view() === 'lookup'"
+        (click)="view.set('lookup')"
+      >
+        Consultar una solicitud
+      </button>
+    </div>
+
+    <div class="card arrepentimiento-card">
+      @if (view() === 'form') {
+        @if (!created()) {
+          <form class="arrepentimiento-form" novalidate (submit)="onSubmit($event)">
+            <div class="form-row form-row--split">
+              <div class="form-field">
+                <label for="ar-name">Nombre completo</label>
+                <input
+                  id="ar-name"
+                  type="text"
+                  autocomplete="name"
+                  [formField]="withdrawalForm.buyerName"
+                  [class.invalid]="withdrawalForm.buyerName().touched() && withdrawalForm.buyerName().invalid()"
+                />
+                @if (withdrawalForm.buyerName().touched() && withdrawalForm.buyerName().invalid()) {
+                  <span class="form-error">{{ withdrawalForm.buyerName().errors()[0]?.message }}</span>
+                }
+              </div>
+
+              <div class="form-field">
+                <label for="ar-email">Email</label>
+                <input
+                  id="ar-email"
+                  type="email"
+                  autocomplete="email"
+                  [formField]="withdrawalForm.email"
+                  [class.invalid]="withdrawalForm.email().touched() && withdrawalForm.email().invalid()"
+                />
+                @if (withdrawalForm.email().touched() && withdrawalForm.email().invalid()) {
+                  <span class="form-error">{{ withdrawalForm.email().errors()[0]?.message }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="form-row form-row--split">
+              <div class="form-field">
+                <label for="ar-phone">Teléfono <span class="form-optional">(opcional)</span></label>
+                <input id="ar-phone" type="tel" autocomplete="tel" [formField]="withdrawalForm.phone" />
+              </div>
+
+              <div class="form-field">
+                <label for="ar-order"
+                  >Referencia del pedido <span class="form-optional">(si la tenés)</span></label
+                >
+                <input id="ar-order" type="text" [formField]="withdrawalForm.orderReference" />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="ar-product">Qué producto querés devolver</label>
+              <textarea
+                id="ar-product"
+                rows="3"
+                placeholder="Ej: Decant Bleu de Chanel 5ml, comprado el..."
+                [formField]="withdrawalForm.productDescription"
+                [class.invalid]="
+                  withdrawalForm.productDescription().touched() &&
+                  withdrawalForm.productDescription().invalid()
+                "
+              ></textarea>
+              @if (
+                withdrawalForm.productDescription().touched() &&
+                withdrawalForm.productDescription().invalid()
+              ) {
+                <span class="form-error">{{
+                  withdrawalForm.productDescription().errors()[0]?.message
+                }}</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="ar-comments">Comentarios <span class="form-optional">(opcional)</span></label>
+              <textarea id="ar-comments" rows="3" [formField]="withdrawalForm.comments"></textarea>
+            </div>
+
+            @if (error()) {
+              <p class="arrepentimiento-error" role="alert">{{ error() }}</p>
+            }
+
+            <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+              {{ submitting() ? 'Enviando...' : 'Enviar solicitud de arrepentimiento' }}
+            </button>
+          </form>
+        } @else {
+          <div class="arrepentimiento-success" role="status">
+            <p class="arrepentimiento-success-title">Solicitud recibida</p>
+            <p class="arrepentimiento-success-desc">
+              Guardá este código de gestión para hacer el seguimiento de tu trámite:
+            </p>
+            <p class="arrepentimiento-tracking-code">{{ created()!.trackingCode }}</p>
+            <p class="arrepentimiento-success-desc">
+              Estado actual: {{ statusLabels[created()!.status] ?? created()!.status }}
+            </p>
+            <button type="button" class="btn btn-ghost" (click)="sendAnother()">
+              Hacer otra solicitud
+            </button>
+          </div>
+        }
+      } @else {
+        <form class="arrepentimiento-form" novalidate (submit)="onLookup($event)">
+          <div class="form-row form-row--split">
+            <div class="form-field">
+              <label for="ar-lookup-code">Código de gestión</label>
+              <input
+                id="ar-lookup-code"
+                type="text"
+                placeholder="AR-20261106-9F3C2A"
+                [formField]="lookupForm.trackingCode"
+                [class.invalid]="lookupForm.trackingCode().touched() && lookupForm.trackingCode().invalid()"
+              />
+              @if (lookupForm.trackingCode().touched() && lookupForm.trackingCode().invalid()) {
+                <span class="form-error">{{ lookupForm.trackingCode().errors()[0]?.message }}</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="ar-lookup-email">Email con el que hiciste la solicitud</label>
+              <input
+                id="ar-lookup-email"
+                type="email"
+                [formField]="lookupForm.email"
+                [class.invalid]="lookupForm.email().touched() && lookupForm.email().invalid()"
+              />
+              @if (lookupForm.email().touched() && lookupForm.email().invalid()) {
+                <span class="form-error">{{ lookupForm.email().errors()[0]?.message }}</span>
+              }
+            </div>
+          </div>
+
+          @if (lookupError()) {
+            <p class="arrepentimiento-error" role="alert">{{ lookupError() }}</p>
+          }
+
+          <button type="submit" class="btn btn-primary" [disabled]="lookingUp()">
+            {{ lookingUp() ? 'Buscando...' : 'Consultar estado' }}
+          </button>
+
+          @if (lookupResult(); as result) {
+            <div class="arrepentimiento-result">
+              <p><strong>Código:</strong> {{ result.trackingCode }}</p>
+              <p><strong>Estado:</strong> {{ statusLabels[result.status] ?? result.status }}</p>
+              <p><strong>Producto:</strong> {{ result.productDescription }}</p>
+            </div>
+          }
+        </form>
+      }
+    </div>
+  </div>
+</section>

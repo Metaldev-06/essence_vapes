@@ -27,6 +27,22 @@ export type Sillage = 'intimo' | 'moderado' | 'fuerte' | 'enorme';
 
 export type Longevity = '2-4h' | '4-6h' | '6-8h' | '8-12h' | '12h+';
 
+export type FragranceConcentration = 'edt' | 'edp' | 'parfum' | 'extrait' | 'colonia';
+
+export const CONCENTRATION_LABELS: Record<FragranceConcentration, string> = {
+  edt: 'Eau de Toilette (EDT)',
+  edp: 'Eau de Parfum (EDP)',
+  parfum: 'Parfum',
+  extrait: 'Extrait de Parfum',
+  colonia: 'Colonia',
+};
+
+/**
+ * Nunca se asigna "autorizado" por default - lo decide un admin humano con el registro
+ * sanitario real en mano. Ver Disposición ANMAT 2543/2026 y Ley 26.687 para "vapes".
+ */
+export type SaleAuthorizationStatus = 'no_verificado' | 'autorizado' | 'rechazado';
+
 export interface FragranceNotes {
   readonly top: readonly string[];
   readonly heart: readonly string[];
@@ -117,4 +133,24 @@ export interface Product {
   readonly occasions?: OccasionRatings;
   readonly sillage?: Sillage;
   readonly longevity?: Longevity;
+
+  /** Transparencia de producto (sección 5/6 del cumplimiento Argentina). */
+  readonly countryOfOrigin?: string;
+  readonly concentration?: FragranceConcentration;
+  readonly netContentMl?: number;
+  readonly manufacturerOrImporter?: string;
+  readonly sanitaryRegistrationNumber?: string;
+
+  /** Solo tiene sentido cuando category=decants. */
+  readonly decantSourceDescription?: string;
+  readonly decantVolumeMl?: number;
+  readonly batchNumber?: string;
+  readonly sourceProductId?: string;
+
+  /** Solo tiene sentido cuando category=vapes - ver `requiresAgeVerification`. */
+  readonly saleAuthorizationStatus: SaleAuthorizationStatus;
+  readonly saleAuthorizationCode?: string;
+  readonly saleAuthorizationValidFrom?: string;
+  readonly saleAuthorizationValidUntil?: string;
+  readonly requiresAgeVerification: boolean;
 }

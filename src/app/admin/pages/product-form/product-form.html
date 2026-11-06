@@ -432,6 +432,106 @@
       </div>
 
       <div class="form-section">
+        <h2 class="form-section-title">Datos regulatorios</h2>
+        <p class="form-section-hint">
+          Dejá vacío lo que no corresponda o no esté disponible todavía - nunca inventes un
+          número de registro sanitario.
+        </p>
+        <div class="form-grid form-grid-3">
+          <div class="form-field">
+            <label for="pf-country-origin"
+              >País de origen <span class="form-optional">(rotulado/consumidor)</span></label
+            >
+            <input id="pf-country-origin" type="text" placeholder="Argentina" [formField]="productForm.countryOfOrigin" />
+          </div>
+          <div class="form-field">
+            <label for="pf-concentration">Concentración</label>
+            <select id="pf-concentration" [formField]="productForm.concentration">
+              <option value="">Sin especificar</option>
+              @for (option of concentrationOptions; track option) {
+                <option [value]="option">{{ concentrationLabels[option] }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="pf-net-content">Contenido neto <span class="form-optional">(ml)</span></label>
+            <input id="pf-net-content" type="number" [formField]="productForm.netContentMl" />
+          </div>
+        </div>
+        <div class="form-grid form-grid-2">
+          <div class="form-field">
+            <label for="pf-manufacturer">Fabricante / importador</label>
+            <input id="pf-manufacturer" type="text" [formField]="productForm.manufacturerOrImporter" />
+          </div>
+          <div class="form-field">
+            <label for="pf-sanitary-reg"
+              >N° de registro sanitario <span class="form-optional">(si existe)</span></label
+            >
+            <input id="pf-sanitary-reg" type="text" [formField]="productForm.sanitaryRegistrationNumber" />
+          </div>
+        </div>
+
+        @if (productForm.category().value() === 'decants') {
+          <div class="form-section-divider"></div>
+          <h3 class="form-section-subtitle">Decant - transparencia y trazabilidad</h3>
+          <div class="form-field">
+            <label for="pf-decant-source"
+              >Aviso de transparencia <span class="form-optional">(se muestra en la ficha)</span></label
+            >
+            <textarea
+              id="pf-decant-source"
+              rows="2"
+              placeholder="Este decant es un fraccionamiento del perfume original, no un frasco de fábrica."
+              [formField]="productForm.decantSourceDescription"
+            ></textarea>
+          </div>
+          <div class="form-grid form-grid-3">
+            <div class="form-field">
+              <label for="pf-decant-volume">Volumen exacto <span class="form-optional">(ml)</span></label>
+              <input id="pf-decant-volume" type="number" [formField]="productForm.decantVolumeMl" />
+            </div>
+            <div class="form-field">
+              <label for="pf-batch">Lote / referencia</label>
+              <input id="pf-batch" type="text" [formField]="productForm.batchNumber" />
+            </div>
+            <div class="form-field">
+              <label for="pf-source-product"
+                >Id del perfume original <span class="form-optional">(opcional)</span></label
+              >
+              <input id="pf-source-product" type="text" [formField]="productForm.sourceProductId" />
+            </div>
+          </div>
+        }
+
+        @if (productForm.category().value() === 'vapes') {
+          <div class="form-section-divider"></div>
+          <h3 class="form-section-subtitle">Vapes - restricciones de venta</h3>
+          <p class="form-section-hint">
+            No se permiten afirmaciones como "seguro", "saludable" o "ayuda a dejar de fumar" sin
+            autorización específica (Ley 26.687) - el servidor rechaza el guardado si detecta
+            alguna en nombre, subtítulo o notas.
+          </p>
+          <div class="form-grid form-grid-2">
+            <div class="form-field">
+              <label for="pf-sale-auth-status">Estado de autorización</label>
+              <select id="pf-sale-auth-status" [formField]="productForm.saleAuthorizationStatus">
+                <option value="">Sin especificar (queda como "sin verificar")</option>
+                @for (option of saleAuthorizationStatusOptions; track option) {
+                  <option [value]="option">{{ saleAuthorizationStatusLabels[option] }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="pf-sale-auth-code"
+                >N° de autorización <span class="form-optional">(si existe)</span></label
+              >
+              <input id="pf-sale-auth-code" type="text" [formField]="productForm.saleAuthorizationCode" />
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="form-section">
         <h2 class="form-section-title">
           Uso por estación <span class="form-optional">(0-5, opcional)</span>
         </h2>

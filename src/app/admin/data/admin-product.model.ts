@@ -70,6 +70,7 @@ export interface AdminVariantInput {
   priceValue: number;
   stock?: number;
   sortOrder?: number;
+  featured?: boolean;
 }
 
 /**

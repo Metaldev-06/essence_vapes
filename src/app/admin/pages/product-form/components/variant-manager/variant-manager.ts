@@ -6,6 +6,7 @@ import {
   type Product,
   type VariantSummary,
 } from '../../../../../ecommerce/data/product.model';
+import { ToggleSwitch } from '../../../../shared/toggle-switch/toggle-switch';
 
 // Mirrors MAX_IMAGES_PER_PRODUCT (backend reuses the same constant for variant images too).
 const MAX_VARIANT_IMAGES = 6;
@@ -13,7 +14,7 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-variant-manager',
-  imports: [],
+  imports: [ToggleSwitch],
   templateUrl: './variant-manager.html',
   styleUrl: './variant-manager.css',
 })
@@ -107,6 +108,21 @@ export class VariantManager {
         label,
         priceValue,
         stock,
+      });
+      this.variantsChanged.emit(product);
+    } catch (error) {
+      this.error.set(extractErrorMessage(error));
+    } finally {
+      this.savingId.set(null);
+    }
+  }
+
+  protected async toggleFeatured(variantId: string, featured: boolean): Promise<void> {
+    this.savingId.set(variantId);
+    this.error.set(null);
+    try {
+      const product = await this.productsAdminService.updateVariant(this.productId(), variantId, {
+        featured,
       });
       this.variantsChanged.emit(product);
     } catch (error) {

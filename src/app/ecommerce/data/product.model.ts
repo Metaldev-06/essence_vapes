@@ -85,6 +85,7 @@ export interface VariantSummary {
   readonly price: string;
   readonly stock: number;
   readonly images: readonly MediaAsset[];
+  readonly featured: boolean;
 }
 
 export interface Product {

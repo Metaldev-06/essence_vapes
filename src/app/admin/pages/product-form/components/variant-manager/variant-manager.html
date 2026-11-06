@@ -1,7 +1,8 @@
 <div class="variant-manager">
   <p class="variant-manager-hint">
     La variante base (etiqueta, precio y stock) se edita arriba, en "Precio y stock". Acá se
-    agregan variantes extra (ej. otros ml), cada una con su propio precio, stock e imagen.
+    agregan variantes extra (ej. otros ml), cada una con su propio precio, stock, imagen y estado
+    de destacado - marcar el producto como destacado no destaca automáticamente sus variantes.
   </p>
 
   @if (extraVariants().length > 0) {
@@ -21,6 +22,13 @@
               <span>Stock</span>
               <input type="number" min="0" #stockInput [value]="variant.stock" />
             </label>
+            <app-toggle-switch
+              class="variant-featured-toggle"
+              [checked]="variant.featured"
+              [busy]="savingId() === variant.id"
+              (checkedChange)="toggleFeatured(variant.id, $event)"
+              label="Destacado"
+            />
             <div class="variant-row-actions">
               <button
                 type="button"

@@ -53,6 +53,10 @@
   min-width: 100px;
 }
 
+.variant-featured-toggle {
+  padding-bottom: 6px;
+}
+
 .variant-row-actions {
   display: flex;
   gap: 8px;

@@ -51,6 +51,7 @@ export class Header {
   protected logout(): void {
     this.authService.logout();
     this.userMenuOpen.set(false);
+    this.navOpen.set(false);
   }
 
   protected onDocumentClick(event: MouseEvent): void {

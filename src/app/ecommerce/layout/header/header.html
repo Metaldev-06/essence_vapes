@@ -40,11 +40,30 @@
           >
         </li>
         @if (!authService.isRestoring() && !authService.isAuthenticated()) {
-          <!-- On very narrow screens the login button moves from the bar into the menu. -->
+          <!-- On mobile the login button moves from the top bar into the hamburger menu. -->
           <li class="header__nav-login">
             <a [routerLink]="'/auth/login'" [queryParams]="{ returnUrl: router.url }" (click)="closeNav()"
               >Iniciar sesión</a
             >
+          </li>
+        }
+        @if (!authService.isRestoring() && authService.isAuthenticated()) {
+          <!-- On mobile the account menu moves from the top bar into the hamburger menu too. -->
+          <li class="header__nav-account">
+            <p class="header__nav-account-name">{{ authService.user()?.fullName }}</p>
+            <p class="header__nav-account-email">{{ authService.user()?.email }}</p>
+            <a
+              class="header__nav-account-link"
+              [routerLink]="'/favoritos'"
+              routerLinkActive="active"
+              ariaCurrentWhenActive="page"
+              (click)="closeNav()"
+            >
+              Mis favoritos
+            </a>
+            <button type="button" class="header__nav-account-logout" (click)="logout()">
+              Cerrar sesión
+            </button>
           </li>
         }
       </ul>

@@ -66,6 +66,8 @@ export default class Register {
   protected readonly registerForm = form(this.model, registerSchema);
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
+  protected readonly showPassword = signal(false);
+  protected readonly showConfirmPassword = signal(false);
 
   protected async onSubmit(event: Event): Promise<void> {
     event.preventDefault();

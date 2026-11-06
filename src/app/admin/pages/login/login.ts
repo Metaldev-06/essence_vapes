@@ -37,6 +37,7 @@ export default class Login {
   protected readonly loginForm = form(this.model, loginSchema);
   protected readonly error = signal<string | null>(null);
   protected readonly submitting = signal(false);
+  protected readonly showPassword = signal(false);
 
   protected async onSubmit(event: Event): Promise<void> {
     event.preventDefault();

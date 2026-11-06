@@ -50,12 +50,19 @@
 .product-card-photo {
   object-fit: contain;
   filter: drop-shadow(0 12px 24px color-mix(in srgb, var(--accent-color) 35%, transparent));
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .product-bottle {
   width: 72px;
   height: 130px;
   filter: drop-shadow(0 12px 24px color-mix(in srgb, var(--accent-color) 35%, transparent));
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.product-card:hover .product-card-photo,
+.product-card:hover .product-bottle {
+  transform: scale(1.07);
 }
 
 .product-bottle-cap {
@@ -314,4 +321,11 @@
 .product-card-cart:disabled {
   cursor: not-allowed;
   opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card-photo,
+  .product-bottle {
+    transition: none;
+  }
 }

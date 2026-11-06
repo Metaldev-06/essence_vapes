@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import type { ProductCategory, ScentStyle, SortOption } from './product.model';
+import type { Gender, ProductCategory, ScentStyle, SortOption } from './product.model';
 
 export interface ProductsFiltersSnapshot {
   readonly term: string;
   readonly category: ProductCategory | 'todos';
+  readonly gender: Gender | 'todos';
   readonly sort: SortOption;
   readonly styles: readonly ScentStyle[];
   readonly capacityMl: number | null;
@@ -12,6 +13,7 @@ export interface ProductsFiltersSnapshot {
 export const DEFAULT_PRODUCTS_FILTERS: ProductsFiltersSnapshot = {
   term: '',
   category: 'todos',
+  gender: 'todos',
   sort: 'destacados',
   styles: [],
   capacityMl: null,

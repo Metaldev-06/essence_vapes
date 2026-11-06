@@ -15,7 +15,13 @@ import {
   type ProductsSortField,
 } from '../../data/products.service';
 import { ProductsFiltersStore } from '../../data/products-filters-store';
-import type { Product, ProductCategory, ScentStyle, SortOption } from '../../data/product.model';
+import type {
+  Gender,
+  Product,
+  ProductCategory,
+  ScentStyle,
+  SortOption,
+} from '../../data/product.model';
 import { ProductsHeader } from './components/products-header/products-header';
 import { ProductsFilters, type FilterOption } from './components/products-filters/products-filters';
 import { ProductsGrid } from './components/products-grid/products-grid';
@@ -45,11 +51,19 @@ export default class Products implements OnDestroy {
     { id: 'nombre', label: 'Nombre A-Z' },
   ];
 
+  protected readonly genderOptions: readonly FilterOption<Gender | 'todos'>[] = [
+    { id: 'todos', label: 'Todos los géneros' },
+    { id: 'masculino', label: 'Masculino' },
+    { id: 'femenino', label: 'Femenino' },
+    { id: 'unisex', label: 'Unisex' },
+  ];
+
   /** Read once on load - this page never reflects its filters in the URL, only in sessionStorage. */
   private readonly initialFilters = this.filtersStore.read();
 
   protected readonly search = signal(this.initialFilters.term);
   protected readonly activeCategory = signal<ProductCategory | 'todos'>(this.initialFilters.category);
+  protected readonly activeGender = signal<Gender | 'todos'>(this.initialFilters.gender);
   protected readonly sortBy = signal<SortOption>(this.initialFilters.sort);
   protected readonly activeStyles = signal<ReadonlySet<ScentStyle>>(
     new Set(this.initialFilters.styles),
@@ -100,6 +114,7 @@ export default class Products implements OnDestroy {
       this.filtersStore.write({
         term: this.search(),
         category: this.activeCategory(),
+        gender: this.activeGender(),
         sort: this.sortBy(),
         styles: Array.from(styles),
         capacityMl: capacity === 'todas' ? null : capacity,
@@ -138,12 +153,14 @@ export default class Products implements OnDestroy {
   private buildFilters(): ProductsQuery {
     const term = this.debouncedSearch.value().trim();
     const category = this.activeCategory();
+    const gender = this.activeGender();
     const styles = this.activeStyles();
     const capacity = this.activeCapacity();
 
     return {
       term: term.length > 0 ? term : undefined,
       category: category === 'todos' ? undefined : category,
+      gender: gender === 'todos' ? undefined : gender,
       styles: styles.size > 0 ? Array.from(styles) : undefined,
       capacityMl: capacity === 'todas' ? undefined : [capacity],
       ...this.sortParams(this.sortBy()),

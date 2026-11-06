@@ -283,7 +283,7 @@ function buildPayload(model: ProductFormModel, styles: ReadonlySet<ScentStyle>):
 
   if (model.variantLabel.trim()) payload.variantLabel = model.variantLabel.trim();
   if (model.oldPriceValue) payload.oldPriceValue = model.oldPriceValue;
-  if (model.badge.trim()) payload.badge = model.badge.trim();
+  payload.badge = model.badge.trim() ? model.badge.trim() : null;
   if (model.year) payload.year = model.year;
   if (model.origin.trim()) payload.origin = model.origin.trim();
   if (model.gender) payload.gender = model.gender as Gender;

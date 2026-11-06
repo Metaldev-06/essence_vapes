@@ -25,7 +25,7 @@ export interface AdminProductInput {
   notes: string[];
   priceValue: number;
   oldPriceValue?: number;
-  badge?: string;
+  badge?: string | null;
   accent: string;
   category: ProductCategory;
   styles: ScentStyle[];

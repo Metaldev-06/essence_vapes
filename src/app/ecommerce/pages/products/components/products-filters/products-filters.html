@@ -51,6 +51,15 @@
       <input type="search" placeholder="Buscar por marca o nombre..." [value]="search()" (input)="onSearchInput($event)" />
     </label>
 
+    <label class="products-gender">
+      <span class="sr-only">Filtrar por género</span>
+      <select [value]="gender()" (change)="onGenderChange($event)">
+        @for (option of genderOptions(); track option.id) {
+          <option [value]="option.id">{{ option.label }}</option>
+        }
+      </select>
+    </label>
+
     @if (capacityOptions().length > 0) {
       <label class="products-capacity">
         <span class="sr-only">Filtrar por capacidad</span>

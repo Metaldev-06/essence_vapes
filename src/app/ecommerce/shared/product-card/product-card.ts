@@ -4,7 +4,13 @@ import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
 import { CompareService } from '../../../core/compare/compare.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
-import { CATEGORY_SINGULAR_LABELS, type Product } from '../../data/product.model';
+import { CATEGORY_SINGULAR_LABELS, type Gender, type Product } from '../../data/product.model';
+
+const GENDER_LABELS: Record<Gender, string> = {
+  masculino: 'Masculino',
+  femenino: 'Femenino',
+  unisex: 'Unisex',
+};
 
 @Component({
   selector: 'app-product-card',
@@ -21,6 +27,11 @@ export class ProductCard {
   protected readonly maxCompareItems = this.compareService.maxItems;
 
   protected readonly categoryLabel = computed(() => CATEGORY_SINGULAR_LABELS[this.product().category]);
+
+  protected readonly genderLabel = computed(() => {
+    const gender = this.product().gender;
+    return gender ? GENDER_LABELS[gender] : undefined;
+  });
 
   /** First uploaded photo, if any - falls back to the decorative SVG bottle otherwise. */
   protected readonly coverImage = computed(() => this.product().images[0]);

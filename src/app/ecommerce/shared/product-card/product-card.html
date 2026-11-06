@@ -124,6 +124,11 @@
       @if (product().variantLabel) {
         <span class="product-card-variant-label">{{ product().variantLabel }}</span>
       }
+      @if (genderLabel(); as gender) {
+        <span class="product-card-gender" [class]="'product-card-gender--' + product().gender">{{
+          gender
+        }}</span>
+      }
     </span>
     <h3 class="product-card-name">{{ product().name }}</h3>
     <span class="product-card-subtitle">{{ product().subtitle }}</span>

@@ -4,14 +4,19 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { API_BASE_URL } from '../config/api.config';
-import type { Product } from '../../ecommerce/data/product.model';
+import { BASE_VARIANT_ID, type Product } from '../../ecommerce/data/product.model';
 import { AuthService } from '../auth/auth.service';
+
+const toKey = (productId: string, variantId: string): string => `${productId}::${variantId}`;
 
 /**
  * Single source of truth for the current user's favorites - both the full list (for the
  * favorites page) and the id set (for heart icons on every product card/gallery across the
  * app). Loads on login/session-restore, clears on logout, and updates optimistically so a
  * heart toggled anywhere is reflected everywhere without a refetch.
+ *
+ * Favorites are per VARIANT (same `productId::variantId` key the cart uses), not per product -
+ * favoriting a 2ml decant must not also favorite its 5ml sibling or the base product.
  */
 @Injectable({ providedIn: 'root' })
 export class FavoritesService {
@@ -23,10 +28,12 @@ export class FavoritesService {
   private readonly productsSignal = signal<Product[]>([]);
   private readonly loadingSignal = signal(false);
 
-  /** Favorited products, most recently favorited first. */
+  /** Favorited product variants, most recently favorited first. */
   readonly products = this.productsSignal.asReadonly();
   readonly isLoading = this.loadingSignal.asReadonly();
-  readonly ids = computed(() => new Set(this.productsSignal().map((product) => product.id)));
+  readonly ids = computed(
+    () => new Set(this.productsSignal().map((product) => toKey(product.id, product.variantId))),
+  );
 
   constructor() {
     // Angular can re-run an effect more than once for what is logically the same
@@ -47,21 +54,21 @@ export class FavoritesService {
     });
   }
 
-  isFavorite(productId: string): boolean {
-    return this.ids().has(productId);
+  isFavorite(productId: string, variantId: string = BASE_VARIANT_ID): boolean {
+    return this.ids().has(toKey(productId, variantId));
   }
 
   /** Toggles a favorite, redirecting a guest to login (preserving their current page) instead of failing silently. */
-  async toggle(productId: string): Promise<void> {
+  async toggle(productId: string, variantId: string = BASE_VARIANT_ID): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       void this.router.navigate(['/auth/login'], { queryParams: { returnUrl: this.router.url } });
       return;
     }
 
-    if (this.isFavorite(productId)) {
-      await this.remove(productId);
+    if (this.isFavorite(productId, variantId)) {
+      await this.remove(productId, variantId);
     } else {
-      await this.add(productId);
+      await this.add(productId, variantId);
     }
   }
 
@@ -77,23 +84,29 @@ export class FavoritesService {
     }
   }
 
-  private async add(productId: string): Promise<void> {
+  private async add(productId: string, variantId: string): Promise<void> {
     try {
       const product = await firstValueFrom(
-        this.http.post<Product>(`${this.baseUrl}/${productId}`, {}),
+        this.http.post<Product>(`${this.baseUrl}/${productId}`, { variantId }),
       );
       this.productsSignal.update((items) =>
-        items.some((item) => item.id === productId) ? items : [product, ...items],
+        items.some((item) => item.id === productId && item.variantId === variantId)
+          ? items
+          : [product, ...items],
       );
     } catch {
       /* Best-effort optimistic UI; the next refresh() reconciles with the server. */
     }
   }
 
-  private async remove(productId: string): Promise<void> {
+  private async remove(productId: string, variantId: string): Promise<void> {
     try {
-      await firstValueFrom(this.http.delete(`${this.baseUrl}/${productId}`));
-      this.productsSignal.update((items) => items.filter((item) => item.id !== productId));
+      await firstValueFrom(
+        this.http.delete(`${this.baseUrl}/${productId}`, { params: { variantId } }),
+      );
+      this.productsSignal.update((items) =>
+        items.filter((item) => !(item.id === productId && item.variantId === variantId)),
+      );
     } catch {
       /* Best-effort optimistic UI; the next refresh() reconciles with the server. */
     }

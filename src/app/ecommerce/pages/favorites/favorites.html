@@ -45,7 +45,7 @@
 
       @if (filteredProducts().length > 0) {
         <div class="favorites-grid">
-          @for (product of filteredProducts(); track product.id) {
+          @for (product of filteredProducts(); track product.id + '::' + product.variantId) {
             <app-product-card [product]="product" />
           }
         </div>

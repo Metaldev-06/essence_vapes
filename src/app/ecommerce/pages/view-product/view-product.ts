@@ -50,9 +50,11 @@ export default class ViewProduct {
   protected readonly selectedVariantId = signal('');
 
   /**
-   * Same product, with `images` swapped for the selected variant's own, if it has any. Kept as a
-   * `computed()` (not a plain method call from the template) so its reference stays stable across
-   * change-detection runs - `ProductGallery` resets its active photo index whenever this changes.
+   * Same product, with `variantId` pointed at the selected variant (so `ProductGallery`
+   * favorites the right one, not always the base) and `images` swapped for that variant's own,
+   * if it has any. Kept as a `computed()` (not a plain method call from the template) so its
+   * reference stays stable across change-detection runs - `ProductGallery` resets its active
+   * photo index whenever this changes.
    */
   protected readonly effectiveProduct = computed<Product | undefined>(() => {
     const product = this.product();
@@ -60,8 +62,12 @@ export default class ViewProduct {
     const variant = product.variants.find(
       (candidate) => candidate.id === this.selectedVariantId(),
     );
-    if (!variant || variant.images.length === 0) return product;
-    return { ...product, images: variant.images };
+    if (!variant) return product;
+    return {
+      ...product,
+      variantId: variant.id,
+      images: variant.images.length > 0 ? variant.images : product.images,
+    };
   });
 
   private readonly relatedResource = this.productsService.list(() => {

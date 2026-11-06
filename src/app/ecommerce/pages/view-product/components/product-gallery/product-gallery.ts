@@ -15,7 +15,7 @@ export class ProductGallery {
   readonly product = input.required<Product>();
 
   protected readonly isFavorite = computed(() =>
-    this.favoritesService.isFavorite(this.product().id),
+    this.favoritesService.isFavorite(this.product().id, this.product().variantId),
   );
 
   /** Resets to the first photo whenever the product changes (e.g. navigating via "related products"). */
@@ -28,7 +28,7 @@ export class ProductGallery {
   protected readonly activeImage = computed(() => this.product().images[this.activeImageIndex()]);
 
   protected toggleFavorite(): void {
-    void this.favoritesService.toggle(this.product().id);
+    void this.favoritesService.toggle(this.product().id, this.product().variantId);
   }
 
   protected selectImage(index: number): void {

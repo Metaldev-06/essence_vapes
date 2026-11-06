@@ -23,7 +23,7 @@ export class ProductCard {
   protected readonly coverImage = computed(() => this.product().images[0]);
 
   protected readonly isFavorite = computed(() =>
-    this.favoritesService.isFavorite(this.product().id),
+    this.favoritesService.isFavorite(this.product().id, this.product().variantId),
   );
 
   protected readonly canAddToCart = computed(() => {
@@ -35,7 +35,7 @@ export class ProductCard {
   });
 
   protected toggleFavorite(): void {
-    void this.favoritesService.toggle(this.product().id);
+    void this.favoritesService.toggle(this.product().id, this.product().variantId);
   }
 
   protected addToCart(): void {

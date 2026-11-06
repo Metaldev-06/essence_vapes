@@ -11,6 +11,8 @@
       [activeStyles]="activeStyles()"
       (toggleStyle)="toggleStyle($event)"
       (clearStyles)="clearStyles()"
+      [capacityOptions]="capacityOptions()"
+      [(capacity)]="activeCapacity"
     />
 
     <app-products-grid

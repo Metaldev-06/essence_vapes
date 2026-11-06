@@ -40,6 +40,8 @@ export default class Products {
   protected readonly activeCategory = signal<ProductCategory | 'todos'>(this.readInitialCategory());
   protected readonly sortBy = signal<SortOption>('destacados');
   protected readonly activeStyles = signal<ReadonlySet<ScentStyle>>(this.readInitialStyles());
+  protected readonly activeCapacity = signal<number | 'todas'>(this.readInitialCapacity());
+  protected readonly capacityOptions = this.productsService.capacities;
 
   private readonly debouncedSearch = debounced(this.search, 300);
   private readonly offset = signal(0);
@@ -102,11 +104,13 @@ export default class Products {
     const term = this.debouncedSearch.value().trim();
     const category = this.activeCategory();
     const styles = this.activeStyles();
+    const capacity = this.activeCapacity();
 
     return {
       term: term.length > 0 ? term : undefined,
       category: category === 'todos' ? undefined : category,
       styles: styles.size > 0 ? Array.from(styles) : undefined,
+      capacityMl: capacity === 'todas' ? undefined : [capacity],
       ...this.sortParams(this.sortBy()),
     };
   }
@@ -138,5 +142,11 @@ export default class Products {
       .map((style) => style.trim())
       .filter((style): style is ScentStyle => valid.includes(style));
     return new Set(styles);
+  }
+
+  private readInitialCapacity(): number | 'todas' {
+    const raw = this.route.snapshot.queryParamMap.get('ml');
+    const value = Number(raw);
+    return raw && Number.isFinite(value) && value > 0 ? value : 'todas';
   }
 }

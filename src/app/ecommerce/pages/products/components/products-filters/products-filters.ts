@@ -19,10 +19,12 @@ export class ProductsFilters {
   readonly categories = input.required<readonly FilterOption<ProductCategory | 'todos'>[]>();
   readonly sortOptions = input.required<readonly FilterOption<SortOption>[]>();
   readonly activeStyles = input<ReadonlySet<ScentStyle>>(new Set());
+  readonly capacityOptions = input<readonly number[]>([]);
 
   readonly category = model.required<ProductCategory | 'todos'>();
   readonly sort = model.required<SortOption>();
   readonly search = model('');
+  readonly capacity = model<number | 'todas'>('todas');
 
   readonly toggleStyle = output<ScentStyle>();
   readonly clearStyles = output<void>();
@@ -33,5 +35,10 @@ export class ProductsFilters {
 
   protected onSortChange(event: Event): void {
     this.sort.set((event.target as HTMLSelectElement).value as SortOption);
+  }
+
+  protected onCapacityChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.capacity.set(value === 'todas' ? 'todas' : Number(value));
   }
 }

@@ -11,6 +11,7 @@ export interface ProductsQuery {
   readonly term?: string;
   readonly category?: ProductCategory;
   readonly styles?: readonly ScentStyle[];
+  readonly capacityMl?: readonly number[];
   readonly sort?: ProductsSortField;
   readonly order?: 'asc' | 'desc';
   readonly limit?: number;
@@ -48,6 +49,14 @@ export class ProductsService {
   readonly featured = this.featuredResource.value;
   readonly featuredLoading = this.featuredResource.isLoading;
 
+  private readonly capacitiesResource = httpResource<number[]>(
+    () => `${this.baseUrl}/capacities`,
+    { defaultValue: [] },
+  );
+
+  /** Distinct ml capacities currently in the catalog (e.g. [2, 5, 10, 100, 125, 200]). */
+  readonly capacities = this.capacitiesResource.value;
+
   list(query: () => ProductsQuery | undefined) {
     return httpResource<ProductsPage>(
       () => {
@@ -71,6 +80,8 @@ export class ProductsService {
     if (query.term) params['term'] = query.term;
     if (query.category) params['category'] = query.category;
     if (query.styles && query.styles.length > 0) params['styles'] = query.styles.join(',');
+    if (query.capacityMl && query.capacityMl.length > 0)
+      params['capacityMl'] = query.capacityMl.join(',');
     if (query.sort) params['sort'] = query.sort;
     if (query.order) params['order'] = query.order;
     return params;

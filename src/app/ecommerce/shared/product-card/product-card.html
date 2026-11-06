@@ -73,9 +73,6 @@
         </svg>
         {{ categoryLabel() }}
       </span>
-      @if (product().badge) {
-        <span class="product-card-badge">{{ product().badge }}</span>
-      }
     </div>
 
     <button
@@ -119,25 +116,24 @@
   </div>
 
   <div class="product-card-body">
-    <span class="product-card-brand">
-      {{ product().brand }}
-      @if (product().variantLabel) {
-        <span class="product-card-variant-label">{{ product().variantLabel }}</span>
-      }
-      @if (genderLabel(); as gender) {
-        <span class="product-card-gender" [class]="'product-card-gender--' + product().gender">{{
-          gender
-        }}</span>
-      }
-    </span>
-    <h3 class="product-card-name">{{ product().name }}</h3>
-    <span class="product-card-subtitle">{{ product().subtitle }}</span>
+    <div class="product-card-brand-row">
+      <span class="product-card-brand">{{ product().brand }}</span>
 
-    <div class="product-card-notes">
-      @for (note of product().notes; track note) {
-        <span class="note-pill">{{ note }}</span>
-      }
+      <div class="product-card-meta">
+        @if (product().variantLabel) {
+          <span class="product-card-chip product-card-ml">{{ product().variantLabel }}</span>
+        }
+        @if (genderLabel(); as gender) {
+          <span
+            class="product-card-chip product-card-gender"
+            [class]="'product-card-gender--' + product().gender"
+            >{{ gender }}</span
+          >
+        }
+      </div>
     </div>
+
+    <h3 class="product-card-name">{{ product().name }}</h3>
 
     <div class="product-card-footer">
       <div class="product-price">

@@ -1,0 +1,130 @@
+:host {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+}
+
+.compare-tray {
+  background: var(--color-surface-elevated);
+  border-top: 1px solid var(--color-border-subtle);
+  box-shadow: 0 -12px 32px -16px rgb(0 0 0 / 35%);
+}
+
+.compare-tray-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+}
+
+.compare-tray-items {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+  padding: 2px;
+}
+
+.compare-tray-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.compare-tray-remove {
+  position: absolute;
+  top: -6px;
+  right: -2px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+}
+
+.compare-tray-remove:hover {
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+}
+
+.compare-tray-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.compare-tray-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.compare-tray-item--loading .compare-tray-thumb {
+  opacity: 0.4;
+}
+
+.compare-tray-name {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.compare-tray-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.compare-tray-count {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .compare-tray-inner {
+    padding: 8px 14px;
+    gap: 10px;
+  }
+
+  .compare-tray-name {
+    display: none;
+  }
+
+  .compare-tray-item {
+    width: 44px;
+  }
+
+  .compare-tray-count {
+    display: none;
+  }
+}

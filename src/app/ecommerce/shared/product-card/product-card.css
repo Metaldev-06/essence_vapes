@@ -128,7 +128,8 @@
   border: 1px solid color-mix(in srgb, var(--accent-color) 45%, transparent);
 }
 
-.product-card-favorite {
+.product-card-favorite,
+.product-card-compare {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -150,12 +151,18 @@
     transform 0.15s ease;
 }
 
-.product-card-favorite:hover {
+.product-card-compare {
+  right: 50px;
+}
+
+.product-card-favorite:hover,
+.product-card-compare:hover {
   transform: scale(1.06);
   border-color: color-mix(in srgb, var(--accent-color) 45%, transparent);
 }
 
-.product-card-favorite:focus-visible {
+.product-card-favorite:focus-visible,
+.product-card-compare:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
@@ -164,6 +171,18 @@
   color: var(--color-danger);
   background: color-mix(in srgb, var(--color-danger) 16%, var(--color-bg));
   border-color: color-mix(in srgb, var(--color-danger) 40%, transparent);
+}
+
+.product-card-compare.active {
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 16%, var(--color-bg));
+  border-color: color-mix(in srgb, var(--accent-color) 40%, transparent);
+}
+
+.product-card-compare:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  transform: none;
 }
 
 .product-card-body {

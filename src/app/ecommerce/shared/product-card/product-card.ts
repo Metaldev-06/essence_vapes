@@ -2,6 +2,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
+import { CompareService } from '../../../core/compare/compare.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
 import { CATEGORY_SINGULAR_LABELS, type Product } from '../../data/product.model';
 
@@ -14,8 +15,10 @@ import { CATEGORY_SINGULAR_LABELS, type Product } from '../../data/product.model
 export class ProductCard {
   private readonly favoritesService = inject(FavoritesService);
   private readonly cartService = inject(CartService);
+  private readonly compareService = inject(CompareService);
 
   readonly product = input.required<Product>();
+  protected readonly maxCompareItems = this.compareService.maxItems;
 
   protected readonly categoryLabel = computed(() => CATEGORY_SINGULAR_LABELS[this.product().category]);
 
@@ -24,6 +27,15 @@ export class ProductCard {
 
   protected readonly isFavorite = computed(() =>
     this.favoritesService.isFavorite(this.product().id, this.product().variantId),
+  );
+
+  protected readonly isComparing = computed(() =>
+    this.compareService.isComparing(this.product().id, this.product().variantId),
+  );
+
+  /** Disabled only when trying to ADD a new item while already at the comparator's max. */
+  protected readonly compareDisabled = computed(
+    () => !this.isComparing() && this.compareService.isFull(),
   );
 
   protected readonly canAddToCart = computed(() => {
@@ -36,6 +48,10 @@ export class ProductCard {
 
   protected toggleFavorite(): void {
     void this.favoritesService.toggle(this.product().id, this.product().variantId);
+  }
+
+  protected toggleCompare(): void {
+    this.compareService.toggle(this.product().id, this.product().variantId);
   }
 
   protected addToCart(): void {

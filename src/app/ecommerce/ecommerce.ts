@@ -3,10 +3,11 @@ import { RouterOutlet } from '@angular/router';
 
 import { Header } from './layout/header/header';
 import { Footer } from './layout/footer/footer';
+import { CompareTray } from './shared/compare-tray/compare-tray';
 
 @Component({
   selector: 'app-ecommerce',
-  imports: [RouterOutlet, Header, Footer],
+  imports: [RouterOutlet, Header, Footer, CompareTray],
   templateUrl: './ecommerce.html',
   styleUrl: './ecommerce.css',
 })

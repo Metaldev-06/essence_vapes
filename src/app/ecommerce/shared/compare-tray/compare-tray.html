@@ -1,0 +1,38 @@
+@if (compareService.count() > 0) {
+  <div class="compare-tray" role="region" aria-label="Comparador de productos">
+    <div class="compare-tray-inner">
+      <div class="compare-tray-items">
+        @for (product of compareService.products(); track $index) {
+          @if (product) {
+            <div class="compare-tray-item">
+              <button
+                type="button"
+                class="compare-tray-remove"
+                [attr.aria-label]="'Quitar ' + product.name + ' del comparador'"
+                (click)="remove(product)"
+              >
+                ×
+              </button>
+              @if (product.images[0]; as cover) {
+                <img [src]="cover.url" [alt]="product.name" class="compare-tray-thumb" />
+              } @else {
+                <span class="compare-tray-thumb compare-tray-thumb--empty" aria-hidden="true">🧴</span>
+              }
+              <span class="compare-tray-name">{{ product.name }}</span>
+            </div>
+          } @else {
+            <div class="compare-tray-item compare-tray-item--loading" aria-hidden="true">
+              <span class="compare-tray-thumb compare-tray-thumb--empty"></span>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="compare-tray-actions">
+        <span class="compare-tray-count">{{ compareService.count() }}/{{ compareService.maxItems }}</span>
+        <button type="button" class="btn btn-sm btn-ghost" (click)="compareService.clear()">Vaciar</button>
+        <a [routerLink]="'/comparar'" class="btn btn-sm btn-primary">Comparar</a>
+      </div>
+    </div>
+  </div>
+}

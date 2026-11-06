@@ -35,6 +35,15 @@ export const ecommerceRoutes: Routes = [
         },
       },
       {
+        path: 'comparar',
+        loadComponent: () => import('./pages/compare/compare'),
+        title: 'Comparar fragancias | Essence Vapes',
+        data: {
+          description:
+            'Compará en tiempo real notas, estadísticas y precio entre distintos perfumes, decants y esencias.',
+        },
+      },
+      {
         path: 'contacto',
         loadComponent: () => import('./pages/contact/contact'),
         title: 'Contacto | Essence Vapes',

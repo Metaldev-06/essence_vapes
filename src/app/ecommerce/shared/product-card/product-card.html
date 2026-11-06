@@ -80,6 +80,23 @@
 
     <button
       type="button"
+      class="product-card-compare"
+      [class.active]="isComparing()"
+      [disabled]="compareDisabled()"
+      [attr.aria-pressed]="isComparing()"
+      [attr.aria-label]="isComparing() ? 'Quitar de comparación' : 'Agregar a comparación'"
+      [title]="compareDisabled() ? 'Ya tenés ' + maxCompareItems + ' productos para comparar' : ''"
+      (click)="toggleCompare()"
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="8" height="18" rx="1.5" />
+        <rect x="13" y="3" width="8" height="18" rx="1.5" />
+        <path d="M7 9v2M17 9v2" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
       class="product-card-favorite"
       [class.active]="isFavorite()"
       [attr.aria-pressed]="isFavorite()"

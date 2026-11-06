@@ -1,5 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormField, email, form, minLength, required, schema } from '@angular/forms/signals';
+
+import { ContactService } from '../../../../data/contact.service';
 
 interface ContactModel {
   name: string;
@@ -28,6 +30,8 @@ const contactSchema = schema<ContactModel>((path) => {
   styleUrl: './contact-form.css',
 })
 export class ContactForm {
+  private readonly contactService = inject(ContactService);
+
   protected readonly reasons = [
     { id: 'consulta-general', label: 'Consulta general' },
     { id: 'estado-pedido', label: 'Estado de un pedido' },
@@ -38,18 +42,38 @@ export class ContactForm {
   private readonly model = signal(emptyModel());
   protected readonly contactForm = form(this.model, contactSchema);
   protected readonly submitted = signal(false);
+  protected readonly submitting = signal(false);
+  protected readonly error = signal<string | null>(null);
 
-  protected onSubmit(event: Event): void {
+  protected async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
     this.contactForm().markAsTouched();
     if (!this.contactForm().valid()) {
       return;
     }
-    this.submitted.set(true);
+
+    this.submitting.set(true);
+    this.error.set(null);
+    const { name, email: emailValue, phone, reason, message } = this.model();
+    const result = await this.contactService.send({
+      name,
+      email: emailValue,
+      phone: phone || undefined,
+      reason,
+      message,
+    });
+    this.submitting.set(false);
+
+    if (result.success) {
+      this.submitted.set(true);
+    } else {
+      this.error.set(result.message);
+    }
   }
 
   protected sendAnother(): void {
     this.model.set(emptyModel());
     this.submitted.set(false);
+    this.error.set(null);
   }
 }

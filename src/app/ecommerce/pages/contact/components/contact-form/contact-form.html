@@ -60,7 +60,13 @@
       }
     </div>
 
-    <button type="submit" class="btn btn-primary">Enviar mensaje</button>
+    @if (error()) {
+      <p class="contact-form-error" role="alert">{{ error() }}</p>
+    }
+
+    <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+      {{ submitting() ? 'Enviando...' : 'Enviar mensaje' }}
+    </button>
   </form>
 } @else {
   <div class="contact-success" role="status">

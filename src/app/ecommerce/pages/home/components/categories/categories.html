@@ -9,15 +9,15 @@
           <em class="section-title-accent">necesitás</em>
         </h2>
       </div>
-      <a routerLink="/productos" class="btn btn-ghost">Ver todo →</a>
+      <button type="button" class="btn btn-ghost" (click)="goToAll()">Ver todo →</button>
     </div>
 
     <div class="categories-grid">
       @for (category of categories; track category.id) {
-        <a
-          [routerLink]="'/productos'"
-          [queryParams]="{ cat: category.id }"
+        <button
+          type="button"
           [class]="'category-card ' + category.variantClass"
+          (click)="goToCategory(category.id)"
         >
           <span class="category-card-icon" aria-hidden="true">{{ category.icon }}</span>
           <span class="category-card-body">
@@ -31,7 +31,7 @@
               </span>
             </span>
           </span>
-        </a>
+        </button>
       }
     </div>
   </div>

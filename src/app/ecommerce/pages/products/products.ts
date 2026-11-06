@@ -1,11 +1,20 @@
-import { Component, computed, debounced, effect, inject, signal, untracked } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {
+  Component,
+  computed,
+  debounced,
+  effect,
+  inject,
+  signal,
+  untracked,
+  type OnDestroy,
+} from '@angular/core';
 import {
   ProductsService,
   PRODUCTS_PAGE_SIZE,
   type ProductsQuery,
   type ProductsSortField,
 } from '../../data/products.service';
+import { ProductsFiltersStore } from '../../data/products-filters-store';
 import type { Product, ProductCategory, ScentStyle, SortOption } from '../../data/product.model';
 import { ProductsHeader } from './components/products-header/products-header';
 import { ProductsFilters, type FilterOption } from './components/products-filters/products-filters';
@@ -17,9 +26,9 @@ import { ProductsGrid } from './components/products-grid/products-grid';
   templateUrl: './products.html',
   styleUrl: './products.css',
 })
-export default class Products {
-  private readonly route = inject(ActivatedRoute);
+export default class Products implements OnDestroy {
   private readonly productsService = inject(ProductsService);
+  private readonly filtersStore = inject(ProductsFiltersStore);
 
   protected readonly categories: readonly FilterOption<ProductCategory | 'todos'>[] = [
     { id: 'todos', label: 'Todos' },
@@ -36,11 +45,18 @@ export default class Products {
     { id: 'nombre', label: 'Nombre A-Z' },
   ];
 
-  protected readonly search = signal('');
-  protected readonly activeCategory = signal<ProductCategory | 'todos'>(this.readInitialCategory());
-  protected readonly sortBy = signal<SortOption>('destacados');
-  protected readonly activeStyles = signal<ReadonlySet<ScentStyle>>(this.readInitialStyles());
-  protected readonly activeCapacity = signal<number | 'todas'>(this.readInitialCapacity());
+  /** Read once on load - this page never reflects its filters in the URL, only in sessionStorage. */
+  private readonly initialFilters = this.filtersStore.read();
+
+  protected readonly search = signal(this.initialFilters.term);
+  protected readonly activeCategory = signal<ProductCategory | 'todos'>(this.initialFilters.category);
+  protected readonly sortBy = signal<SortOption>(this.initialFilters.sort);
+  protected readonly activeStyles = signal<ReadonlySet<ScentStyle>>(
+    new Set(this.initialFilters.styles),
+  );
+  protected readonly activeCapacity = signal<number | 'todas'>(
+    this.initialFilters.capacityMl ?? 'todas',
+  );
   protected readonly capacityOptions = this.productsService.capacities;
 
   private readonly debouncedSearch = debounced(this.search, 300);
@@ -75,6 +91,25 @@ export default class Products {
       this.items.set(isFirstPage ? page.data : [...untracked(() => this.items()), ...page.data]);
       this.total.set(page.pagination.total);
     });
+
+    // Persists every filter change to sessionStorage - a refresh (or navigating away and back)
+    // keeps whatever was last applied, since none of this ever reaches the URL.
+    effect(() => {
+      const styles = this.activeStyles();
+      const capacity = this.activeCapacity();
+      this.filtersStore.write({
+        term: this.search(),
+        category: this.activeCategory(),
+        sort: this.sortBy(),
+        styles: Array.from(styles),
+        capacityMl: capacity === 'todas' ? null : capacity,
+      });
+    });
+  }
+
+  /** Leaving the page resets the filters for next time - only a refresh WHILE on it keeps them. */
+  ngOnDestroy(): void {
+    this.filtersStore.clear();
   }
 
   protected loadMore(): void {
@@ -126,27 +161,5 @@ export default class Products {
       default:
         return { sort: 'featured', order: 'desc' };
     }
-  }
-
-  private readInitialCategory(): ProductCategory | 'todos' {
-    const value = this.route.snapshot.queryParamMap.get('cat');
-    const valid: readonly string[] = ['perfumes', 'decants', 'vapes', 'esencias'];
-    return valid.includes(value ?? '') ? (value as ProductCategory) : 'todos';
-  }
-
-  private readInitialStyles(): ReadonlySet<ScentStyle> {
-    const valid: readonly string[] = ['fresco', 'dulce', 'intenso', 'elegante', 'nocturno', 'citrico'];
-    const raw = this.route.snapshot.queryParamMap.get('styles') ?? '';
-    const styles = raw
-      .split(',')
-      .map((style) => style.trim())
-      .filter((style): style is ScentStyle => valid.includes(style));
-    return new Set(styles);
-  }
-
-  private readInitialCapacity(): number | 'todas' {
-    const raw = this.route.snapshot.queryParamMap.get('ml');
-    const value = Number(raw);
-    return raw && Number.isFinite(value) && value > 0 ? value : 'todas';
   }
 }

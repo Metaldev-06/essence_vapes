@@ -7,9 +7,19 @@ import type {
   AuthResult,
   AuthSession,
   AuthUser,
+  EmailVerificationOutcome,
   LoginCredentials,
   RegisterData,
+  SecurityStatus,
 } from './auth.model';
+
+export type EmailVerificationConfirmResult =
+  | { success: true; outcome: EmailVerificationOutcome }
+  | { success: false; message: string };
+
+export type PasswordCodeVerifyResult =
+  | { success: true; authorization: string }
+  | { success: false; message: string };
 
 const TOKEN_STORAGE_KEY = 'essence-vapes-token';
 
@@ -76,6 +86,172 @@ export class AuthService {
     this.tokenSignal.set(null);
     this.userSignal.set(null);
     this.clearStoredToken();
+  }
+
+  // -------------------------------------------------------------------------------------
+  // Verificación de email
+  // -------------------------------------------------------------------------------------
+
+  async resendEmailVerification(): Promise<AuthResult> {
+    try {
+      await firstValueFrom(this.http.post(`${this.baseUrl}/email-verification/resend`, {}));
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  /** No requiere sesión - el token del link ya identifica la cuenta por sí solo. */
+  async confirmEmailVerification(token: string): Promise<EmailVerificationConfirmResult> {
+    try {
+      const result = await firstValueFrom(
+        this.http.post<{ outcome: EmailVerificationOutcome }>(
+          `${this.baseUrl}/email-verification/confirm`,
+          { token },
+        ),
+      );
+      // Un token recién confirmado puede pertenecer al usuario ya logueado (p.ej. verificó
+      // desde otra pestaña) - refrescar su estado para que el banner desaparezca sin recargar.
+      if (result.outcome === 'ok' && this.isAuthenticated()) void this.refreshCurrentUser();
+      return { success: true, outcome: result.outcome };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  // -------------------------------------------------------------------------------------
+  // Olvidé mi contraseña (no autenticado)
+  // -------------------------------------------------------------------------------------
+
+  /** El backend siempre responde 200 con el mismo mensaje genérico - nunca revela si el
+   *  email existe. Solo falla por red/servidor, nunca por "ese correo no está registrado". */
+  async forgotPassword(email: string): Promise<AuthResult> {
+    try {
+      await firstValueFrom(this.http.post(`${this.baseUrl}/password/forgot`, { email }));
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  async verifyPasswordResetCode(email: string, code: string): Promise<PasswordCodeVerifyResult> {
+    try {
+      const result = await firstValueFrom(
+        this.http.post<{ resetAuthorization: string }>(`${this.baseUrl}/password/verify-code`, {
+          email,
+          code,
+        }),
+      );
+      return { success: true, authorization: result.resetAuthorization };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  async resetPassword(resetAuthorization: string, newPassword: string): Promise<AuthResult> {
+    try {
+      await firstValueFrom(
+        this.http.post(`${this.baseUrl}/password/reset`, { resetAuthorization, newPassword }),
+      );
+      // La contraseña nueva invalida toda sesión existente (incluida esta, si había alguna) -
+      // ver `sessionVersion` en el backend. Siempre se redirige a login después de esto.
+      this.logout();
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  // -------------------------------------------------------------------------------------
+  // Cambiar contraseña (autenticado) - distinto de "olvidé mi contraseña"
+  // -------------------------------------------------------------------------------------
+
+  async requestPasswordChange(): Promise<AuthResult> {
+    try {
+      await firstValueFrom(this.http.post(`${this.baseUrl}/password/change/request`, {}));
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  async verifyPasswordChangeCode(code: string): Promise<PasswordCodeVerifyResult> {
+    try {
+      const result = await firstValueFrom(
+        this.http.post<{ changeAuthorization: string }>(
+          `${this.baseUrl}/password/change/verify`,
+          { code },
+        ),
+      );
+      return { success: true, authorization: result.changeAuthorization };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  async confirmPasswordChange(
+    changeAuthorization: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<AuthResult> {
+    try {
+      await firstValueFrom(
+        this.http.post(`${this.baseUrl}/password/change/confirm`, {
+          changeAuthorization,
+          currentPassword,
+          newPassword,
+        }),
+      );
+      // Mismo motivo que `resetPassword`: la sesión actual también queda invalidada.
+      this.logout();
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  // -------------------------------------------------------------------------------------
+  // Perfil / cuenta
+  // -------------------------------------------------------------------------------------
+
+  async updateProfile(fullName: string): Promise<AuthResult> {
+    try {
+      const user = await firstValueFrom(
+        this.http.patch<AuthUser>(`${this.baseUrl}/me`, { fullName }),
+      );
+      this.userSignal.set(user);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  /** El backend invalida el JWT actual también - siempre seguido de `logout()` local. */
+  async revokeAllSessions(): Promise<AuthResult> {
+    try {
+      await firstValueFrom(this.http.post(`${this.baseUrl}/sessions/revoke-all`, {}));
+      this.logout();
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: this.extractErrorMessage(error) };
+    }
+  }
+
+  async getSecurityStatus(): Promise<SecurityStatus | null> {
+    try {
+      return await firstValueFrom(this.http.get<SecurityStatus>(`${this.baseUrl}/me/security`));
+    } catch {
+      return null;
+    }
+  }
+
+  private async refreshCurrentUser(): Promise<void> {
+    try {
+      const user = await firstValueFrom(this.http.get<AuthUser>(`${this.baseUrl}/me`));
+      this.userSignal.set(user);
+    } catch {
+      /* Si falla, el estado anterior se mantiene - no es crítico para este caso. */
+    }
   }
 
   /**

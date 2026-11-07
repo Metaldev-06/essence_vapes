@@ -1,0 +1,65 @@
+<section class="section auth-page">
+  <div class="container">
+    <div class="auth-card card">
+      @switch (state()) {
+        @case ('no_token') {
+          <h1 class="auth-title">Enlace incompleto</h1>
+          <p class="auth-subtitle">Este enlace de verificación no es válido. Revisá que lo copiaste completo desde el correo.</p>
+          <a class="btn btn-primary auth-submit" [routerLink]="'/auth/login'">Ir a iniciar sesión</a>
+        }
+
+        @case ('idle') {
+          <h1 class="auth-title">Confirmá tu correo</h1>
+          <p class="auth-subtitle">
+            Hacé click para confirmar que esta dirección de email es tuya y activar tu cuenta.
+          </p>
+          <button type="button" class="btn btn-primary auth-submit" (click)="confirm()">
+            Verificar mi correo
+          </button>
+        }
+
+        @case ('confirming') {
+          <h1 class="auth-title">Verificando...</h1>
+          <p class="auth-subtitle">Un momento, estamos confirmando tu correo.</p>
+        }
+
+        @case ('ok') {
+          <h1 class="auth-title">¡Tu correo quedó verificado!</h1>
+          <p class="auth-subtitle">Ya podés usar todas las funciones de tu cuenta.</p>
+          <a class="btn btn-primary auth-submit" [routerLink]="destinationLink">Continuar</a>
+        }
+
+        @case ('already_verified') {
+          <h1 class="auth-title">Tu correo ya estaba verificado</h1>
+          <p class="auth-subtitle">No hace falta hacer nada más.</p>
+          <a class="btn btn-primary auth-submit" [routerLink]="destinationLink">Continuar</a>
+        }
+
+        @case ('expired') {
+          <h1 class="auth-title">Este enlace venció</h1>
+          <p class="auth-subtitle">
+            Los enlaces de verificación vencen después de 24 horas. Iniciá sesión y pedí uno
+            nuevo desde Configuración de cuenta.
+          </p>
+          <a class="btn btn-primary auth-submit" [routerLink]="'/auth/login'">Ir a iniciar sesión</a>
+        }
+
+        @case ('invalid') {
+          <h1 class="auth-title">Enlace inválido</h1>
+          <p class="auth-subtitle">
+            No pudimos reconocer este enlace. Puede que ya se haya usado o que esté incompleto.
+          </p>
+          <a class="btn btn-primary auth-submit" [routerLink]="'/auth/login'">Ir a iniciar sesión</a>
+        }
+
+        @case ('error') {
+          <h1 class="auth-title">Algo falló de nuestro lado</h1>
+          <p class="auth-subtitle">{{ errorMessage() ?? 'Probá de nuevo en unos minutos.' }}</p>
+          <button type="button" class="btn btn-primary auth-submit" (click)="confirm()">
+            Reintentar
+          </button>
+        }
+      }
+    </div>
+  </div>
+</section>

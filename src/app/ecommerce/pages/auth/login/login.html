@@ -54,6 +54,7 @@
           @if (loginForm.password().touched() && loginForm.password().invalid()) {
             <span class="form-error">{{ loginForm.password().errors()[0]?.message }}</span>
           }
+          <a class="auth-forgot-link" [routerLink]="'/auth/olvide-contrasena'">¿Olvidaste tu contraseña?</a>
         </div>
 
         @if (error()) {

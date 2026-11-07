@@ -6,9 +6,20 @@ export interface AuthUser {
   readonly fullName: string;
   readonly role: Role;
   readonly isActive: boolean;
+  readonly emailVerified: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
+
+export interface SecurityStatus {
+  readonly emailVerified: boolean;
+  readonly emailVerifiedAt: string | null;
+  readonly passwordChangedAt: string | null;
+  readonly createdAt: string;
+}
+
+export type EmailVerificationOutcome = 'ok' | 'already_verified' | 'expired' | 'invalid';
+export type SecurityCodeErrorOutcome = 'invalid' | 'expired' | 'too_many_attempts';
 
 export interface AuthSession {
   readonly user: AuthUser;

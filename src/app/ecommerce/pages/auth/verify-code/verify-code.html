@@ -1,0 +1,65 @@
+<section class="section auth-page">
+  <div class="container">
+    <div class="auth-card card">
+      <h1 class="auth-title">Ingresá el código</h1>
+      <p class="auth-subtitle">
+        Te enviamos un código de 6 dígitos a <strong>{{ email }}</strong>.
+      </p>
+
+      <div class="code-inputs" (paste)="onPaste($event)">
+        @for (digit of digits(); track $index) {
+          <input
+            [id]="'code-digit-' + $index"
+            class="code-digit"
+            type="text"
+            inputmode="numeric"
+            maxlength="1"
+            autocomplete="one-time-code"
+            [attr.aria-label]="'Dígito ' + ($index + 1) + ' de 6'"
+            [value]="digit"
+            [disabled]="submitting() || expired()"
+            (input)="onDigitInput($index, $event)"
+            (keydown)="onDigitKeydown($index, $event)"
+          />
+        }
+      </div>
+
+      @if (error()) {
+        <p class="auth-form-error" role="alert">{{ error() }}</p>
+      }
+
+      @if (expired()) {
+        <p class="code-expired" role="alert">El código venció. Pedí uno nuevo.</p>
+      } @else {
+        <p class="code-timer">El código vence en {{ formattedTime() }}</p>
+      }
+
+      @if (submitting()) {
+        <p class="code-status">Verificando...</p>
+      }
+
+      <button
+        type="button"
+        class="btn btn-ghost auth-submit"
+        [disabled]="resendCooldown() > 0 || resending()"
+        (click)="resend()"
+      >
+        @if (resending()) {
+          Reenviando...
+        } @else if (resendCooldown() > 0) {
+          Reenviar código ({{ resendCooldown() }}s)
+        } @else {
+          Reenviar código
+        }
+      </button>
+
+      @if (resent()) {
+        <p class="code-resent">Te enviamos un código nuevo - el anterior ya no es válido.</p>
+      }
+
+      <p class="auth-switch">
+        <a [routerLink]="'/auth/login'">Volver a iniciar sesión</a>
+      </p>
+    </div>
+  </div>
+</section>

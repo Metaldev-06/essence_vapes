@@ -10,6 +10,7 @@ export type ProductsSortField =
 export interface ProductsQuery {
   readonly term?: string;
   readonly category?: ProductCategory;
+  readonly brand?: string;
   readonly gender?: Gender;
   readonly styles?: readonly ScentStyle[];
   readonly capacityMl?: readonly number[];
@@ -58,6 +59,13 @@ export class ProductsService {
   /** Distinct ml capacities currently in the catalog (e.g. [2, 5, 10, 100, 125, 200]). */
   readonly capacities = this.capacitiesResource.value;
 
+  private readonly brandsResource = httpResource<string[]>(() => `${this.baseUrl}/brands`, {
+    defaultValue: [],
+  });
+
+  /** Distinct brand names currently in the catalog, sorted alphabetically. */
+  readonly brands = this.brandsResource.value;
+
   list(query: () => ProductsQuery | undefined) {
     return httpResource<ProductsPage>(
       () => {
@@ -80,6 +88,7 @@ export class ProductsService {
     };
     if (query.term) params['term'] = query.term;
     if (query.category) params['category'] = query.category;
+    if (query.brand) params['brand'] = query.brand;
     if (query.gender) params['gender'] = query.gender;
     if (query.styles && query.styles.length > 0) params['styles'] = query.styles.join(',');
     if (query.capacityMl && query.capacityMl.length > 0)

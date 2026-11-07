@@ -4,6 +4,7 @@ import type { Gender, ProductCategory, ScentStyle, SortOption } from './product.
 export interface ProductsFiltersSnapshot {
   readonly term: string;
   readonly category: ProductCategory | 'todos';
+  readonly brand: string | 'todas';
   readonly gender: Gender | 'todos';
   readonly sort: SortOption;
   readonly styles: readonly ScentStyle[];
@@ -13,6 +14,7 @@ export interface ProductsFiltersSnapshot {
 export const DEFAULT_PRODUCTS_FILTERS: ProductsFiltersSnapshot = {
   term: '',
   category: 'todos',
+  brand: 'todas',
   gender: 'todos',
   sort: 'destacados',
   styles: [],

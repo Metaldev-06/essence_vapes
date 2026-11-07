@@ -64,6 +64,7 @@ export default class Products implements OnDestroy {
 
   protected readonly search = signal(this.initialFilters.term);
   protected readonly activeCategory = signal<ProductCategory | 'todos'>(this.initialFilters.category);
+  protected readonly activeBrand = signal<string | 'todas'>(this.initialFilters.brand);
   protected readonly activeGender = signal<Gender | 'todos'>(this.initialFilters.gender);
   protected readonly sortBy = signal<SortOption>(this.initialFilters.sort);
   protected readonly activeStyles = signal<ReadonlySet<ScentStyle>>(
@@ -73,6 +74,7 @@ export default class Products implements OnDestroy {
     this.initialFilters.capacityMl ?? 'todas',
   );
   protected readonly capacityOptions = this.productsService.capacities;
+  protected readonly brandOptions = this.productsService.brands;
 
   private readonly debouncedSearch = debounced(this.search, 300);
   private readonly offset = signal(0);
@@ -115,6 +117,7 @@ export default class Products implements OnDestroy {
       this.filtersStore.write({
         term: this.search(),
         category: this.activeCategory(),
+        brand: this.activeBrand(),
         gender: this.activeGender(),
         sort: this.sortBy(),
         styles: Array.from(styles),
@@ -154,6 +157,7 @@ export default class Products implements OnDestroy {
   private buildFilters(): ProductsQuery {
     const term = this.debouncedSearch.value().trim();
     const category = this.activeCategory();
+    const brand = this.activeBrand();
     const gender = this.activeGender();
     const styles = this.activeStyles();
     const capacity = this.activeCapacity();
@@ -161,6 +165,7 @@ export default class Products implements OnDestroy {
     return {
       term: term.length > 0 ? term : undefined,
       category: category === 'todos' ? undefined : category,
+      brand: brand === 'todas' ? undefined : brand,
       gender: gender === 'todos' ? undefined : gender,
       styles: styles.size > 0 ? Array.from(styles) : undefined,
       capacityMl: capacity === 'todas' ? undefined : [capacity],

@@ -11,8 +11,13 @@
     }
   </div>
 
-  <div class="sidebar-section">
-    <h3 class="sidebar-section-title">Categoría</h3>
+  <details class="sidebar-section">
+    <summary class="sidebar-section-title">
+      Categoría
+      <svg class="sidebar-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </summary>
     <div class="sidebar-options" role="group" aria-label="Filtrar por categoría">
       @for (option of categories(); track option.id) {
         <button
@@ -27,10 +32,50 @@
         </button>
       }
     </div>
-  </div>
+  </details>
 
-  <div class="sidebar-section">
-    <h3 class="sidebar-section-title">Género</h3>
+  @if (brandOptions().length > 0) {
+    <details class="sidebar-section">
+      <summary class="sidebar-section-title">
+        Marca
+        <svg class="sidebar-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </summary>
+      <div class="sidebar-options" role="group" aria-label="Filtrar por marca">
+        <button
+          type="button"
+          class="sidebar-option"
+          [class.active]="brand() === 'todas'"
+          [attr.aria-pressed]="brand() === 'todas'"
+          (click)="brand.set('todas')"
+        >
+          <span class="sidebar-option-dot" aria-hidden="true"></span>
+          Todas las marcas
+        </button>
+        @for (option of brandOptions(); track option) {
+          <button
+            type="button"
+            class="sidebar-option"
+            [class.active]="brand() === option"
+            [attr.aria-pressed]="brand() === option"
+            (click)="brand.set(option)"
+          >
+            <span class="sidebar-option-dot" aria-hidden="true"></span>
+            {{ option }}
+          </button>
+        }
+      </div>
+    </details>
+  }
+
+  <details class="sidebar-section">
+    <summary class="sidebar-section-title">
+      Género
+      <svg class="sidebar-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </summary>
     <div class="sidebar-options" role="group" aria-label="Filtrar por género">
       @for (option of genderOptions(); track option.id) {
         <button
@@ -45,11 +90,16 @@
         </button>
       }
     </div>
-  </div>
+  </details>
 
   @if (capacityOptions().length > 0) {
-    <div class="sidebar-section">
-      <h3 class="sidebar-section-title">Capacidad</h3>
+    <details class="sidebar-section">
+      <summary class="sidebar-section-title">
+        Capacidad
+        <svg class="sidebar-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </summary>
       <div class="sidebar-options" role="group" aria-label="Filtrar por capacidad">
         <button
           type="button"
@@ -74,6 +124,6 @@
           </button>
         }
       </div>
-    </div>
+    </details>
   }
 </aside>

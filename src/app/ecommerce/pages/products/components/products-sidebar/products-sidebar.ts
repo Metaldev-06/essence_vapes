@@ -12,18 +12,25 @@ export class ProductsSidebar {
   readonly categories = input.required<readonly FilterOption<ProductCategory | 'todos'>[]>();
   readonly genderOptions = input.required<readonly FilterOption<Gender | 'todos'>[]>();
   readonly capacityOptions = input<readonly number[]>([]);
+  readonly brandOptions = input<readonly string[]>([]);
 
   readonly category = model.required<ProductCategory | 'todos'>();
   readonly gender = model.required<Gender | 'todos'>();
   readonly capacity = model<number | 'todas'>('todas');
+  readonly brand = model<string | 'todas'>('todas');
 
   protected readonly hasActiveFilters = computed(
-    () => this.category() !== 'todos' || this.gender() !== 'todos' || this.capacity() !== 'todas',
+    () =>
+      this.category() !== 'todos' ||
+      this.gender() !== 'todos' ||
+      this.capacity() !== 'todas' ||
+      this.brand() !== 'todas',
   );
 
   protected clearAll(): void {
     this.category.set('todos');
     this.gender.set('todos');
     this.capacity.set('todas');
+    this.brand.set('todas');
   }
 }

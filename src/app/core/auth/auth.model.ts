@@ -4,11 +4,20 @@ export interface AuthUser {
   readonly id: string;
   readonly email: string;
   readonly fullName: string;
+  readonly phone: string | null;
+  /** ISO 8601 ("YYYY-MM-DD"). */
+  readonly birthDate: string | null;
   readonly role: Role;
   readonly isActive: boolean;
   readonly emailVerified: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
+}
+
+export interface UpdateProfileData {
+  readonly fullName?: string;
+  readonly phone?: string | null;
+  readonly birthDate?: string | null;
 }
 
 export interface SecurityStatus {

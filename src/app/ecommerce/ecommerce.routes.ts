@@ -103,8 +103,33 @@ export const ecommerceRoutes: Routes = [
         path: 'cuenta',
         loadComponent: () => import('./pages/account/account'),
         canActivate: [authOnlyGuard],
-        title: 'Configuración de cuenta | Essence Vapes',
-        data: { description: 'Gestioná tu información personal y la seguridad de tu cuenta.' },
+        children: [
+          { path: '', redirectTo: 'informacion-personal', pathMatch: 'full' },
+          {
+            path: 'informacion-personal',
+            loadComponent: () => import('./pages/account/information/account-information'),
+            title: 'Información personal | Essence Vapes',
+            data: { description: 'Tu nombre y tu correo de acceso.' },
+          },
+          {
+            path: 'direcciones',
+            loadComponent: () => import('./pages/account/addresses/account-addresses'),
+            title: 'Direcciones | Essence Vapes',
+            data: { description: 'Tus direcciones de envío guardadas.' },
+          },
+          {
+            path: 'pedidos',
+            loadComponent: () => import('./pages/account/orders/account-orders'),
+            title: 'Pedidos | Essence Vapes',
+            data: { description: 'El historial de tus compras.' },
+          },
+          {
+            path: 'seguridad',
+            loadComponent: () => import('./pages/account/security/account-security'),
+            title: 'Seguridad | Essence Vapes',
+            data: { description: 'Contraseña y sesiones activas de tu cuenta.' },
+          },
+        ],
       },
       {
         path: 'favoritos',

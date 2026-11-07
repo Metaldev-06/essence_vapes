@@ -1,294 +1,68 @@
-<section class="section account-page">
-  <div class="container account-container">
-    <h1 class="account-heading">Configuración de cuenta</h1>
-
-    @if (user() && !user()!.emailVerified) {
-      <div class="account-banner" role="alert">
-        <span>Todavía no verificaste tu correo <strong>{{ user()!.email }}</strong>.</span>
-        <button
-          type="button"
-          class="btn btn-sm btn-ghost"
-          [disabled]="resendingVerification()"
-          (click)="resendVerification()"
+<section class="account-page">
+  <div class="account-shell">
+    <aside class="account-sidebar">
+      <nav class="account-nav" aria-label="Secciones de la cuenta">
+        <span class="account-nav-heading">Mi cuenta</span>
+        <a
+          [routerLink]="'/cuenta/informacion-personal'"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
         >
-          {{ resendingVerification() ? 'Enviando...' : 'Reenviar correo' }}
-        </button>
-      </div>
-      @if (verificationMessage()) {
-        <p class="account-banner-message">{{ verificationMessage() }}</p>
-      }
-    }
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" />
+          </svg>
+          Información personal
+        </a>
+        <a
+          [routerLink]="'/cuenta/direcciones'"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11Z" />
+            <circle cx="12" cy="10" r="2.5" />
+          </svg>
+          Direcciones
+        </a>
+        <a
+          [routerLink]="'/cuenta/pedidos'"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 8l9-4 9 4-9 4-9-4Z" />
+            <path d="M3 8v9l9 4 9-4V8" />
+            <path d="M12 12v9" />
+          </svg>
+          Pedidos
+        </a>
+        <a
+          [routerLink]="'/cuenta/seguridad'"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3l7 3.5v5c0 4.5-3 7.5-7 9.5-4-2-7-5-7-9.5v-5L12 3Z" />
+            <path d="M9.5 12l2 2 3.5-3.5" />
+          </svg>
+          Seguridad
+        </a>
+      </nav>
 
-    <nav class="account-tabs" aria-label="Secciones de la cuenta">
-      <a href="#informacion-personal">Información personal</a>
-      <a href="#seguridad">Seguridad</a>
-      <a href="#sesiones">Sesiones</a>
-    </nav>
-
-    <!-- Información personal -->
-    <section id="informacion-personal" class="account-section card">
-      <h2 class="account-section-title">Información personal</h2>
-
-      <form class="account-form" novalidate (submit)="saveProfile($event)">
-        <div class="form-field">
-          <label for="account-name">Nombre</label>
-          <input
-            id="account-name"
-            type="text"
-            autocomplete="name"
-            [formField]="profileForm.fullName"
-            [class.invalid]="profileForm.fullName().touched() && profileForm.fullName().invalid()"
-          />
-          @if (profileForm.fullName().touched() && profileForm.fullName().invalid()) {
-            <span class="form-error">{{ profileForm.fullName().errors()[0]?.message }}</span>
-          }
-        </div>
-
-        <div class="form-field">
-          <label>Email</label>
-          <div class="account-email-row">
-            <span class="account-email-value">{{ user()?.email }}</span>
-            @if (user()?.emailVerified) {
-              <span class="account-badge account-badge-verified">Verificado</span>
-            } @else {
-              <span class="account-badge account-badge-pending">Pendiente de verificación</span>
-            }
+      <div class="account-sidebar-footer">
+        <div class="account-sidebar-user">
+          <span class="account-sidebar-avatar" aria-hidden="true">{{ userInitial() }}</span>
+          <div class="account-sidebar-user-info">
+            <span class="account-sidebar-name">{{ authService.user()?.fullName }}</span>
+            <span class="account-sidebar-email">{{ authService.user()?.email }}</span>
           </div>
         </div>
-
-        @if (profileMessage()) {
-          <p class="account-success">{{ profileMessage() }}</p>
-        }
-        @if (profileError()) {
-          <p class="account-error" role="alert">{{ profileError() }}</p>
-        }
-
-        <button type="submit" class="btn btn-primary account-submit" [disabled]="savingProfile()">
-          {{ savingProfile() ? 'Guardando...' : 'Guardar cambios' }}
-        </button>
-      </form>
-    </section>
-
-    <!-- Seguridad -->
-    <section id="seguridad" class="account-section card">
-      <h2 class="account-section-title">Seguridad</h2>
-
-      @if (security(); as sec) {
-        <p class="account-security-info">
-          @if (sec.passwordChangedAt) {
-            Último cambio de contraseña: {{ sec.passwordChangedAt | date: 'dd/MM/yyyy' }}
-          } @else {
-            Todavía no cambiaste tu contraseña desde que creaste la cuenta.
-          }
-        </p>
-      }
-
-      @switch (changeStep()) {
-        @case ('idle') {
-          <button
-            type="button"
-            class="btn btn-ghost"
-            [disabled]="changeSubmitting()"
-            (click)="startPasswordChange()"
-          >
-            Cambiar contraseña
-          </button>
-        }
-
-        @case ('code') {
-          <form class="account-form" novalidate (submit)="verifyChangeCode($event)">
-            <p class="account-form-hint">
-              Te enviamos un código de 6 dígitos a tu correo verificado. Vence en 10 minutos.
-            </p>
-            <div class="form-field">
-              <label for="change-code">Código</label>
-              <input
-                id="change-code"
-                type="text"
-                inputmode="numeric"
-                autocomplete="one-time-code"
-                [formField]="changePasswordForm.code"
-                [class.invalid]="changePasswordForm.code().touched() && changePasswordForm.code().invalid()"
-              />
-              @if (changePasswordForm.code().touched() && changePasswordForm.code().invalid()) {
-                <span class="form-error">{{ changePasswordForm.code().errors()[0]?.message }}</span>
-              }
-            </div>
-            @if (changeError()) {
-              <p class="account-error" role="alert">{{ changeError() }}</p>
-            }
-            <div class="account-form-actions">
-              <button type="submit" class="btn btn-primary" [disabled]="changeSubmitting()">
-                {{ changeSubmitting() ? 'Verificando...' : 'Verificar código' }}
-              </button>
-              <button type="button" class="btn btn-ghost" (click)="cancelPasswordChange()">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        }
-
-        @case ('password') {
-          <form class="account-form" novalidate (submit)="confirmPasswordChange($event)">
-            <div class="form-field">
-              <label for="change-current">Contraseña actual</label>
-              <div class="password-field">
-                <input
-                  id="change-current"
-                  [type]="showCurrentPassword() ? 'text' : 'password'"
-                  autocomplete="current-password"
-                  [formField]="changePasswordForm.currentPassword"
-                  [class.invalid]="
-                    changePasswordForm.currentPassword().touched() &&
-                    changePasswordForm.currentPassword().invalid()
-                  "
-                />
-                <button
-                  type="button"
-                  class="password-toggle"
-                  [attr.aria-label]="showCurrentPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                  [attr.aria-pressed]="showCurrentPassword()"
-                  (click)="showCurrentPassword.set(!showCurrentPassword())"
-                >
-                  @if (showCurrentPassword()) {
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M1 1l22 22" />
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-                    </svg>
-                  } @else {
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  }
-                </button>
-              </div>
-              @if (
-                changePasswordForm.currentPassword().touched() &&
-                changePasswordForm.currentPassword().invalid()
-              ) {
-                <span class="form-error">{{
-                  changePasswordForm.currentPassword().errors()[0]?.message
-                }}</span>
-              }
-            </div>
-
-            <div class="form-field">
-              <label for="change-new">Contraseña nueva</label>
-              <div class="password-field">
-                <input
-                  id="change-new"
-                  [type]="showNewPassword() ? 'text' : 'password'"
-                  autocomplete="new-password"
-                  [formField]="changePasswordForm.newPassword"
-                  [class.invalid]="
-                    changePasswordForm.newPassword().touched() &&
-                    changePasswordForm.newPassword().invalid()
-                  "
-                />
-                <button
-                  type="button"
-                  class="password-toggle"
-                  [attr.aria-label]="showNewPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                  [attr.aria-pressed]="showNewPassword()"
-                  (click)="showNewPassword.set(!showNewPassword())"
-                >
-                  @if (showNewPassword()) {
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M1 1l22 22" />
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-                    </svg>
-                  } @else {
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  }
-                </button>
-              </div>
-              @if (
-                changePasswordForm.newPassword().touched() &&
-                changePasswordForm.newPassword().invalid()
-              ) {
-                <span class="form-error">{{
-                  changePasswordForm.newPassword().errors()[0]?.message
-                }}</span>
-              }
-            </div>
-
-            <div class="form-field">
-              <label for="change-confirm">Repetí la contraseña nueva</label>
-              <input
-                id="change-confirm"
-                type="password"
-                autocomplete="new-password"
-                [formField]="changePasswordForm.confirmPassword"
-                [class.invalid]="
-                  changePasswordForm.confirmPassword().touched() &&
-                  changePasswordForm.confirmPassword().invalid()
-                "
-              />
-              @if (
-                changePasswordForm.confirmPassword().touched() &&
-                changePasswordForm.confirmPassword().invalid()
-              ) {
-                <span class="form-error">{{
-                  changePasswordForm.confirmPassword().errors()[0]?.message
-                }}</span>
-              }
-            </div>
-
-            @if (changeError()) {
-              <p class="account-error" role="alert">{{ changeError() }}</p>
-            }
-
-            <div class="account-form-actions">
-              <button type="submit" class="btn btn-primary" [disabled]="changeSubmitting()">
-                {{ changeSubmitting() ? 'Actualizando...' : 'Actualizar contraseña' }}
-              </button>
-              <button type="button" class="btn btn-ghost" (click)="cancelPasswordChange()">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        }
-
-        @case ('done') {
-          <p class="account-success">Tu contraseña se actualizó correctamente.</p>
-          <p class="account-form-hint">
-            Por tu seguridad, cerramos esta sesión. Iniciá sesión de nuevo con tu contraseña
-            nueva.
-          </p>
-          <button type="button" class="btn btn-primary" (click)="goToLogin()">
-            Ir a iniciar sesión
-          </button>
-        }
-      }
-
-      <div class="account-logout-row">
-        <button type="button" class="btn btn-ghost" (click)="logout()">Cerrar sesión</button>
       </div>
-    </section>
+    </aside>
 
-    <!-- Sesiones -->
-    <section id="sesiones" class="account-section card">
-      <h2 class="account-section-title">Sesiones</h2>
-      <p class="account-form-hint">
-        No llevamos un registro de dispositivos individuales, pero podés cerrar todas tus
-        sesiones activas (incluida esta) de una sola vez.
-      </p>
-      <button
-        type="button"
-        class="btn btn-ghost"
-        [disabled]="revokingSessions()"
-        (click)="revokeAllSessions()"
-      >
-        {{ revokingSessions() ? 'Cerrando sesiones...' : 'Cerrar sesión en todos los dispositivos' }}
-      </button>
-    </section>
+    <main class="account-main">
+      <router-outlet />
+    </main>
   </div>
 </section>

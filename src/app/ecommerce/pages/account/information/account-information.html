@@ -1,0 +1,80 @@
+<div class="account-content">
+  <header class="account-content-header">
+    <h1 class="account-content-title">Información personal</h1>
+    <p class="account-content-subtitle">Tu nombre y tu correo de acceso.</p>
+  </header>
+
+  <section class="account-card card">
+    <form class="account-form" novalidate (submit)="saveProfile($event)">
+      <div class="form-field">
+        <label for="account-name">Nombre</label>
+        <input
+          id="account-name"
+          type="text"
+          autocomplete="name"
+          [formField]="profileForm.fullName"
+          [class.invalid]="profileForm.fullName().touched() && profileForm.fullName().invalid()"
+        />
+        @if (profileForm.fullName().touched() && profileForm.fullName().invalid()) {
+          <span class="form-error">{{ profileForm.fullName().errors()[0]?.message }}</span>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="account-phone">Teléfono <span class="form-optional">(opcional)</span></label>
+          <input
+            id="account-phone"
+            type="tel"
+            autocomplete="tel"
+            placeholder="+54 9 11 1234-5678"
+            [formField]="profileForm.phone"
+          />
+        </div>
+
+        <div class="form-field">
+          <label for="account-birth-date">Fecha de nacimiento <span class="form-optional">(opcional)</span></label>
+          <input id="account-birth-date" type="date" [formField]="profileForm.birthDate" />
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Email</label>
+        <div class="account-email-row">
+          <span class="account-email-value">{{ authService.user()?.email }}</span>
+          @if (authService.user()?.emailVerified) {
+            <span class="account-badge account-badge-verified">Verificado</span>
+          } @else {
+            <span class="account-badge account-badge-pending">Pendiente de verificación</span>
+          }
+        </div>
+        @if (!authService.user()?.emailVerified) {
+          <div class="account-verify-action">
+            <button
+              type="button"
+              class="btn btn-sm btn-ghost"
+              [disabled]="resendingVerification()"
+              (click)="resendVerification()"
+            >
+              {{ resendingVerification() ? 'Enviando...' : 'Reenviar correo de verificación' }}
+            </button>
+            @if (verificationMessage()) {
+              <span class="account-verify-message">{{ verificationMessage() }}</span>
+            }
+          </div>
+        }
+      </div>
+
+      @if (profileMessage()) {
+        <p class="account-success">{{ profileMessage() }}</p>
+      }
+      @if (profileError()) {
+        <p class="account-error" role="alert">{{ profileError() }}</p>
+      }
+
+      <button type="submit" class="btn btn-primary account-submit" [disabled]="savingProfile()">
+        {{ savingProfile() ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </form>
+  </section>
+</div>

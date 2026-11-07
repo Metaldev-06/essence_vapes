@@ -11,6 +11,7 @@ import type {
   LoginCredentials,
   RegisterData,
   SecurityStatus,
+  UpdateProfileData,
 } from './auth.model';
 
 export type EmailVerificationConfirmResult =
@@ -214,11 +215,9 @@ export class AuthService {
   // Perfil / cuenta
   // -------------------------------------------------------------------------------------
 
-  async updateProfile(fullName: string): Promise<AuthResult> {
+  async updateProfile(data: UpdateProfileData): Promise<AuthResult> {
     try {
-      const user = await firstValueFrom(
-        this.http.patch<AuthUser>(`${this.baseUrl}/me`, { fullName }),
-      );
+      const user = await firstValueFrom(this.http.patch<AuthUser>(`${this.baseUrl}/me`, data));
       this.userSignal.set(user);
       return { success: true };
     } catch (error) {

@@ -1,7 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { filter, map, startWith } from 'rxjs';
+import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -10,8 +8,9 @@ const DISMISSED_KEY = 'ev:verify-email-banner-dismissed';
 /**
  * Banner global y no bloqueante: una cuenta sin verificar sigue pudiendo usar el carrito y
  * favoritos con normalidad (decisión explícita - esta tienda todavía no tiene checkout, no hay
- * ninguna función realmente "privada" que gatear). Se oculta en `/cuenta` (esa página ya tiene
- * su propio aviso con más contexto) y se puede descartar por el resto de la sesión del navegador.
+ * ninguna función realmente "privada" que gatear). Se muestra en cualquier página, `/cuenta`
+ * incluida - es la única fuente de este aviso, no se duplica dentro de las páginas de cuenta. Se
+ * puede descartar por el resto de la sesión del navegador.
  */
 @Component({
   selector: 'app-verify-email-banner',
@@ -21,16 +20,6 @@ const DISMISSED_KEY = 'ev:verify-email-banner-dismissed';
 })
 export class VerifyEmailBanner {
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-
-  private readonly currentUrl = toSignal(
-    this.router.events.pipe(
-      filter((event) => event instanceof NavigationEnd),
-      map(() => this.router.url),
-      startWith(this.router.url),
-    ),
-    { initialValue: this.router.url },
-  );
 
   protected readonly dismissed = signal(this.readDismissed());
   protected readonly resending = signal(false);
@@ -38,12 +27,7 @@ export class VerifyEmailBanner {
 
   protected readonly visible = computed(() => {
     const user = this.authService.user();
-    return (
-      !!user &&
-      !user.emailVerified &&
-      !this.dismissed() &&
-      !this.currentUrl().startsWith('/cuenta')
-    );
+    return !!user && !user.emailVerified && !this.dismissed();
   });
 
   protected async resend(): Promise<void> {

@@ -1,7 +1,8 @@
 .contact-header {
   position: relative;
   overflow: hidden;
-  padding-block: 64px 40px;
+  /* The header is fixed, so offset the content by its height. */
+  padding-block: calc(var(--header-height) + 32px) 40px;
   border-bottom: 1px solid var(--color-border-subtle);
 }
 

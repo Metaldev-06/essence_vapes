@@ -20,20 +20,20 @@ export class ContactInfo {
     {
       icon: 'chat',
       label: 'WhatsApp',
-      value: '+54 9 11 0000-0000',
-      href: 'https://wa.me/5491100000000',
+      value: '+54 9 3704 344943',
+      href: 'https://wa.me/5493704344943',
     },
     {
       icon: 'camera',
       label: 'Instagram',
       value: '@essence_vapes',
-      href: 'https://instagram.com/essence_vapes',
+      href: 'https://www.instagram.com/essence_vapes/',
     },
     {
       icon: 'mail',
       label: 'Email',
-      value: 'hola@essencevapes.com.ar',
-      href: 'mailto:hola@essencevapes.com.ar',
+      value: 'contacto@essencevapes.com.ar',
+      href: 'mailto:contacto@essencevapes.com.ar',
     },
   ];
 }

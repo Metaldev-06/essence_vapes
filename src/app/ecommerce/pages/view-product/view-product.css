@@ -129,8 +129,8 @@
 
 .view-product-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 32px;
   align-items: start;
 }
 

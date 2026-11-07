@@ -1,6 +1,5 @@
 import { NgOptimizedImage } from '@angular/common';
-import { Component, computed, inject, input, linkedSignal } from '@angular/core';
-import { FavoritesService } from '../../../../../core/favorites/favorites.service';
+import { Component, computed, input, linkedSignal } from '@angular/core';
 import type { Product } from '../../../../data/product.model';
 
 @Component({
@@ -10,13 +9,7 @@ import type { Product } from '../../../../data/product.model';
   styleUrl: './product-gallery.css',
 })
 export class ProductGallery {
-  private readonly favoritesService = inject(FavoritesService);
-
   readonly product = input.required<Product>();
-
-  protected readonly isFavorite = computed(() =>
-    this.favoritesService.isFavorite(this.product().id, this.product().variantId),
-  );
 
   /** Resets to the first photo whenever the product changes (e.g. navigating via "related products"). */
   protected readonly activeImageIndex = linkedSignal(() => {
@@ -26,10 +19,6 @@ export class ProductGallery {
 
   /** Currently shown photo, if the product has any - falls back to the decorative SVG bottle otherwise. */
   protected readonly activeImage = computed(() => this.product().images[this.activeImageIndex()]);
-
-  protected toggleFavorite(): void {
-    void this.favoritesService.toggle(this.product().id, this.product().variantId);
-  }
 
   protected selectImage(index: number): void {
     this.activeImageIndex.set(index);

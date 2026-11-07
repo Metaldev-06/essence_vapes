@@ -4,10 +4,9 @@ import type { Product } from '../../../../data/product.model';
 interface Tier {
   readonly step: number;
   readonly label: string;
+  readonly icon: 'clock' | 'heart' | 'layers';
   readonly notes: readonly string[];
   readonly duration: string;
-  readonly description: string;
-  readonly barWidth: string;
 }
 
 @Component({
@@ -33,32 +32,23 @@ export class FragranceProfile {
       {
         step: 1,
         label: flavor ? 'Primera calada' : 'Notas de salida',
+        icon: 'clock',
         notes: top,
-        duration: '0-15 min',
-        description: flavor
-          ? 'Lo que se percibe apenas empezás a vapear.'
-          : 'Lo primero que se siente al aplicar la fragancia.',
-        barWidth: '38%',
+        duration: '0 - 15 min',
       },
       {
         step: 2,
         label: flavor ? 'Cuerpo' : 'Notas de corazón',
+        icon: 'heart',
         notes: heart,
-        duration: '15-60 min',
-        description: flavor
-          ? 'El sabor principal, una vez que se estabiliza.'
-          : 'El corazón de la fragancia, cuando se asienta sobre la piel.',
-        barWidth: '68%',
+        duration: '15 - 60 min',
       },
       {
         step: 3,
         label: flavor ? 'Retrogusto' : 'Notas de fondo',
+        icon: 'layers',
         notes: base,
-        duration: '2-6 h',
-        description: flavor
-          ? 'Lo que queda después de exhalar.'
-          : 'La base que perdura, la que más tiempo se mantiene.',
-        barWidth: '100%',
+        duration: '2 - 6 h',
       },
     ];
   });

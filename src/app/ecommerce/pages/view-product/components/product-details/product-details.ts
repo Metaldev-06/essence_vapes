@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, model, signal } from '@angular/core';
 import { CartService } from '../../../../../core/cart/cart.service';
+import { FavoritesService } from '../../../../../core/favorites/favorites.service';
 import { AgeVerificationService } from '../../../../../core/age-verification/age-verification.service';
 import {
   CATEGORY_LABELS,
@@ -22,6 +23,7 @@ const GENDER_LABELS: Record<Gender, string> = {
 })
 export class ProductDetails {
   private readonly cartService = inject(CartService);
+  private readonly favoritesService = inject(FavoritesService);
   protected readonly ageVerificationService = inject(AgeVerificationService);
 
   readonly product = input.required<Product>();
@@ -29,6 +31,10 @@ export class ProductDetails {
   readonly selectedVariantId = model<string>('');
 
   protected readonly categoryLabel = computed(() => CATEGORY_LABELS[this.product().category]);
+  /** Every current category label pluralizes with a plain trailing "s" ("Decants", "Vapes"...). */
+  protected readonly formatLabel = computed(
+    () => `Formato (${this.categoryLabel().toLowerCase().replace(/s$/, '')})`,
+  );
   protected readonly concentrationLabel = computed(() => {
     const concentration = this.product().concentration;
     return concentration ? CONCENTRATION_LABELS[concentration] : undefined;
@@ -70,18 +76,6 @@ export class ProductDetails {
     return [1, 2, 3, 4, 5].map((step) => Math.min(100, Math.max(0, (rating - (step - 1)) * 100)));
   });
 
-  protected readonly description = computed(() => {
-    const notes = this.product().notes;
-    if (notes.length === 0) {
-      return '';
-    }
-    const list =
-      notes.length === 1
-        ? notes[0]
-        : `${notes.slice(0, -1).join(', ')} y ${notes[notes.length - 1]}`;
-    return `Una composición que combina ${list}.`;
-  });
-
   protected readonly showVariantPicker = computed(() => this.product().variants.length > 1);
 
   protected readonly activeVariant = computed(() => {
@@ -107,6 +101,10 @@ export class ProductDetails {
     };
   });
 
+  protected readonly isFavorite = computed(() =>
+    this.favoritesService.isFavorite(this.product().id, this.activeVariant().id),
+  );
+
   protected readonly quantity = signal(1);
 
   protected readonly inCartQuantity = computed(() =>
@@ -118,6 +116,11 @@ export class ProductDetails {
   protected readonly isOutOfStock = computed(
     () => !this.product().isActive || this.remainingStock() === 0,
   );
+  protected readonly stockStatus = computed<'out' | 'low' | 'in'>(() => {
+    if (this.isOutOfStock()) return 'out';
+    if (this.remainingStock() <= 5) return 'low';
+    return 'in';
+  });
   protected readonly cartError = signal<string | null>(null);
   protected readonly adding = signal(false);
 
@@ -131,6 +134,10 @@ export class ProductDetails {
 
   protected selectVariant(variantId: string): void {
     this.selectedVariantId.set(variantId);
+  }
+
+  protected toggleFavorite(): void {
+    void this.favoritesService.toggle(this.product().id, this.activeVariant().id);
   }
 
   protected confirmAge(event: Event): void {

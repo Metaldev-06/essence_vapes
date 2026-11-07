@@ -1,112 +1,187 @@
-<section class="section usage-guide-section" aria-labelledby="usage-guide-heading">
-  <div class="container">
-    <div class="section-header">
-      <div>
-        <span class="section-label">Guía de uso</span>
-        <h2 id="usage-guide-heading" class="section-title">
-          Estado de ánimo y <em class="section-title-accent">estilo</em>
-        </h2>
-        <p class="section-subtitle">Lo que transmite esta fragancia y cuándo brilla más.</p>
-      </div>
-    </div>
+<section class="section usage-guide-section" aria-label="Guía de uso">
+  @if (hasMoodCard() || occasionTiles().length > 0) {
+    <div class="container">
+      <div class="usage-row usage-row--two">
+        @if (hasMoodCard()) {
+          <div class="usage-card-panel">
+            <h2 class="usage-card-title">Estado de ánimo y <em class="section-title-accent">estilo</em></h2>
+            <p class="usage-card-subtitle">Lo que transmite esta fragancia y cuándo brilla más.</p>
 
-    @if (product().mood; as mood) {
-      <div class="mood-row">
-        @for (item of mood; track item) {
-          <span class="mood-pill">{{ item }}</span>
+            @if (product().mood; as mood) {
+              <div class="mood-row">
+                @for (item of mood; track item) {
+                  <span class="mood-pill">{{ item }}</span>
+                }
+              </div>
+            }
+
+            @if (dayBars().length > 0) {
+              <div class="mini-bars">
+                @for (bar of dayBars(); track bar.label) {
+                  <div class="mini-bar-row">
+                    <span class="mini-bar-label">{{ bar.label }}</span>
+                    <div class="mini-bar-track">
+                      <span class="mini-bar-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
+                    </div>
+                    <span class="mini-bar-value">{{ bar.value }}/5</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (occasionTiles().length > 0) {
+          <div class="usage-card-panel">
+            <h2 class="usage-card-title">
+              <svg class="usage-card-title-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m12 2 3.5 3.5L19 2l3 3-3.5 3.5L22 12l-3 3 .5 4-4-.5-3 3-3.5-3.5L5.5 21 2 18l3.5-3.5L2 12l3-3-.5-4 4 .5Z" />
+              </svg>
+              Ocasiones <em class="section-title-accent">recomendadas</em>
+            </h2>
+
+            <div class="occasion-grid">
+              @for (tile of occasionTiles(); track tile.label) {
+                <div
+                  class="occasion-tile"
+                  [class]="'occasion-tile--' + occasionTier(tile.value)"
+                  [attr.aria-label]="tile.label + ': ' + tile.value + ' de ' + maxRating"
+                >
+                  <span class="occasion-tile-icon" aria-hidden="true">
+                    @switch (tile.icon) {
+                      @case ('trabajo') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="7" width="18" height="13" rx="2" />
+                          <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      }
+                      @case ('romantico') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                      }
+                      @case ('social') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="8" cy="8" r="3" />
+                          <circle cx="17" cy="9" r="2.5" />
+                          <path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 14.5c2.8.3 4.5 2.4 4.5 5.5" />
+                        </svg>
+                      }
+                      @case ('formal') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m12 2 8 8-8 12-8-12 8-8Z" />
+                        </svg>
+                      }
+                      @case ('casual') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M8 4 4 7v3h3v10h10V10h3V7l-4-3-3 2-3-2Z" />
+                        </svg>
+                      }
+                      @case ('deporte') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="9" />
+                          <path d="M3 12h18M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18" />
+                        </svg>
+                      }
+                    }
+                  </span>
+                  <span class="occasion-tile-label">{{ tile.label }}</span>
+                  <span class="occasion-tile-dots" aria-hidden="true">
+                    @for (dot of dotRange; track dot) {
+                      <span class="occasion-dot" [class.filled]="dot < tile.value"></span>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
         }
       </div>
-    }
+    </div>
+  }
 
-    @if (seasonBars().length > 0) {
-      <div class="usage-group">
-        <span class="usage-group-title">Mejores estaciones</span>
-        <div class="usage-cards">
-          @for (bar of seasonBars(); track bar.label) {
-            <div class="usage-card">
-              <span class="usage-card-icon" aria-hidden="true">
-                @switch (bar.icon) {
-                  @case ('primavera') {
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 21V10" />
-                      <path d="M12 10c0-3.5 2.2-6 5.5-6.5C17.2 6.8 15 9.5 12 10Z" />
-                      <path d="M12 13c0-3-2-5-5.5-5.5C6.8 10.8 9 13.5 12 13Z" />
-                    </svg>
-                  }
-                  @case ('verano') {
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="4" />
-                      <path d="M12 3v2M12 19v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M3 12h2M19 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5" />
-                    </svg>
-                  }
-                  @case ('otono') {
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 3c4.5 2 7 5.5 7 10a5 5 0 0 1-9.5 2.2C8 12.5 10 7 12 3Z" />
-                      <path d="M12 21c0-5 1-8 3-11" />
-                    </svg>
-                  }
-                  @case ('invierno') {
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11" />
-                    </svg>
-                  }
-                }
-              </span>
-              <span class="usage-card-label">{{ bar.label }}</span>
-              <div class="usage-card-track">
-                <span class="usage-card-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
-              </div>
-              <span class="usage-card-value">{{ bar.value }}</span>
+  @if (hasStatsRow()) {
+    <div class="container">
+      <div class="usage-row usage-row--three">
+        @if (seasonBars().length > 0) {
+          <div class="usage-card-panel">
+            <h3 class="usage-stat-title">Mejores estaciones</h3>
+            <div class="season-list">
+              @for (bar of seasonBars(); track bar.label) {
+                <div class="season-row">
+                  <span class="season-icon" aria-hidden="true">
+                    @switch (bar.icon) {
+                      @case ('primavera') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 21V10" />
+                          <path d="M12 10c0-3.5 2.2-6 5.5-6.5C17.2 6.8 15 9.5 12 10Z" />
+                          <path d="M12 13c0-3-2-5-5.5-5.5C6.8 10.8 9 13.5 12 13Z" />
+                        </svg>
+                      }
+                      @case ('verano') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="4" />
+                          <path d="M12 3v2M12 19v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M3 12h2M19 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5" />
+                        </svg>
+                      }
+                      @case ('otono') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 3c4.5 2 7 5.5 7 10a5 5 0 0 1-9.5 2.2C8 12.5 10 7 12 3Z" />
+                          <path d="M12 21c0-5 1-8 3-11" />
+                        </svg>
+                      }
+                      @case ('invierno') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11" />
+                        </svg>
+                      }
+                    }
+                  </span>
+                  <span class="season-label">{{ bar.label }}</span>
+                  <div class="season-track">
+                    <span class="season-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
+                  </div>
+                  <span class="season-value">{{ bar.value }}/5</span>
+                </div>
+              }
             </div>
-          }
-        </div>
-      </div>
-    }
+          </div>
+        }
 
-    @if (dayBars().length > 0) {
-      <div class="usage-group">
-        <span class="usage-group-title">Hora del día</span>
-        <div class="usage-cards usage-cards--half">
-          @for (bar of dayBars(); track bar.label) {
-            <div class="usage-card">
-              <span class="usage-card-icon" aria-hidden="true">
-                @if (bar.icon === 'dia') {
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 3v2M12 19v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M3 12h2M19 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5" />
-                  </svg>
-                } @else {
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 3a7 7 0 1 0 6 11 8 8 0 0 1-6-11Z" />
-                  </svg>
-                }
-              </span>
-              <span class="usage-card-label">{{ bar.label }}</span>
-              <div class="usage-card-track">
-                <span class="usage-card-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
-              </div>
-              <span class="usage-card-value">{{ bar.value }}</span>
+        @if (activeSillageIndex() >= 0) {
+          <div class="usage-card-panel">
+            <h3 class="usage-stat-title">Proyección</h3>
+            <p class="usage-stat-desc">Estela en el ambiente</p>
+            <div class="performance-track" role="img" [attr.aria-label]="'Proyección: ' + sillageSteps[activeSillageIndex()].label">
+              @for (step of sillageSteps; track step.id; let i = $index) {
+                <span class="performance-segment" [class.filled]="i <= activeSillageIndex()"></span>
+              }
             </div>
-          }
-        </div>
-      </div>
-    }
+            <div class="performance-steps">
+              @for (step of sillageSteps; track step.id; let i = $index) {
+                <span class="performance-step" [class.active]="i === activeSillageIndex()">{{ step.label }}</span>
+              }
+            </div>
+          </div>
+        }
 
-    @if (occasionBars().length > 0) {
-      <div class="usage-group">
-        <span class="usage-group-title">Ocasiones</span>
-        <div class="occasion-list">
-          @for (bar of occasionBars(); track bar.label) {
-            <div class="occasion-row">
-              <span class="occasion-label">{{ bar.label }}</span>
-              <div class="occasion-track">
-                <span class="occasion-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
-              </div>
-              <span class="occasion-value">{{ bar.value }}</span>
+        @if (activeLongevityIndex() >= 0) {
+          <div class="usage-card-panel">
+            <h3 class="usage-stat-title">Duración</h3>
+            <p class="usage-stat-desc">Permanencia en piel</p>
+            <div class="performance-track" role="img" [attr.aria-label]="'Duración: ' + longevitySteps[activeLongevityIndex()].label">
+              @for (step of longevitySteps; track step.id; let i = $index) {
+                <span class="performance-segment" [class.filled]="i <= activeLongevityIndex()"></span>
+              }
             </div>
-          }
-        </div>
+            <div class="performance-steps">
+              @for (step of longevitySteps; track step.id; let i = $index) {
+                <span class="performance-step" [class.active]="i === activeLongevityIndex()">{{ step.label }}</span>
+              }
+            </div>
+          </div>
+        }
       </div>
-    }
-  </div>
+    </div>
+  }
 </section>

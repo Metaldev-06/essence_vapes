@@ -38,6 +38,8 @@
         <app-product-gallery [product]="effectiveProduct() ?? currentProduct" />
         <app-product-details [product]="currentProduct" [(selectedVariantId)]="selectedVariantId" />
       </div>
+
+      <app-accords-band [product]="currentProduct" />
     </div>
   </section>
 
@@ -45,10 +47,6 @@
 
   @if (hasUsageGuide()) {
     <app-usage-guide [product]="currentProduct" />
-  }
-
-  @if (hasPerformance()) {
-    <app-product-performance [product]="currentProduct" />
   }
 
   @if (relatedProducts().length > 0) {

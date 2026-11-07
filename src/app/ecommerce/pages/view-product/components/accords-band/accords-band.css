@@ -1,0 +1,73 @@
+.accords-band {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  margin-top: 36px;
+  padding-block: 28px;
+  border-top: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.accords-band-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 0 0 auto;
+  max-width: 46%;
+}
+
+.accords-band-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.accords-band-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.accords-pill {
+  padding: 5px 13px;
+  border-radius: var(--radius-full);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.accords-band-divider {
+  align-self: stretch;
+  width: 1px;
+  background: var(--color-border-subtle);
+  flex-shrink: 0;
+}
+
+.accords-band-desc {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .accords-band {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .accords-band-pills {
+    max-width: none;
+  }
+
+  .accords-band-divider {
+    width: 100%;
+    height: 1px;
+  }
+}

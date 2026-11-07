@@ -6,9 +6,9 @@ import { ProductsService } from '../../data/products.service';
 import { CATEGORY_LABELS, type Product } from '../../data/product.model';
 import { ProductGallery } from './components/product-gallery/product-gallery';
 import { ProductDetails } from './components/product-details/product-details';
+import { AccordsBand } from './components/accords-band/accords-band';
 import { FragranceProfile } from './components/fragrance-profile/fragrance-profile';
 import { UsageGuide } from './components/usage-guide/usage-guide';
-import { ProductPerformance } from './components/product-performance/product-performance';
 import { RelatedProducts } from './components/related-products/related-products';
 import { ProductViewSkeleton } from './components/product-view-skeleton/product-view-skeleton';
 
@@ -18,9 +18,9 @@ import { ProductViewSkeleton } from './components/product-view-skeleton/product-
     RouterLink,
     ProductGallery,
     ProductDetails,
+    AccordsBand,
     FragranceProfile,
     UsageGuide,
-    ProductPerformance,
     RelatedProducts,
     ProductViewSkeleton,
   ],
@@ -77,12 +77,14 @@ export default class ViewProduct {
 
   protected readonly hasUsageGuide = computed(() => {
     const product = this.product();
-    return Boolean(product?.mood || product?.seasonUsage || product?.dayUsage || product?.occasions);
-  });
-
-  protected readonly hasPerformance = computed(() => {
-    const product = this.product();
-    return Boolean(product?.sillage || product?.longevity);
+    return Boolean(
+      product?.mood ||
+        product?.seasonUsage ||
+        product?.dayUsage ||
+        product?.occasions ||
+        product?.sillage ||
+        product?.longevity,
+    );
   });
 
   protected readonly relatedProducts = computed(() => {

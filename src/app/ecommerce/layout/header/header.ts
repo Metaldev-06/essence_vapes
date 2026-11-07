@@ -52,6 +52,11 @@ export class Header {
     this.authService.logout();
     this.userMenuOpen.set(false);
     this.navOpen.set(false);
+    // `/cuenta` requires auth (authOnlyGuard) but that guard only runs on navigation, not
+    // reactively - without this, logging out while inside it leaves its stale content on screen.
+    if (this.router.url.startsWith('/cuenta')) {
+      void this.router.navigateByUrl('/');
+    }
   }
 
   protected onDocumentClick(event: MouseEvent): void {

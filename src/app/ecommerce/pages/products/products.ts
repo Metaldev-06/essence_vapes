@@ -24,11 +24,12 @@ import type {
 } from '../../data/product.model';
 import { ProductsHeader } from './components/products-header/products-header';
 import { ProductsFilters, type FilterOption } from './components/products-filters/products-filters';
+import { ProductsSidebar } from './components/products-sidebar/products-sidebar';
 import { ProductsGrid } from './components/products-grid/products-grid';
 
 @Component({
   selector: 'app-products',
-  imports: [ProductsHeader, ProductsFilters, ProductsGrid],
+  imports: [ProductsHeader, ProductsSidebar, ProductsFilters, ProductsGrid],
   templateUrl: './products.html',
   styleUrl: './products.css',
 })

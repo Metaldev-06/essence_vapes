@@ -1,44 +1,28 @@
 <div class="products-filters">
-  <div class="products-filters-left">
-    <div class="products-filters-chips" role="group" aria-label="Filtrar por categoría">
-      @for (option of categories(); track option.id) {
+  <div class="products-filters-styles">
+    <div class="style-pills" role="group" aria-label="Filtrar por estilo olfativo">
+      @for (style of styleOptions; track style.id) {
         <button
           type="button"
-          class="filter-chip"
-          [class.active]="category() === option.id"
-          [attr.aria-pressed]="category() === option.id"
-          (click)="category.set(option.id)"
+          class="style-pill"
+          [class.active]="activeStyles().has(style.id)"
+          [attr.aria-pressed]="activeStyles().has(style.id)"
+          (click)="toggleStyle.emit(style.id)"
         >
-          {{ option.label }}
+          <span aria-hidden="true">{{ style.emoji }}</span>
+          {{ style.label }}
         </button>
       }
     </div>
 
-    <div class="products-filters-styles">
-      <div class="style-pills" role="group" aria-label="Filtrar por estilo olfativo">
-        @for (style of styleOptions; track style.id) {
-          <button
-            type="button"
-            class="style-pill"
-            [class.active]="activeStyles().has(style.id)"
-            [attr.aria-pressed]="activeStyles().has(style.id)"
-            (click)="toggleStyle.emit(style.id)"
-          >
-            <span aria-hidden="true">{{ style.emoji }}</span>
-            {{ style.label }}
-          </button>
-        }
-      </div>
-
-      @if (activeStyles().size > 0) {
-        <button type="button" class="clear-styles" (click)="clearStyles.emit()">
-          Limpiar estilos
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-            <path d="M6 6l12 12M18 6 6 18" />
-          </svg>
-        </button>
-      }
-    </div>
+    @if (activeStyles().size > 0) {
+      <button type="button" class="clear-styles" (click)="clearStyles.emit()">
+        Limpiar estilos
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+    }
   </div>
 
   <div class="products-filters-tools">
@@ -50,27 +34,6 @@
       <span class="sr-only">Buscar por marca o nombre</span>
       <input type="search" placeholder="Buscar por marca o nombre..." [value]="search()" (input)="onSearchInput($event)" />
     </label>
-
-    <label class="products-gender">
-      <span class="sr-only">Filtrar por género</span>
-      <select [value]="gender()" (change)="onGenderChange($event)">
-        @for (option of genderOptions(); track option.id) {
-          <option [value]="option.id">{{ option.label }}</option>
-        }
-      </select>
-    </label>
-
-    @if (capacityOptions().length > 0) {
-      <label class="products-capacity">
-        <span class="sr-only">Filtrar por capacidad</span>
-        <select (change)="onCapacityChange($event)">
-          <option value="todas" [selected]="capacity() === 'todas'">Todas las capacidades</option>
-          @for (option of capacityOptions(); track option) {
-            <option [value]="option" [selected]="capacity() === option">{{ option }}ml</option>
-          }
-        </select>
-      </label>
-    }
 
     <label class="products-sort">
       <span class="sr-only">Ordenar productos</span>

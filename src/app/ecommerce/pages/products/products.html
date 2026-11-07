@@ -1,27 +1,32 @@
 <app-products-header [count]="total()" />
 
 <section class="section products-body">
-  <div class="container">
-    <app-products-filters
+  <div class="container products-layout">
+    <app-products-sidebar
       [categories]="categories"
-      [sortOptions]="sortOptions"
       [genderOptions]="genderOptions"
+      [capacityOptions]="capacityOptions()"
       [(category)]="activeCategory"
       [(gender)]="activeGender"
-      [(sort)]="sortBy"
-      [(search)]="search"
-      [activeStyles]="activeStyles()"
-      (toggleStyle)="toggleStyle($event)"
-      (clearStyles)="clearStyles()"
-      [capacityOptions]="capacityOptions()"
       [(capacity)]="activeCapacity"
     />
 
-    <app-products-grid
-      [products]="items()"
-      [isLoading]="isLoading()"
-      [hasMore]="hasMore()"
-      (loadMore)="loadMore()"
-    />
+    <div class="products-main">
+      <app-products-filters
+        [sortOptions]="sortOptions"
+        [(sort)]="sortBy"
+        [(search)]="search"
+        [activeStyles]="activeStyles()"
+        (toggleStyle)="toggleStyle($event)"
+        (clearStyles)="clearStyles()"
+      />
+
+      <app-products-grid
+        [products]="items()"
+        [isLoading]="isLoading()"
+        [hasMore]="hasMore()"
+        (loadMore)="loadMore()"
+      />
+    </div>
   </div>
 </section>

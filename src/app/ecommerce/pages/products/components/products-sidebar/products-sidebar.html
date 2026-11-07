@@ -1,0 +1,79 @@
+<aside class="products-sidebar" aria-label="Filtros de productos">
+  <div class="sidebar-header">
+    <h2 class="sidebar-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+        <path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round" />
+      </svg>
+      Filtros
+    </h2>
+    @if (hasActiveFilters()) {
+      <button type="button" class="sidebar-clear" (click)="clearAll()">Limpiar todo</button>
+    }
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-section-title">Categoría</h3>
+    <div class="sidebar-options" role="group" aria-label="Filtrar por categoría">
+      @for (option of categories(); track option.id) {
+        <button
+          type="button"
+          class="sidebar-option"
+          [class.active]="category() === option.id"
+          [attr.aria-pressed]="category() === option.id"
+          (click)="category.set(option.id)"
+        >
+          <span class="sidebar-option-dot" aria-hidden="true"></span>
+          {{ option.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-section-title">Género</h3>
+    <div class="sidebar-options" role="group" aria-label="Filtrar por género">
+      @for (option of genderOptions(); track option.id) {
+        <button
+          type="button"
+          class="sidebar-option"
+          [class.active]="gender() === option.id"
+          [attr.aria-pressed]="gender() === option.id"
+          (click)="gender.set(option.id)"
+        >
+          <span class="sidebar-option-dot" aria-hidden="true"></span>
+          {{ option.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (capacityOptions().length > 0) {
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">Capacidad</h3>
+      <div class="sidebar-options" role="group" aria-label="Filtrar por capacidad">
+        <button
+          type="button"
+          class="sidebar-option"
+          [class.active]="capacity() === 'todas'"
+          [attr.aria-pressed]="capacity() === 'todas'"
+          (click)="capacity.set('todas')"
+        >
+          <span class="sidebar-option-dot" aria-hidden="true"></span>
+          Todas las capacidades
+        </button>
+        @for (option of capacityOptions(); track option) {
+          <button
+            type="button"
+            class="sidebar-option"
+            [class.active]="capacity() === option"
+            [attr.aria-pressed]="capacity() === option"
+            (click)="capacity.set(option)"
+          >
+            <span class="sidebar-option-dot" aria-hidden="true"></span>
+            {{ option }}ml
+          </button>
+        }
+      </div>
+    </div>
+  }
+</aside>

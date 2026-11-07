@@ -19,47 +19,6 @@
   margin-bottom: 32px;
 }
 
-.products-filters-left {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-}
-
-.products-filters-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.filter-chip {
-  padding: 9px 18px;
-  border-radius: var(--radius-full);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-subtle);
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.filter-chip:hover {
-  background: var(--color-surface-elevated);
-}
-
-.filter-chip.active {
-  color: var(--color-bg);
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-}
-
-.filter-chip:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-
 .products-filters-tools {
   display: flex;
   align-items: center;
@@ -73,6 +32,8 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .style-pills {
@@ -159,8 +120,6 @@
   color: var(--color-text-muted);
 }
 
-.products-gender select,
-.products-capacity select,
 .products-sort select {
   padding: 9px 14px;
   border-radius: var(--radius-full);
@@ -174,8 +133,6 @@
 }
 
 .products-search:focus-within,
-.products-gender select:focus-visible,
-.products-capacity select:focus-visible,
 .products-sort select:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;

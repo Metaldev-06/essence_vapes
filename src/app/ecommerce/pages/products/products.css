@@ -1,3 +1,20 @@
 .products-body {
   padding-top: 40px;
 }
+
+.products-layout {
+  display: grid;
+  grid-template-columns: 264px 1fr;
+  align-items: start;
+  gap: 28px;
+}
+
+.products-main {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .products-layout {
+    grid-template-columns: 1fr;
+  }
+}

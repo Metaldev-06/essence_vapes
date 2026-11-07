@@ -1,0 +1,4 @@
+Contact: mailto:soporte@essencevapes.com.ar
+Expires: 2027-11-07T00:00:00.000Z
+Preferred-Languages: es, en
+Canonical: https://www.essencevapes.com.ar/.well-known/security.txt

@@ -306,4 +306,9 @@
   }
 
   <app-toast [toast]="toast()" (dismissed)="dismissToast()" />
+  <app-confirm-dialog
+    [data]="deleteDialogData()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
 </div>

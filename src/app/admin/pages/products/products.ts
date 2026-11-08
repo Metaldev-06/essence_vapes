@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { AdminProductsFiltersStore } from '../../data/admin-products-filters-store';
 import { extractErrorMessage } from '../../data/extract-error-message';
 import { ProductsAdminService } from '../../data/products-admin.service';
+import { ConfirmDialog, type ConfirmDialogData } from '../../shared/confirm-dialog/confirm-dialog';
 import { Toast, type ToastMessage } from '../../shared/toast/toast';
 import { ToggleSwitch } from '../../shared/toggle-switch/toggle-switch';
 import {
@@ -24,7 +25,7 @@ interface CategoryOption {
 
 @Component({
   selector: 'app-admin-products',
-  imports: [RouterLink, NgOptimizedImage, ToggleSwitch, Toast],
+  imports: [RouterLink, NgOptimizedImage, ToggleSwitch, Toast, ConfirmDialog],
   templateUrl: './products.html',
   styleUrl: './products.css',
 })
@@ -56,6 +57,8 @@ export default class AdminProducts {
   protected readonly isLoading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly deletingId = signal<string | null>(null);
+  /** The product awaiting delete confirmation in the modal - `null` while it's closed. */
+  protected readonly pendingDelete = signal<Product | null>(null);
   /** Ids whose visibility change is still in flight - their switch shows a busy state. */
   protected readonly togglingIds = signal<ReadonlySet<string>>(new Set());
   /** Ids whose "destacado" change is still in flight - their switch shows a busy state. */
@@ -70,6 +73,17 @@ export default class AdminProducts {
   protected readonly pageCount = computed(() => Math.max(1, Math.ceil(this.total() / PAGE_SIZE)));
   protected readonly hasPrev = computed(() => this.offset() > 0);
   protected readonly hasNext = computed(() => this.offset() + PAGE_SIZE < this.total());
+  protected readonly deleteDialogData = computed<ConfirmDialogData | null>(() => {
+    const product = this.pendingDelete();
+    if (!product) return null;
+    return {
+      title: 'Eliminar producto',
+      message: `¿Eliminar "${product.name}" de forma permanente? Esta acción no se puede deshacer.`,
+      note: 'Si solo querés que no aparezca en la tienda, usá el interruptor "Visible".',
+      confirmLabel: 'Eliminar',
+      tone: 'danger',
+    };
+  });
 
   constructor() {
     // Persists search + category on every change so a page refresh keeps the filter applied.
@@ -159,11 +173,18 @@ export default class AdminProducts {
     }
   }
 
-  protected async remove(product: Product): Promise<void> {
-    const confirmed = confirm(
-      `¿Eliminar "${product.name}" de forma permanente? Esta acción no se puede deshacer.\n\nSi solo querés que no aparezca en la tienda, usá el interruptor "Visible".`,
-    );
-    if (!confirmed) return;
+  protected remove(product: Product): void {
+    this.pendingDelete.set(product);
+  }
+
+  protected cancelDelete(): void {
+    this.pendingDelete.set(null);
+  }
+
+  protected async confirmDelete(): Promise<void> {
+    const product = this.pendingDelete();
+    if (!product) return;
+    this.pendingDelete.set(null);
 
     this.deletingId.set(product.id);
     this.error.set(null);

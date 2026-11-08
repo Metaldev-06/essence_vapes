@@ -1,0 +1,283 @@
+<div class="messages-page">
+  <header class="messages-header">
+    <div>
+      <h1 class="messages-title">Mensajes</h1>
+      <p class="messages-subtitle">
+        Centro de atención - Contacto, Ventas y Soporte en un solo lugar.
+        <a [routerLink]="'/admin/mensajes/configuracion'" class="messages-settings-link">
+          Configuración
+        </a>
+      </p>
+    </div>
+
+    @if (stats(); as s) {
+      <div class="messages-stats">
+        <select class="messages-stats-period" [value]="statsPeriod()" (change)="onStatsPeriodChange($event)">
+          <option value="today">Hoy</option>
+          <option value="7d">Últimos 7 días</option>
+          <option value="30d">Últimos 30 días</option>
+          <option value="all">Todo</option>
+        </select>
+        <div class="messages-stat"><strong>{{ totalUnread() }}</strong><span>No leídos</span></div>
+        <div class="messages-stat"><strong>{{ s.received }}</strong><span>Recibidos</span></div>
+        <div class="messages-stat"><strong>{{ s.sent }}</strong><span>Enviados</span></div>
+        <div class="messages-stat">
+          <strong>{{ s.byStatus['pendiente'] + s.byStatus['nuevo'] + s.byStatus['en_proceso'] }}</strong>
+          <span>Pendientes</span>
+        </div>
+        <div class="messages-stat"><strong>{{ s.byStatus['resuelto'] }}</strong><span>Resueltos</span></div>
+        @if (s.avgFirstResponseMinutes !== null) {
+          <div class="messages-stat">
+            <strong>{{ s.avgFirstResponseMinutes }}m</strong>
+            <span>1ra respuesta</span>
+          </div>
+        }
+      </div>
+    }
+  </header>
+
+  <div class="messages-layout" [attr.data-mobile-view]="mobileView()">
+    <!-- Panel izquierdo: navegación -->
+    <nav class="messages-nav" aria-label="Bandejas y filtros">
+      @for (item of navItems; track item.key) {
+        <button
+          type="button"
+          class="messages-nav-item"
+          [class.active]="activeNavKey() === item.key"
+          (click)="selectNav(item.key)"
+        >
+          {{ item.label }}
+          @if (item.inbox) {
+            @for (summary of inboxesSummary(); track summary.inbox) {
+              @if (summary.inbox === item.inbox && summary.unread > 0) {
+                <span class="messages-nav-badge">{{ summary.unread }}</span>
+              }
+            }
+          }
+          @if (item.key === 'todas' && totalUnread() > 0) {
+            <span class="messages-nav-badge">{{ totalUnread() }}</span>
+          }
+        </button>
+      }
+    </nav>
+
+    <!-- Panel central: lista de conversaciones -->
+    <section class="messages-list" aria-label="Conversaciones">
+      <div class="messages-search">
+        <button type="button" class="messages-mobile-nav-btn" (click)="mobileView.set('nav')">
+          ☰ Bandejas
+        </button>
+        <input
+          type="search"
+          placeholder="Buscar por remitente, asunto o contenido..."
+          [value]="search()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+
+      @if (threadsLoading()) {
+        <p class="messages-list-state">Cargando conversaciones...</p>
+      } @else if (threadsError()) {
+        <p class="messages-list-state messages-list-error">{{ threadsError() }}</p>
+      } @else if (threads().length === 0) {
+        <p class="messages-list-state">No hay conversaciones acá.</p>
+      } @else {
+        <ul class="messages-thread-list">
+          @for (thread of threads(); track thread.id) {
+            <li>
+              <button
+                type="button"
+                class="messages-thread-item"
+                [class.unread]="!thread.read"
+                [class.selected]="selectedThreadId() === thread.id"
+                (click)="openThread(thread)"
+              >
+                <div class="messages-thread-item-top">
+                  <span class="messages-thread-item-from">{{ thread.from ?? '(sin remitente)' }}</span>
+                  <span class="messages-thread-item-date">{{ thread.receivedAt | date: 'd MMM, HH:mm' }}</span>
+                </div>
+                <div class="messages-thread-item-subject">
+                  @if (thread.starred) {
+                    <span aria-hidden="true">★</span>
+                  }
+                  {{ thread.subject || '(sin asunto)' }}
+                </div>
+                <div class="messages-thread-item-meta">
+                  <span class="messages-thread-pill">{{ inboxLabels[thread.inbox] }}</span>
+                  <span class="messages-thread-pill messages-thread-pill-status">
+                    {{ statusLabels[thread.status] }}
+                  </span>
+                  @if (thread.hasAttachment) {
+                    <span aria-hidden="true" title="Tiene adjuntos">📎</span>
+                  }
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Panel derecho: conversación abierta -->
+    <section class="messages-detail" aria-label="Conversación">
+      @if (!selectedThreadId()) {
+        <div class="messages-detail-empty">
+          <p>Elegí una conversación para verla acá.</p>
+        </div>
+      } @else {
+        <button type="button" class="messages-detail-back" (click)="backToList()">← Volver</button>
+
+        @if (threadDetailLoading()) {
+          <p class="messages-list-state">Cargando conversación...</p>
+        } @else if (threadDetail(); as detail) {
+          <header class="messages-detail-header">
+            <h2>{{ detail.thread.subject || '(sin asunto)' }}</h2>
+            <div class="messages-detail-toolbar">
+              <select
+                [value]="detail.status"
+                (change)="onStatusChange($event)"
+                [disabled]="savingState()"
+                aria-label="Estado"
+              >
+                @for (status of statusOptions; track status) {
+                  <option [value]="status">{{ statusLabels[status] }}</option>
+                }
+              </select>
+              <select
+                [value]="detail.priority"
+                (change)="onPriorityChange($event)"
+                [disabled]="savingState()"
+                aria-label="Prioridad"
+              >
+                @for (priority of priorityOptions; track priority) {
+                  <option [value]="priority">{{ priorityLabels[priority] }}</option>
+                }
+              </select>
+              <button
+                type="button"
+                class="messages-star-btn"
+                [class.active]="detail.starred"
+                (click)="toggleStarred()"
+                [attr.aria-pressed]="detail.starred"
+                title="Destacar"
+              >
+                ★
+              </button>
+              @if (detail.emails.length > 0) {
+                <button
+                  type="button"
+                  class="btn btn-sm btn-ghost"
+                  (click)="toggleContactPanel(detail.emails[0].from)"
+                >
+                  Ver contacto
+                </button>
+              }
+              <button type="button" class="btn btn-sm btn-ghost" (click)="moveToFolder('archive')">
+                Archivar
+              </button>
+              <button type="button" class="btn btn-sm btn-ghost" (click)="moveToFolder('spam')">
+                Spam
+              </button>
+              <button type="button" class="btn btn-sm btn-ghost" (click)="moveToFolder('trash')">
+                Eliminar
+              </button>
+            </div>
+          </header>
+
+          @if (contactPanelOpen()) {
+            <aside class="messages-contact-panel" aria-label="Información del contacto">
+              @if (contactLoading()) {
+                <p>Cargando...</p>
+              } @else if (contactSummary(); as contact) {
+                <p class="messages-contact-email">{{ contact.email }}</p>
+                @if (contact.registeredAccount; as account) {
+                  <p class="messages-contact-account">
+                    ✓ Cuenta registrada: {{ account.fullName }} (desde
+                    {{ account.memberSince | date: 'MMM yyyy' }})
+                  </p>
+                } @else {
+                  <p class="messages-contact-account messages-contact-account-unregistered">
+                    No tiene una cuenta registrada en la web.
+                  </p>
+                }
+                <p class="messages-contact-stat">
+                  {{ contact.conversationCount }} conversación(es)
+                  @if (contact.lastContact) {
+                    · último contacto {{ contact.lastContact | date: 'd MMM yyyy' }}
+                  }
+                </p>
+              }
+            </aside>
+          }
+
+          <div class="messages-detail-emails">
+            @for (email of detail.emails; track email.id) {
+              <article class="messages-email" [class.outbound]="email.direction === 'outbound'">
+                <header class="messages-email-header">
+                  <span class="messages-email-from">{{ email.from }}</span>
+                  <span class="messages-email-date">{{ email.receivedAt | date: 'd MMM yyyy, HH:mm' }}</span>
+                </header>
+                <p class="messages-email-to">Para: {{ email.to.join(', ') }}</p>
+                @if (email.html) {
+                  <app-email-body [html]="email.html" />
+                } @else if (email.text) {
+                  <pre class="messages-email-text">{{ email.text }}</pre>
+                }
+                @if (email.attachments.length > 0) {
+                  <ul class="messages-email-attachments">
+                    @for (attachment of email.attachments; track attachment.id) {
+                      <li>
+                        📄 {{ attachment.filename || 'archivo' }}
+                        @if (attachment.size) {
+                          <span>({{ formatBytes(attachment.size) }})</span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                }
+              </article>
+            }
+          </div>
+
+          @if (detail.emails.length > 0) {
+            <app-reply-editor
+              [inbox]="detail.inbox"
+              [threadId]="detail.thread.id"
+              [emailId]="detail.emails[detail.emails.length - 1].id"
+              [signature]="selectedSignatureBody()"
+              [cannedResponses]="cannedResponses()"
+              (sent)="onReplySent()"
+            />
+          }
+
+          <section class="messages-notes" aria-label="Notas internas">
+            <h3>Notas internas <span class="messages-notes-hint">(nunca se envían al cliente)</span></h3>
+            @for (note of detail.notes; track note.id) {
+              <div class="messages-note">
+                <p>{{ note.body }}</p>
+                <span>{{ note.authorName }} · {{ note.createdAt | date: 'd MMM, HH:mm' }}</span>
+              </div>
+            }
+            <div class="messages-note-form">
+              <textarea
+                placeholder="Agregar una nota interna..."
+                [value]="newNoteBody()"
+                (input)="onNoteInput($event)"
+              ></textarea>
+              <button
+                type="button"
+                class="btn btn-sm btn-ghost"
+                [disabled]="savingNote() || !newNoteBody().trim()"
+                (click)="addNote()"
+              >
+                Agregar nota
+              </button>
+            </div>
+          </section>
+        }
+      }
+    </section>
+  </div>
+
+  <app-toast [toast]="toast()" (dismissed)="dismissToast()" />
+</div>

@@ -135,6 +135,21 @@
   outline-offset: 2px;
 }
 
+.sidebar-nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: auto;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
 .sidebar-nav-external {
   margin-top: 10px;
 }

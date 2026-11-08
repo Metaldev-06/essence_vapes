@@ -40,6 +40,16 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./pages/withdrawal-requests/withdrawal-requests'),
         title: 'Botón de arrepentimiento | Admin Essence Vapes',
       },
+      {
+        path: 'mensajes',
+        loadComponent: () => import('./pages/messages/messages'),
+        title: 'Mensajes | Admin Essence Vapes',
+      },
+      {
+        path: 'mensajes/configuracion',
+        loadComponent: () => import('./pages/messages-settings/messages-settings'),
+        title: 'Configuración de mensajes | Admin Essence Vapes',
+      },
     ],
   },
 ];

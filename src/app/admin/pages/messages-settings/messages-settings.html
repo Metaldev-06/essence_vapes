@@ -1,0 +1,102 @@
+<div class="messages-settings">
+  <a [routerLink]="'/admin/mensajes'" class="back-link">← Volver a Mensajes</a>
+  <h1 class="messages-settings-title">Configuración de mensajes</h1>
+
+  @if (loading()) {
+    <p class="messages-settings-state">Cargando...</p>
+  } @else if (error()) {
+    <p class="messages-settings-state messages-settings-error">{{ error() }}</p>
+  } @else {
+    <section class="messages-settings-section">
+      <h2>Firmas por bandeja</h2>
+      <p class="messages-settings-hint">Se insertan manualmente desde el editor de respuesta - nunca automático.</p>
+      <div class="signatures-grid">
+        @for (inbox of inboxOptions; track inbox) {
+          <div class="signature-card">
+            <h3>{{ inboxLabels[inbox] }}</h3>
+            <textarea
+              [value]="signatureDrafts()[inbox]"
+              (input)="onSignatureInput(inbox, $event)"
+            ></textarea>
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              [disabled]="savingSignature() === inbox"
+              (click)="saveSignature(inbox)"
+            >
+              {{ savingSignature() === inbox ? 'Guardando...' : 'Guardar firma' }}
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="messages-settings-section">
+      <h2>Respuestas rápidas</h2>
+      <p class="messages-settings-hint">
+        Plantillas para consultas repetidas. Variables opcionales: {{ '{{nombre_cliente}}' }},
+        {{ '{{producto}}' }}, {{ '{{comercio}}' }}.
+      </p>
+
+      <form class="canned-form" (submit)="$event.preventDefault(); saveCannedResponse()">
+        <input
+          type="text"
+          placeholder="Título (ej: Consulta por disponibilidad)"
+          [value]="formModel().title"
+          (input)="onTitleInput($event)"
+          required
+        />
+        <select [value]="formModel().inbox" (change)="onInboxSelect($event)">
+          <option value="">Todas las bandejas</option>
+          @for (inbox of inboxOptions; track inbox) {
+            <option [value]="inbox">{{ inboxLabels[inbox] }}</option>
+          }
+        </select>
+        <textarea
+          placeholder="Cuerpo de la respuesta..."
+          [value]="formModel().body"
+          (input)="onBodyInput($event)"
+          required
+        ></textarea>
+        <div class="canned-form-actions">
+          @if (editingId()) {
+            <button type="button" class="btn btn-sm btn-ghost" (click)="cancelEdit()">Cancelar</button>
+          }
+          <button type="submit" class="btn btn-sm btn-primary" [disabled]="saving()">
+            {{ editingId() ? 'Guardar cambios' : 'Crear respuesta rápida' }}
+          </button>
+        </div>
+      </form>
+
+      <ul class="canned-list">
+        @for (response of cannedResponses(); track response.id) {
+          <li class="canned-item">
+            <div>
+              <strong>{{ response.title }}</strong>
+              @if (response.inbox) {
+                <span class="canned-item-pill">{{ inboxLabels[response.inbox] }}</span>
+              }
+              <p>{{ response.body }}</p>
+            </div>
+            <div class="canned-item-actions">
+              <button type="button" class="btn btn-sm btn-ghost" (click)="editCannedResponse(response)">
+                Editar
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-ghost icon-button-danger"
+                (click)="removeCannedResponse(response)"
+              >
+                Eliminar
+              </button>
+            </div>
+          </li>
+        } @empty {
+          <p class="messages-settings-state">Todavía no creaste ninguna respuesta rápida.</p>
+        }
+      </ul>
+    </section>
+  }
+
+  <app-toast [toast]="toast()" (dismissed)="dismissToast()" />
+</div>

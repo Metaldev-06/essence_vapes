@@ -1,0 +1,94 @@
+<div class="reply-editor">
+  <div class="reply-editor-row">
+    <button type="button" class="link-btn" (click)="showCcBcc.set(!showCcBcc())">
+      {{ showCcBcc() ? 'Ocultar CC/CCO' : 'CC/CCO' }}
+    </button>
+
+    @if (cannedResponses().length > 0) {
+      <label class="reply-editor-canned">
+        <span class="sr-only">Insertar respuesta rápida</span>
+        <select [value]="selectedCannedId()" (change)="onCannedResponseSelected($event)">
+          <option value="">Respuesta rápida...</option>
+          @for (canned of cannedResponses(); track canned.id) {
+            <option [value]="canned.id">{{ canned.title }}</option>
+          }
+        </select>
+      </label>
+    }
+  </div>
+
+  @if (showCcBcc()) {
+    <div class="reply-editor-ccbcc">
+      <label>
+        <span>CC</span>
+        <input
+          type="text"
+          placeholder="correo1@ejemplo.com, correo2@ejemplo.com"
+          [value]="ccValue()"
+          (input)="onCcInput($event)"
+        />
+      </label>
+      <label>
+        <span>CCO</span>
+        <input
+          type="text"
+          placeholder="correo@ejemplo.com"
+          [value]="bccValue()"
+          (input)="onBccInput($event)"
+        />
+      </label>
+    </div>
+  }
+
+  <div class="reply-editor-toolbar" role="toolbar" aria-label="Formato">
+    <button type="button" (click)="format('bold')" aria-label="Negrita" title="Negrita"><b>B</b></button>
+    <button type="button" (click)="format('italic')" aria-label="Itálica" title="Itálica"><i>I</i></button>
+    <button type="button" (click)="format('underline')" aria-label="Subrayado" title="Subrayado"><u>S</u></button>
+    <button type="button" (click)="insertLink()" aria-label="Insertar enlace" title="Insertar enlace">🔗</button>
+    @if (signature()) {
+      <button type="button" (click)="insertSignature()" title="Insertar firma">Firma</button>
+    }
+    <label class="reply-editor-attach-btn" title="Adjuntar archivo">
+      📎
+      <input type="file" multiple hidden (change)="onFilesSelected($event)" />
+    </label>
+  </div>
+
+  <div
+    #editor
+    class="reply-editor-body"
+    contenteditable="true"
+    role="textbox"
+    aria-multiline="true"
+    aria-label="Cuerpo de la respuesta"
+    data-placeholder="Escribí tu respuesta..."
+    (input)="onEditorInput()"
+  ></div>
+
+  @if (attachments().length > 0) {
+    <ul class="reply-editor-attachments">
+      @for (file of attachments(); track file.name; let i = $index) {
+        <li>
+          <span>{{ file.name }}</span>
+          <button type="button" (click)="removeAttachment(i)" aria-label="Quitar adjunto">×</button>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (error()) {
+    <p class="reply-editor-error" role="alert">{{ error() }}</p>
+  }
+  @if (justSent()) {
+    <p class="reply-editor-success" role="status">Respuesta enviada</p>
+  }
+
+  <div class="reply-editor-actions">
+    <button type="button" class="btn btn-sm btn-ghost" (click)="discard()" [disabled]="sending()">
+      Descartar
+    </button>
+    <button type="button" class="btn btn-sm btn-primary" (click)="send()" [disabled]="sending()">
+      {{ sending() ? 'Enviando...' : 'Responder' }}
+    </button>
+  </div>
+</div>

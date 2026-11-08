@@ -1,8 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormField, form, max, min, pattern, required, schema } from '@angular/forms/signals';
 
 import { extractErrorMessage } from '../../data/extract-error-message';
+import { parseCapacityMl } from '../../../ecommerce/data/parse-capacity-ml';
 import type {
   AdminProductInput,
   AiProductCandidate,
@@ -504,12 +505,57 @@ export default class ProductForm {
     this.isEditMode ? 'Editar producto' : 'Nuevo producto',
   );
 
+  /** Fine-grained dependency for the label-sync effect below - only notifies when the label
+   * string itself actually changes, not on every keystroke elsewhere in the form (unlike reading
+   * `this.model()` directly, which would re-run the effect on any field edit). */
+  private readonly variantLabelValue = computed(() => this.model().variantLabel);
+  /**
+   * The label value the regulatory ml fields were last synced against - `null` until the initial
+   * model (new/loaded/duplicated) is actually in place, which the effect below uses to tell a
+   * genuine admin edit of the label apart from the label simply arriving from the server.
+   */
+  private lastSyncedVariantLabel: string | null = null;
+
   constructor() {
     if (this.productId) {
-      void this.loadProduct(this.productId);
+      void this.loadProduct(this.productId).then(() => {
+        this.lastSyncedVariantLabel = this.model().variantLabel;
+      });
     } else if (this.duplicateFromId) {
-      void this.loadDuplicateSource(this.duplicateFromId);
+      void this.loadDuplicateSource(this.duplicateFromId).then(() => {
+        this.lastSyncedVariantLabel = this.model().variantLabel;
+      });
+    } else {
+      this.lastSyncedVariantLabel = this.model().variantLabel;
     }
+
+    // Convenience sync: "Etiqueta de variante" ("5ml", "10ml"...) says the same ml the regulatory
+    // "Contenido neto"/"Volumen exacto" fields need, so keep them following it to save a step -
+    // they stay plain, freely editable inputs the admin can still type over at any time; editing
+    // the label again afterward just re-syncs them to the new size, which is the point.
+    // Guarded by `lastSyncedVariantLabel` so this only reacts to the admin actually changing the
+    // label field, never to the label simply arriving from a `loadProduct`/`loadDuplicateSource`
+    // fetch - otherwise just opening "Editar producto" would silently overwrite already-saved
+    // regulatory data on every visit.
+    effect(() => {
+      const label = this.variantLabelValue();
+      if (this.lastSyncedVariantLabel === null || label === this.lastSyncedVariantLabel) return;
+      this.lastSyncedVariantLabel = label;
+
+      const parsedMl = parseCapacityMl(label);
+      if (parsedMl === null) return;
+
+      untracked(() => {
+        this.model.update((current) => {
+          const nextDecantVolumeMl =
+            current.category === 'decants' ? parsedMl : current.decantVolumeMl;
+          if (current.netContentMl === parsedMl && current.decantVolumeMl === nextDecantVolumeMl) {
+            return current;
+          }
+          return { ...current, netContentMl: parsedMl, decantVolumeMl: nextDecantVolumeMl };
+        });
+      });
+    });
   }
 
   /**

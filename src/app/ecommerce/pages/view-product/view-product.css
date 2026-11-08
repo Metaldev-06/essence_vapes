@@ -101,6 +101,12 @@
   .breadcrumb-list {
     font-size: 12.5px;
     padding-inline: 10px;
+    /* Nunca envuelve a una 2da línea en mobile - con 2 líneas siempre queda raro (la flechita
+       separadora del siguiente ítem queda flotando sola al arrancar la línea de abajo, sin nada
+       antes). En una sola línea fija, lo que no entra se trunca con "..." en `.breadcrumb-current`
+       (ver abajo) en vez de pasar a una 2da línea. */
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
 
   /* Keep only the home icon on small screens to save room */
@@ -113,8 +119,15 @@
     white-space: nowrap;
   }
 
+  /* "Productos" es redundante acá (la categoría que sigue ya ubica, y "Productos" está a un
+     toque en el menú) - sacarlo libera espacio real y es lo que hace que, la mayoría de las
+     veces, el trail entre en una sola línea en vez de 2. */
+  .breadcrumb-item:nth-child(2) {
+    display: none;
+  }
+
   .breadcrumb-current {
-    max-width: 11rem;
+    max-width: 13rem;
   }
 }
 

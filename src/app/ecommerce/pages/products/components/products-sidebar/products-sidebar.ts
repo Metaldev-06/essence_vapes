@@ -27,6 +27,14 @@ export class ProductsSidebar {
       this.brand() !== 'todas',
   );
 
+  // Bound to each collapsible section's `[open]` - only re-asserted when the boolean itself
+  // flips (Angular skips the DOM write when the expression is unchanged), so a selection made
+  // via a deep link or another section opens the relevant panel automatically without fighting
+  // the user if they manually collapse it again afterwards.
+  protected readonly brandOpen = computed(() => this.brand() !== 'todas');
+  protected readonly genderOpen = computed(() => this.gender() !== 'todos');
+  protected readonly capacityOpen = computed(() => this.capacity() !== 'todas');
+
   protected clearAll(): void {
     this.category.set('todos');
     this.gender.set('todos');

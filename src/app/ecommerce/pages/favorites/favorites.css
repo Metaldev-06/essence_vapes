@@ -201,9 +201,13 @@
   gap: 20px;
 }
 
-.favorites-grid--list {
+/* Compound selector so this always outranks the `.favorites-grid` column overrides in the
+   responsive breakpoints below, regardless of source order. */
+.favorites-grid.favorites-grid--list {
   grid-template-columns: 1fr;
-  max-width: 640px;
+  gap: 14px;
+  width: 100%;
+  max-width: none;
 }
 
 .favorites-empty {

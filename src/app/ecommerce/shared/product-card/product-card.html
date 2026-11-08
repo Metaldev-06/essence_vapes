@@ -1,4 +1,8 @@
-<article class="product-card" [style.--accent-color]="product().accent">
+<article
+  class="product-card"
+  [class.product-card--list]="layout() === 'list'"
+  [style.--accent-color]="product().accent"
+>
   <a
     [routerLink]="['/productos', product().id]"
     [queryParams]="product().variantId !== 'base' ? { variant: product().variantId } : {}"
@@ -116,9 +120,10 @@
   </div>
 
   <div class="product-card-body">
-    <span class="product-card-brand">{{ product().brand }}</span>
-
-    <h3 class="product-card-name">{{ product().name }}</h3>
+    <div class="product-card-heading">
+      <span class="product-card-brand">{{ product().brand }}</span>
+      <h3 class="product-card-name">{{ product().name }}</h3>
+    </div>
 
     <div class="product-card-meta">
       @if (product().variantLabel) {

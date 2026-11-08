@@ -72,6 +72,7 @@
 
 summary.sidebar-section-title {
   cursor: pointer;
+  user-select: none;
 }
 
 summary.sidebar-section-title::-webkit-details-marker {
@@ -119,6 +120,7 @@ summary.sidebar-section-title:focus-visible {
   border: 1px solid transparent;
   cursor: pointer;
   text-align: left;
+  user-select: none;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 

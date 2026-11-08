@@ -24,6 +24,8 @@ export class ProductCard {
   private readonly compareService = inject(CompareService);
 
   readonly product = input.required<Product>();
+  /** `'list'` lays the card out as a horizontal row (used by `/favoritos`' list view toggle). */
+  readonly layout = input<'grid' | 'list'>('grid');
   protected readonly maxCompareItems = this.compareService.maxItems;
 
   protected readonly categoryLabel = computed(() => CATEGORY_SINGULAR_LABELS[this.product().category]);

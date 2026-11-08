@@ -30,7 +30,7 @@
   </div>
 
   @if (brandOptions().length > 0) {
-    <details class="sidebar-section">
+    <details class="sidebar-section" [open]="brandOpen()">
       <summary class="sidebar-section-title">
         Marca
         <svg class="sidebar-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -64,7 +64,7 @@
     </details>
   }
 
-  <details class="sidebar-section">
+  <details class="sidebar-section" [open]="genderOpen()">
     <summary class="sidebar-section-title">
       Género
       <svg class="sidebar-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -88,7 +88,7 @@
   </details>
 
   @if (capacityOptions().length > 0) {
-    <details class="sidebar-section">
+    <details class="sidebar-section" [open]="capacityOpen()">
       <summary class="sidebar-section-title">
         Capacidad
         <svg class="sidebar-section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

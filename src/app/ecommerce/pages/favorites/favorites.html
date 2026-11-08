@@ -141,7 +141,7 @@
       @if (sortedProducts().length > 0) {
         <div class="favorites-grid" [class.favorites-grid--list]="viewMode() === 'list'">
           @for (product of sortedProducts(); track product.id + '::' + product.variantId) {
-            <app-product-card [product]="product" />
+            <app-product-card [product]="product" [layout]="viewMode()" />
           }
         </div>
       } @else {

@@ -195,6 +195,11 @@
   padding: 14px 14px 16px;
 }
 
+/* Default (grid) mode: invisible wrapper, children lay out exactly as if it weren't there. */
+.product-card-heading {
+  display: contents;
+}
+
 .product-card-brand {
   font-size: 10px;
   font-weight: 700;
@@ -327,5 +332,76 @@
   .product-card-photo,
   .product-bottle {
     transition: none;
+  }
+}
+
+/* ── List mode (the /favoritos view toggle) ───────────────────────── */
+
+.product-card--list {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.product-card--list:hover {
+  transform: none;
+}
+
+.product-card--list .product-card-visual {
+  flex: 0 0 160px;
+  width: 160px;
+  height: auto;
+  min-height: 140px;
+  padding: 0;
+}
+
+.product-card--list .product-card-body {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  padding: 14px 20px;
+}
+
+.product-card--list .product-card-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.product-card--list .product-card-name {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.product-card--list .product-card-meta {
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+.product-card--list .product-card-footer {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+@media (max-width: 560px) {
+  .product-card--list {
+    flex-direction: column;
+  }
+
+  .product-card--list .product-card-visual {
+    width: 100%;
+    min-height: 180px;
+  }
+
+  .product-card--list .product-card-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .product-card--list .product-card-meta {
+    justify-content: flex-start;
   }
 }

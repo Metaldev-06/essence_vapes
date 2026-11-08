@@ -1,0 +1,62 @@
+.compare-radar {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin-inline: auto;
+  display: block;
+  overflow: visible;
+}
+
+.compare-radar-ring {
+  fill: none;
+  stroke: var(--color-border-subtle);
+  stroke-width: 1;
+}
+
+.compare-radar-shape {
+  fill: color-mix(in srgb, var(--series-color) 16%, transparent);
+  stroke: var(--series-color);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.compare-radar-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+}
+
+.compare-radar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.compare-radar-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.compare-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--series-color);
+}
+
+.compare-legend-photo {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--color-surface-elevated);
+  border: 1.5px solid var(--series-color);
+}

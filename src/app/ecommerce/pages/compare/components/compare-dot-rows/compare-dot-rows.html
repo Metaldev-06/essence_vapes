@@ -1,0 +1,17 @@
+<div class="compare-dot-rows">
+  @for (row of rows(); track row.name; let i = $index) {
+    <div class="compare-dot-row">
+      <span class="compare-dot" [style.--series-color]="seriesColor(i)" aria-hidden="true"></span>
+      <span class="compare-dot-row-name">{{ row.name }}</span>
+      @if (row.chips.length > 0) {
+        <div class="compare-chips">
+          @for (chip of row.chips; track chip) {
+            <span class="compare-chip">{{ chip }}</span>
+          }
+        </div>
+      } @else {
+        <span class="compare-empty">—</span>
+      }
+    </div>
+  }
+</div>

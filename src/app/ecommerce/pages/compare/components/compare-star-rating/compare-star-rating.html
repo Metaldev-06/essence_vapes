@@ -1,0 +1,15 @@
+<div class="compare-product-rating">
+  <span class="star-row" aria-hidden="true">
+    @for (fill of starFills(); track $index) {
+      <span class="star">
+        <svg class="star-bg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.6 6.8L12 17.1 5.8 20.5l1.6-6.8L2.2 9l6.9-.7L12 2Z" />
+        </svg>
+        <svg class="star-fg" [style.clip-path]="'inset(0 ' + (100 - fill) + '% 0 0)'" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.6 6.8L12 17.1 5.8 20.5l1.6-6.8L2.2 9l6.9-.7L12 2Z" />
+        </svg>
+      </span>
+    }
+  </span>
+  <span class="compare-rating-text">{{ rating() }} ({{ ratingCount() }})</span>
+</div>

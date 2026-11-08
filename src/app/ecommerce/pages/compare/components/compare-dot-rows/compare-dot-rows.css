@@ -1,0 +1,57 @@
+.compare-dot-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.compare-dot-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.compare-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--series-color);
+}
+
+.compare-dot-row-name {
+  flex-shrink: 0;
+  min-width: 120px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.compare-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.compare-chip {
+  padding: 3px 11px;
+  border-radius: var(--radius-full);
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+}
+
+.compare-empty {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+  .compare-dot-row-name {
+    min-width: 100%;
+  }
+}

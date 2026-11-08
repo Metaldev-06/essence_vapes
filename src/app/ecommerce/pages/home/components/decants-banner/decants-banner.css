@@ -62,41 +62,17 @@
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: flex-end;
-  gap: 18px;
+  align-items: center;
+  justify-content: center;
 }
 
-.decant-bottle {
-  filter: drop-shadow(0 10px 24px color-mix(in srgb, var(--color-aurora-cyan) 30%, transparent));
+.decant-photo {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 36px color-mix(in srgb, var(--color-aurora-cyan) 40%, transparent));
   animation: float 5s ease-in-out infinite;
-}
-
-.decant-bottle--md {
-  animation-duration: 6.5s;
-  animation-delay: 0.6s;
-  opacity: 0.9;
-}
-
-.decant-bottle--sm {
-  animation-duration: 4.5s;
-  animation-delay: 1.2s;
-  opacity: 0.75;
-}
-
-.decant-bottle-cap {
-  fill: var(--color-aurora-cyan);
-}
-
-.decant-bottle-body {
-  fill: var(--color-surface);
-  stroke: color-mix(in srgb, var(--color-aurora-cyan) 40%, transparent);
-  stroke-width: 1;
-}
-
-.decant-bottle-label {
-  fill: color-mix(in srgb, var(--color-aurora-cyan) 14%, transparent);
-  stroke: color-mix(in srgb, var(--color-aurora-cyan) 30%, transparent);
-  stroke-width: 0.75;
 }
 
 .decants-text-side {
@@ -202,7 +178,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .decants-ring,
-  .decant-bottle {
+  .decant-photo {
     animation: none;
   }
 }

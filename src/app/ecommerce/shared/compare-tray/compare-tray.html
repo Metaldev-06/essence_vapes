@@ -1,4 +1,4 @@
-@if (compareService.count() > 0) {
+@if (compareService.count() > 0 && !isOnComparePage()) {
   <div class="compare-tray" role="region" aria-label="Comparador de productos">
     <div class="compare-tray-inner">
       <div class="compare-tray-items">

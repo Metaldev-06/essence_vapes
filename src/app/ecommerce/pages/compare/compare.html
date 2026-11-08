@@ -1,11 +1,29 @@
 <section class="compare-page section">
   <div class="container">
-    <div class="compare-header">
-      <span class="section-label">En tiempo real</span>
-      <h1 class="section-title">Comparar fragancias</h1>
-      <p class="section-subtitle">
-        Estadísticas, notas y perfil de cada fragancia o decant, lado a lado.
-      </p>
+    <div class="compare-hero">
+      <div class="compare-hero-copy">
+        <span class="section-label">En tiempo real</span>
+        <h1 class="section-title">Comparar <em class="section-title-accent">fragancias</em></h1>
+        <p class="section-subtitle">
+          Comparás notas, duración, proyección y estilo de cada fragancia lado a lado.
+        </p>
+        <div class="compare-badges">
+          <span>⚖️ Comparación objetiva</span>
+          <span>⚡ En tiempo real</span>
+          <span>📊 Perfiles detallados</span>
+        </div>
+      </div>
+
+      <div class="compare-howto">
+        <span class="compare-howto-icon" aria-hidden="true">ℹ️</span>
+        <div>
+          <strong>Cómo comparar</strong>
+          <p>
+            Analizá las principales diferencias: notas, acordes, rendimiento, mejores estaciones
+            y ocasiones de uso para elegir la que mejor se adapte a tu estilo.
+          </p>
+        </div>
+      </div>
     </div>
 
     @if (products().length === 0) {
@@ -17,17 +35,72 @@
         <a [routerLink]="'/productos'" class="btn btn-primary">Explorar productos</a>
       </div>
     } @else {
+      <div class="compare-bar">
+        <div class="compare-bar-title">
+          <span class="compare-bar-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="8" height="18" rx="1.5" />
+              <rect x="13" y="3" width="8" height="18" rx="1.5" />
+            </svg>
+          </span>
+          <span class="compare-bar-title-copy">
+            <strong>Comparador</strong>
+            <span>{{ products().length }} / {{ compareService.maxItems }} fragancias</span>
+          </span>
+        </div>
+
+        <div class="compare-bar-chips">
+          @for (product of products(); track product.id + '::' + product.variantId; let i = $index) {
+            <div class="compare-bar-chip" [style.--series-color]="seriesColor(i)">
+              <span class="compare-bar-dot" aria-hidden="true"></span>
+              @if (product.images[0]; as cover) {
+                <img [ngSrc]="cover.url" [alt]="product.name" width="22" height="22" class="compare-bar-thumb" />
+              }
+              <span class="compare-bar-chip-text">{{ product.brand }} · {{ product.name }}</span>
+              @if (product.variantLabel) {
+                <span class="compare-product-chip">{{ product.variantLabel }}</span>
+              }
+              <button
+                type="button"
+                [attr.aria-label]="'Quitar ' + product.name + ' del comparador'"
+                (click)="remove(product)"
+              >
+                ×
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="compare-bar-actions">
+          @if (canAddMore()) {
+            <a [routerLink]="'/productos'" class="compare-bar-btn compare-bar-add">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Agregar otra fragancia
+            </a>
+          }
+          <button type="button" class="compare-bar-btn compare-bar-wipe" (click)="compareService.clear()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+            </svg>
+            Vaciar
+          </button>
+        </div>
+      </div>
+
       @if (!hasEnoughToCompare()) {
         <p class="compare-hint" role="status">
           Agregá al menos un producto más para poder comparar.
         </p>
-      }
+      } @else {
+        <div class="compare-cards" [style.grid-template-columns]="'repeat(' + products().length + ', minmax(200px, 1fr))'">
+          @for (product of products(); track product.id + '::' + product.variantId; let i = $index) {
+            <div class="compare-product-card" [style.--series-color]="seriesColor(i)">
+              @if (isPairwise() && overallWinnerIndex() === i) {
+                <span class="compare-crown" title="Gana más diferencias clave" aria-hidden="true">👑</span>
+              }
 
-      <div class="compare-scroll">
-        <div class="compare-grid" [style.grid-template-columns]="gridTemplateColumns()">
-          <div class="compare-cell compare-cell--corner"></div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell compare-header-cell">
               <button
                 type="button"
                 class="compare-remove"
@@ -36,228 +109,267 @@
               >
                 ×
               </button>
-              <a
-                [routerLink]="['/productos', product.id]"
-                [queryParams]="product.variantId !== 'base' ? { variant: product.variantId } : {}"
-                class="compare-header-link"
-              >
-                @if (product.images[0]; as cover) {
-                  <img [ngSrc]="cover.url" [alt]="product.name" width="96" height="96" class="compare-photo" />
-                } @else {
-                  <span class="compare-photo compare-photo--empty" aria-hidden="true">🧴</span>
+
+              <div class="compare-product-main">
+                <div class="compare-product-visual">
+                  @if (product.images[0]; as cover) {
+                    <img [ngSrc]="cover.url" [alt]="product.name" width="120" height="120" class="compare-photo" />
+                  } @else {
+                    <span class="compare-photo compare-photo--empty" aria-hidden="true">🧴</span>
+                  }
+                </div>
+
+                <div class="compare-product-info">
+                  <div class="compare-product-top">
+                    <span class="compare-product-brand">{{ product.brand }}</span>
+                    <h2 class="compare-product-name">{{ product.name }}</h2>
+                    <div class="compare-product-chips">
+                      <span class="compare-product-chip">
+                        {{ categoryLabels[product.category] }}@if (product.concentration) { ({{ concentrationLabels[product.concentration] }}) }
+                      </span>
+                      @if (product.gender) {
+                        <span class="compare-product-chip">{{ genderLabels[product.gender] }}</span>
+                      }
+                      @if (topSeasons(product); as seasons) {
+                        <span class="compare-product-chip">☀️ {{ seasons }}</span>
+                      }
+                      @if (product.variantLabel) {
+                        <span class="compare-product-chip">{{ product.variantLabel }}</span>
+                      }
+                    </div>
+                  </div>
+
+                  <span class="compare-price">{{ product.price }}</span>
+
+                  @if (product.rating) {
+                    <app-compare-star-rating [rating]="product.rating" [ratingCount]="product.ratingCount ?? 0" />
+                  }
+                </div>
+              </div>
+
+              <div class="compare-product-bottom">
+                @if (highlight(product); as text) {
+                  <p class="compare-product-highlight">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="m12 2 2.2 5.6L20 9l-5.8 1.4L12 16l-2.2-5.6L4 9l5.8-1.4L12 2Z" />
+                    </svg>
+                    Mejor en: {{ text }}
+                  </p>
                 }
-                <span class="compare-brand">{{ product.brand }}</span>
-                <span class="compare-name">{{ product.name }}</span>
-              </a>
-              @if (product.variantLabel) {
-                <span class="compare-variant-label">{{ product.variantLabel }}</span>
-              }
-              <span class="compare-price">{{ product.price }}</span>
-            </div>
-          }
 
-          <div class="compare-cell compare-row-label">Categoría</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">{{ categoryLabels[product.category] }}</div>
-          }
-
-          <div class="compare-cell compare-row-label">Calificación</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (product.rating) {
-                <span class="star-row" aria-hidden="true">
-                  @for (fill of starFills(product); track $index) {
-                    <span class="star">
-                      <svg class="star-bg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.6 6.8L12 17.1 5.8 20.5l1.6-6.8L2.2 9l6.9-.7L12 2Z" />
-                      </svg>
-                      <svg class="star-fg" [style.clip-path]="'inset(0 ' + (100 - fill) + '% 0 0)'" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2l2.9 6.3 6.9.7-5.2 4.7 1.6 6.8L12 17.1 5.8 20.5l1.6-6.8L2.2 9l6.9-.7L12 2Z" />
-                      </svg>
-                    </span>
-                  }
-                </span>
-                <span class="compare-rating-text">{{ product.rating }} ({{ product.ratingCount ?? 0 }})</span>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Sillage</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              {{ product.sillage ? sillageLabels[product.sillage] : '—' }}
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Duración</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">{{ product.longevity ?? '—' }}</div>
-          }
-
-          <div class="compare-cell compare-row-label">Género</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">{{ product.gender ? genderLabels[product.gender] : '—' }}</div>
-          }
-
-          <div class="compare-cell compare-row-label">Año</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">{{ product.year ?? '—' }}</div>
-          }
-
-          <div class="compare-cell compare-row-label">Origen</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">{{ product.origin ?? '—' }}</div>
-          }
-
-          <div class="compare-cell compare-row-label">Concentración</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              {{ product.concentration ? concentrationLabels[product.concentration] : '—' }}
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Notas de salida</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (topNotes(product).length > 0) {
-                <div class="compare-chips">
-                  @for (note of topNotes(product); track note) {
-                    <span class="compare-chip">{{ note }}</span>
-                  }
-                </div>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Notas de corazón</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (heartNotes(product).length > 0) {
-                <div class="compare-chips">
-                  @for (note of heartNotes(product); track note) {
-                    <span class="compare-chip">{{ note }}</span>
-                  }
-                </div>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Notas de fondo</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (baseNotes(product).length > 0) {
-                <div class="compare-chips">
-                  @for (note of baseNotes(product); track note) {
-                    <span class="compare-chip">{{ note }}</span>
-                  }
-                </div>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Acordes</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (product.accords && product.accords.length > 0) {
-                <div class="compare-chips">
-                  @for (accord of product.accords; track accord) {
-                    <span class="compare-chip">{{ accord }}</span>
-                  }
-                </div>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Mood</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (product.mood && product.mood.length > 0) {
-                <div class="compare-chips">
-                  @for (item of product.mood; track item) {
-                    <span class="compare-chip">{{ item }}</span>
-                  }
-                </div>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Mejores estaciones</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (seasonBars(product).length > 0) {
-                <div class="compare-bars">
-                  @for (bar of seasonBars(product); track bar.label) {
-                    <div class="compare-bar-row">
-                      <span class="compare-bar-label">{{ bar.label }}</span>
-                      <div class="compare-bar-track">
-                        <span class="compare-bar-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
-                      </div>
-                    </div>
-                  }
-                </div>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Día / Noche</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (dayBars(product).length > 0) {
-                <div class="compare-bars">
-                  @for (bar of dayBars(product); track bar.label) {
-                    <div class="compare-bar-row">
-                      <span class="compare-bar-label">{{ bar.label }}</span>
-                      <div class="compare-bar-track">
-                        <span class="compare-bar-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
-                      </div>
-                    </div>
-                  }
-                </div>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
-            </div>
-          }
-
-          <div class="compare-cell compare-row-label">Ocasiones</div>
-          @for (product of products(); track product.id + '::' + product.variantId) {
-            <div class="compare-cell">
-              @if (occasionBars(product).length > 0) {
-                <div class="compare-bars">
-                  @for (bar of occasionBars(product); track bar.label) {
-                    <div class="compare-bar-row">
-                      <span class="compare-bar-label">{{ bar.label }}</span>
-                      <div class="compare-bar-track">
-                        <span class="compare-bar-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
-                      </div>
-                    </div>
-                  }
-                </div>
-              } @else {
-                <span class="compare-empty">—</span>
-              }
+                <a
+                  [routerLink]="['/productos', product.id]"
+                  [queryParams]="product.variantId !== 'base' ? { variant: product.variantId } : {}"
+                  class="compare-product-link"
+                >
+                  Ver detalle
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+              </div>
             </div>
           }
         </div>
-      </div>
 
-      <button type="button" class="btn btn-ghost compare-clear-all" (click)="compareService.clear()">
-        Vaciar comparador
-      </button>
+        @if (isPairwise() && differentiators().length > 0) {
+          <div class="compare-block compare-diffs">
+            <div class="compare-block-heading">
+              <span aria-hidden="true">✨</span>
+              <div>
+                <strong>Diferencias clave</strong>
+                <span>Un vistazo rápido a lo que las hace únicas.</span>
+              </div>
+            </div>
+            <div class="compare-diffs-grid">
+              @for (diff of differentiators(); track diff.label) {
+                <div class="compare-diff-chip" [style.--series-color]="seriesColor(diff.winnerIndex)">
+                  <span aria-hidden="true">{{ diff.emoji }}</span>
+                  <span>
+                    <strong>{{ diff.label }}</strong>
+                    <span>{{ products()[diff.winnerIndex].name }}</span>
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="compare-tabs" role="tablist" aria-label="Secciones de comparación">
+          @for (tab of tabs; track tab.id) {
+            <button
+              type="button"
+              role="tab"
+              [class.active]="activeTab() === tab.id"
+              [attr.aria-selected]="activeTab() === tab.id"
+              (click)="setTab(tab.id)"
+            >
+              {{ tab.label }}
+            </button>
+          }
+        </div>
+
+        <div class="compare-panel">
+          @switch (activeTab()) {
+            @case ('resumen') {
+              <div class="compare-resumen-layout" [class.compare-resumen-layout--stacked]="resumenStacked()">
+                <div class="compare-panel-card">
+                  <h3 class="compare-panel-title">Resumen general</h3>
+                  <p class="compare-panel-subtitle">Datos clave de cada fragancia.</p>
+
+                  <div class="compare-facts" [style.grid-template-columns]="gridTemplateColumns()">
+                    <div class="compare-cell compare-row-label"></div>
+                    @for (product of products(); track product.id + '::' + product.variantId; let i = $index) {
+                      <div class="compare-cell compare-fact-header" [style.--series-color]="seriesColor(i)">
+                        @if (product.images[0]; as cover) {
+                          <img [ngSrc]="cover.url" [alt]="product.name" width="26" height="26" class="compare-fact-photo" />
+                        }
+                        <span>{{ product.name }}</span>
+                      </div>
+                    }
+
+                    <div class="compare-cell compare-row-label">Categoría</div>
+                    @for (product of products(); track product.id + '::' + product.variantId) {
+                      <div class="compare-cell">{{ categoryLabels[product.category] }}</div>
+                    }
+
+                    <div class="compare-cell compare-row-label">Concentración</div>
+                    @for (product of products(); track product.id + '::' + product.variantId) {
+                      <div class="compare-cell">
+                        {{ product.concentration ? concentrationLabels[product.concentration] : '—' }}
+                      </div>
+                    }
+
+                    <div class="compare-cell compare-row-label">Género</div>
+                    @for (product of products(); track product.id + '::' + product.variantId) {
+                      <div class="compare-cell">{{ product.gender ? genderLabels[product.gender] : '—' }}</div>
+                    }
+
+                    <div class="compare-cell compare-row-label">Año</div>
+                    @for (product of products(); track product.id + '::' + product.variantId) {
+                      <div class="compare-cell">{{ product.year ?? '—' }}</div>
+                    }
+
+                    <div class="compare-cell compare-row-label">Origen</div>
+                    @for (product of products(); track product.id + '::' + product.variantId) {
+                      <div class="compare-cell">{{ product.origin ?? '—' }}</div>
+                    }
+                  </div>
+                </div>
+
+                @if (radar(); as radarData) {
+                  <div class="compare-panel-card">
+                    <h3 class="compare-panel-title">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 2 2 7.5 12 13l10-5.5L12 2Z" />
+                        <path d="M2 16.5 12 22l10-5.5M2 12l10 5.5L22 12" />
+                      </svg>
+                      Perfil aromático (radar)
+                    </h3>
+                    <p class="compare-panel-subtitle">Equilibrio de las familias olfativas.</p>
+                    <app-compare-radar-chart [radar]="radarData" [products]="products()" />
+                  </div>
+                }
+              </div>
+            }
+
+            @case ('notas') {
+              <div class="compare-notes-grid">
+                <div class="compare-panel-card">
+                  <h3 class="compare-panel-title">Notas de salida</h3>
+                  <p class="compare-panel-subtitle">Lo primero que se siente al aplicar la fragancia.</p>
+                  <app-compare-dot-rows [rows]="topNoteRows()" />
+                </div>
+
+                <div class="compare-panel-card">
+                  <h3 class="compare-panel-title">Notas de corazón</h3>
+                  <p class="compare-panel-subtitle">El corazón de la fragancia, cuando se asienta.</p>
+                  <app-compare-dot-rows [rows]="heartNoteRows()" />
+                </div>
+
+                <div class="compare-panel-card">
+                  <h3 class="compare-panel-title">Notas de fondo</h3>
+                  <p class="compare-panel-subtitle">La base que perdura, la que más tiempo se mantiene.</p>
+                  <app-compare-dot-rows [rows]="baseNoteRows()" />
+                </div>
+              </div>
+            }
+
+            @case ('acordes') {
+              <div class="compare-panel-card">
+                <h3 class="compare-panel-title">Acordes dominantes</h3>
+                <p class="compare-panel-subtitle">Los acordes que definen su personalidad.</p>
+                <app-compare-dot-rows [rows]="accordRows()" />
+              </div>
+            }
+
+            @case ('rendimiento') {
+              <div class="compare-panel-card">
+                <h3 class="compare-panel-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />
+                  </svg>
+                  Rendimiento
+                </h3>
+                <p class="compare-panel-subtitle">Duración y proyección en piel.</p>
+                <app-compare-metric-rows [rows]="performanceRows()" [products]="products()" />
+              </div>
+            }
+
+            @case ('cuando') {
+              <div class="compare-panel-card">
+                <h3 class="compare-panel-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="16" rx="2" />
+                    <path d="M3 10h18M8 3v4M16 3v4" />
+                  </svg>
+                  Cuándo usarla
+                </h3>
+                <p class="compare-panel-subtitle">Mejores momentos, estaciones y ocasiones.</p>
+                <app-compare-metric-rows [rows]="usageRows()" [products]="products()" />
+              </div>
+            }
+          }
+        </div>
+
+        @if (isPairwise() && (pickReasons(0).length > 0 || pickReasons(1).length > 0)) {
+          <div class="compare-block compare-choice">
+            <div class="compare-block-heading">
+              <span aria-hidden="true">🎯</span>
+              <div>
+                <strong>¿Cuál elegir?</strong>
+                <span>Según las diferencias reales entre ambas.</span>
+              </div>
+            </div>
+
+            <div class="compare-choice-cards">
+              @for (product of products(); track product.id + '::' + product.variantId; let i = $index) {
+                @if (pickReasons(i === 0 ? 0 : 1).length > 0) {
+                  <div class="compare-choice-card" [style.--series-color]="seriesColor(i)">
+                    <strong>Elegí {{ product.name }} si...</strong>
+                    <ul>
+                      @for (reason of pickReasons(i === 0 ? 0 : 1); track reason) {
+                        <li>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12l4 4L19 6" />
+                          </svg>
+                          {{ reason }}
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        <div class="compare-actions">
+          <button type="button" class="btn btn-ghost compare-clear-all" (click)="compareService.clear()">
+            Vaciar comparador
+          </button>
+        </div>
+      }
     }
   </div>
 </section>

@@ -634,7 +634,132 @@
 }
 
 @media (max-width: 640px) {
+  .compare-page {
+    padding-top: calc(var(--header-height) + 20px);
+  }
+
   .compare-cards {
     grid-template-columns: 1fr !important;
+  }
+
+  /* La fila única (título + chips + acciones) no tenía ancho real para mostrar el nombre del
+     producto - quedaba comprimido a "Jea..." o directamente invisible entre el título y los
+     botones. Ahora cada fragancia es su propia fila a 100% de ancho, debajo de "Comparador".
+     Todo acá fuerza `width: 100%` + `box-sizing: border-box` explícito en cada nivel (la tarjeta,
+     la lista de chips y cada chip) para que la tarjeta completa quede exactamente del mismo
+     ancho que las demás tarjetas de la página - no alcanza con arreglarlo en un solo nivel. */
+  .compare-bar {
+    box-sizing: border-box;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .compare-bar-chips {
+    box-sizing: border-box;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .compare-bar-chip {
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .compare-bar-chip-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .compare-bar-actions {
+    box-sizing: border-box;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .compare-block,
+  .compare-panel-card {
+    padding: 16px;
+  }
+
+  /* Las "Diferencias clave" ocupaban una fila entera por chip (el nombre del producto ganador
+     forzaba el track a crecer más allá de los 170px mínimos) - achica el piso y trunca el texto
+     para que entren 2 por fila como estaba pensado. */
+  .compare-diffs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .compare-diff-chip {
+    min-width: 0;
+    padding: 8px 10px;
+  }
+
+  .compare-diff-chip span {
+    min-width: 0;
+  }
+
+  .compare-diff-chip strong,
+  .compare-diff-chip span:last-child span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Tabs: scroll horizontal en vez de envolver en 2 filas - mismo patrón de "chip strip" que el
+     resto del sitio usa para filtros en mobile. */
+  .compare-tabs {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .compare-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .compare-tabs button {
+    flex-shrink: 0;
+  }
+
+  .compare-cell {
+    padding: 8px 8px;
+    font-size: 12px;
+  }
+
+  .compare-fact-header span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .compare-product-main {
+    gap: 10px;
+  }
+
+  .compare-product-visual {
+    flex: 0 0 88px;
+    width: 88px;
+  }
+
+  .compare-photo {
+    width: 66px;
+    height: 66px;
+  }
+
+  .compare-product-info {
+    padding: 12px 12px 12px 0;
+  }
+
+  .compare-choice-cards {
+    grid-template-columns: 1fr;
   }
 }

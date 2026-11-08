@@ -1,5 +1,5 @@
 import { NgOptimizedImage } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CompareService } from '../../../core/compare/compare.service';
 import { SCENT_STYLE_OPTIONS } from '../../data/scent-styles';
@@ -45,6 +45,8 @@ interface Differentiator {
   readonly winnerIndex: number;
 }
 
+const MOBILE_BREAKPOINT_QUERY = '(max-width: 640px)';
+
 const RADAR_CENTER = 130;
 const RADAR_RADIUS = 66;
 const RADAR_LABEL_RADIUS = 96;
@@ -65,6 +67,7 @@ const MAX_RADAR_AXES = 6;
 })
 export default class Compare {
   protected readonly compareService = inject(CompareService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly categoryLabels = CATEGORY_SINGULAR_LABELS;
   protected readonly concentrationLabels = CONCENTRATION_LABELS;
@@ -88,6 +91,22 @@ export default class Compare {
   protected readonly hasEnoughToCompare = computed(() => this.products().length >= 2);
   protected readonly isPairwise = computed(() => this.products().length === 2);
   protected readonly canAddMore = computed(() => this.compareService.count() < this.compareService.maxItems);
+
+  /** Backs `gridTemplateColumns()` below - the facts table's column widths need to shrink for
+   *  real on mobile (not just via CSS `!important`, which can't safely override a dynamic
+   *  `repeat(n, ...)` track count without breaking row alignment), so this tracks the viewport
+   *  directly instead. `!window.matchMedia` guards SSR/non-browser environments. */
+  protected readonly isMobile = signal(
+    typeof window !== 'undefined' && window.matchMedia ? window.matchMedia(MOBILE_BREAKPOINT_QUERY).matches : false,
+  );
+
+  constructor() {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const query = window.matchMedia(MOBILE_BREAKPOINT_QUERY);
+    const onChange = (event: MediaQueryListEvent) => this.isMobile.set(event.matches);
+    query.addEventListener('change', onChange);
+    this.destroyRef.onDestroy(() => query.removeEventListener('change', onChange));
+  }
 
   protected seriesColor(index: number): string {
     return SERIES_COLORS[index % SERIES_COLORS.length];
@@ -399,7 +418,11 @@ export default class Compare {
    *  table needs more width than a fixed 50/50 split allows, so it stacks instead. */
   protected readonly resumenStacked = computed(() => this.products().length > 2);
 
-  protected readonly gridTemplateColumns = computed(
-    () => `200px repeat(${Math.max(this.products().length, 1)}, minmax(220px, 1fr))`,
-  );
+  protected readonly gridTemplateColumns = computed(() => {
+    const n = Math.max(this.products().length, 1);
+    // Mobile: columnas flexibles sin piso mínimo (`minmax(0, 1fr)`) - con `minmax(220px, 1fr)`
+    // la tabla pedía 640px+ de ancho mínimo (200 + 220×2) y se desbordaba en cualquier celular.
+    if (this.isMobile()) return `72px repeat(${n}, minmax(0, 1fr))`;
+    return `200px repeat(${n}, minmax(220px, 1fr))`;
+  });
 }

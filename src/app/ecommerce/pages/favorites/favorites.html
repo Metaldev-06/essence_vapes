@@ -1,13 +1,59 @@
+<section class="favorites-hero">
+  <div class="favorites-hero-glow" aria-hidden="true"></div>
+  <div class="container">
+    <span class="section-label">Tu espacio personal</span>
+    <h1 class="section-title">Mis <em class="section-title-accent">favoritos</em></h1>
+    <p class="section-subtitle">
+      Guardá las fragancias que te gustan, explorá tu perfil de gustos y descubrí nuevas
+      recomendaciones pensadas especialmente para vos.
+    </p>
+
+    @if (profileSummary(); as summary) {
+      <div class="favorites-summary">
+        <div class="favorites-summary-item favorites-summary-item--avatar">
+          <span class="favorites-summary-avatar" aria-hidden="true">{{ summary.initial }}</span>
+          <span class="favorites-summary-copy">
+            <strong>Tu perfil de fragancias</strong>
+            <span>Basado en {{ summary.favoritesCount }} favoritos</span>
+          </span>
+        </div>
+
+        <div class="favorites-summary-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          <span class="favorites-summary-copy">
+            <strong>{{ summary.topAccordsText }}</strong>
+            <span>Acordes principales</span>
+          </span>
+        </div>
+
+        <div class="favorites-summary-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m12 2 2.2 5.6L20 9l-5.8 1.4L12 16l-2.2-5.6L4 9l5.8-1.4L12 2Z" />
+          </svg>
+          <span class="favorites-summary-copy">
+            <strong>{{ summary.topStylesText }}</strong>
+            <span>Estilo preferido</span>
+          </span>
+        </div>
+
+        <div class="favorites-summary-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19V10M10 19V5M16 19v-7M22 19H2" />
+          </svg>
+          <span class="favorites-summary-copy">
+            <strong>{{ summary.topOccasionsText }}</strong>
+            <span>Ocasiones frecuentes</span>
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
 <section class="favorites-page section">
   <div class="container">
-    <div class="favorites-header">
-      <span class="section-label">Tu espacio</span>
-      <h1 class="section-title">Mis favoritos</h1>
-      <p class="section-subtitle">
-        Guardá las fragancias que te gustan y descubrí tu propio perfil de gustos.
-      </p>
-    </div>
-
     @if (favoritesService.isLoading() && !hasAnyFavorites()) {
       <p class="favorites-loading" role="status">Cargando tus favoritos...</p>
     } @else if (!hasAnyFavorites()) {
@@ -35,17 +81,66 @@
         <a [routerLink]="'/productos'" class="btn btn-primary">Explorar productos</a>
       </div>
     } @else {
-      <div class="favorites-layout">
+      <div class="favorites-insights-layout">
         <app-taste-profile [products]="favoritesService.products()" />
-        <app-favorites-filters
-          [products]="favoritesService.products()"
-          [(activeFilters)]="activeFilters"
-        />
+        <app-favorites-insights [products]="favoritesService.products()" />
       </div>
 
-      @if (filteredProducts().length > 0) {
-        <div class="favorites-grid">
-          @for (product of filteredProducts(); track product.id + '::' + product.variantId) {
+      <app-favorites-filters
+        [products]="favoritesService.products()"
+        [(activeFilters)]="activeFilters"
+      />
+
+      <div class="favorites-grid-header">
+        <div>
+          <span class="favorites-grid-eyebrow">Tus fragancias guardadas</span>
+          <h2 class="favorites-grid-title">Tus favoritos ({{ sortedProducts().length }})</h2>
+        </div>
+
+        <div class="favorites-grid-controls">
+          <div class="favorites-view-toggle" role="group" aria-label="Tipo de vista">
+            <button
+              type="button"
+              [class.active]="viewMode() === 'grid'"
+              [attr.aria-pressed]="viewMode() === 'grid'"
+              aria-label="Vista en grilla"
+              (click)="setViewMode('grid')"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              [class.active]="viewMode() === 'list'"
+              [attr.aria-pressed]="viewMode() === 'list'"
+              aria-label="Vista en lista"
+              (click)="setViewMode('list')"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
+          <label class="favorites-sort">
+            <span class="sr-only">Ordenar favoritos</span>
+            <select [value]="sortBy()" (change)="setSortBy($event)">
+              <option value="reciente">Agregados recientemente</option>
+              <option value="precio-asc">Precio: menor a mayor</option>
+              <option value="precio-desc">Precio: mayor a menor</option>
+              <option value="nombre">Nombre A-Z</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      @if (sortedProducts().length > 0) {
+        <div class="favorites-grid" [class.favorites-grid--list]="viewMode() === 'list'">
+          @for (product of sortedProducts(); track product.id + '::' + product.variantId) {
             <app-product-card [product]="product" />
           }
         </div>
@@ -58,6 +153,8 @@
           </button>
         </div>
       }
+
+      <app-favorites-recommendations [favorites]="favoritesService.products()" />
     }
   </div>
 </section>

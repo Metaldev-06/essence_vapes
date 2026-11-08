@@ -1,0 +1,48 @@
+@if (insights().length > 0) {
+  <div class="favorites-insights">
+    <h2 class="favorites-insights-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m12 2 2.2 5.6L20 9l-5.8 1.4L12 16l-2.2-5.6L4 9l5.8-1.4L12 2Z" />
+      </svg>
+      Tu estilo
+    </h2>
+    <p class="favorites-insights-subtitle">Insights de tu perfil y recomendaciones de uso.</p>
+
+    <div class="favorites-insights-list">
+      @for (insight of insights(); track insight.title) {
+        <div class="favorites-insight-row">
+          <span class="favorites-insight-icon" aria-hidden="true">
+            @switch (insight.icon) {
+              @case ('drop') {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3s-6 6.5-6 11a6 6 0 0 0 12 0c0-4.5-6-11-6-11z" />
+                </svg>
+              }
+              @case ('calendar') {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path d="M3 10h18M8 3v4M16 3v4" />
+                </svg>
+              }
+              @case ('sun') {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 3v2M12 19v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M3 12h2M19 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5" />
+                </svg>
+              }
+              @case ('snow') {
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11" />
+                </svg>
+              }
+            }
+          </span>
+          <span class="favorites-insight-copy">
+            <strong>{{ insight.title }}</strong>
+            <span>{{ insight.description }}</span>
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+}

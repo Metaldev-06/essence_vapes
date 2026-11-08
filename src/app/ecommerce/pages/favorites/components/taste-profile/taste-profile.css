@@ -9,16 +9,70 @@
 }
 
 .taste-profile-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.01em;
   color: var(--color-text-primary);
 }
 
+.taste-profile-title svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
 .taste-profile-subtitle {
   margin-top: -14px;
   font-size: 13px;
   color: var(--color-text-muted);
+}
+
+.taste-profile-radar-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.taste-radar {
+  width: 100%;
+  height: auto;
+}
+
+.taste-radar-ring {
+  fill: none;
+  stroke: var(--color-border-subtle);
+  stroke-width: 1;
+}
+
+.taste-radar-axis {
+  stroke: var(--color-border-subtle);
+  stroke-width: 1;
+}
+
+.taste-radar-shape {
+  fill: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.taste-radar-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+}
+
+.taste-profile-section--compact {
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .taste-profile-radar-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .taste-profile-section {

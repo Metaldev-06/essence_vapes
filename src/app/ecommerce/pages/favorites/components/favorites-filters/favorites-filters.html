@@ -1,6 +1,14 @@
 <div class="favorites-filters">
   <div class="favorites-filters-header">
-    <h2 class="favorites-filters-title">Filtrá por momento, estación u ocasión</h2>
+    <span class="favorites-filters-icon" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 6h16l-6 7v6l-4 2v-8L4 6Z" />
+      </svg>
+    </span>
+    <div class="favorites-filters-heading">
+      <h2 class="favorites-filters-title">Filtrá tus favoritos</h2>
+      <p class="favorites-filters-subtitle">Encontrá tus fragancias según el momento, la estación o la ocasión.</p>
+    </div>
     @if (hasActiveFilters()) {
       <button type="button" class="favorites-filters-clear" (click)="clear()">
         Limpiar filtros
@@ -19,30 +27,32 @@
     }
   </div>
 
-  @for (groupView of groups(); track groupView.group) {
-    <div class="favorites-filters-group">
-      <span class="favorites-filters-group-label">{{ groupView.label }}</span>
-      <div
-        class="favorites-filters-pills"
-        role="group"
-        [attr.aria-label]="'Filtrar por ' + groupView.label"
-      >
-        @for (card of groupView.cards; track card.id) {
-          <button
-            type="button"
-            class="favorite-filter-pill"
-            [class.active]="activeFilters().has(card.id)"
-            [class.empty]="card.count === 0"
-            [attr.aria-pressed]="activeFilters().has(card.id)"
-            [disabled]="card.count === 0"
-            (click)="toggle(card.id)"
-          >
-            <span aria-hidden="true">{{ card.emoji }}</span>
-            {{ card.label }}
-            <span class="favorite-filter-pill-count">{{ card.count }}</span>
-          </button>
-        }
+  <div class="favorites-filters-groups">
+    @for (groupView of groups(); track groupView.group) {
+      <div class="favorites-filters-group">
+        <span class="favorites-filters-group-label">{{ groupView.label }}</span>
+        <div
+          class="favorites-filters-pills"
+          role="group"
+          [attr.aria-label]="'Filtrar por ' + groupView.label"
+        >
+          @for (card of groupView.cards; track card.id) {
+            <button
+              type="button"
+              class="favorite-filter-pill"
+              [class.active]="activeFilters().has(card.id)"
+              [class.empty]="card.count === 0"
+              [attr.aria-pressed]="activeFilters().has(card.id)"
+              [disabled]="card.count === 0"
+              (click)="toggle(card.id)"
+            >
+              <span aria-hidden="true">{{ card.emoji }}</span>
+              {{ card.label }}
+              <span class="favorite-filter-pill-count">{{ card.count }}</span>
+            </button>
+          }
+        </div>
       </div>
-    </div>
-  }
+    }
+  </div>
 </div>

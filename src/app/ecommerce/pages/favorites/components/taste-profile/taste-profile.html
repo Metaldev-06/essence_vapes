@@ -1,9 +1,58 @@
 @if (hasFavorites()) {
   <div class="taste-profile">
-    <h2 class="taste-profile-title">Tu perfil de fragancias</h2>
-    <p class="taste-profile-subtitle">Según tus {{ products().length }} favoritos.</p>
+    <h2 class="taste-profile-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2 2 7.5 12 13l10-5.5L12 2Z" />
+        <path d="M2 16.5 12 22l10-5.5M2 12l10 5.5L22 12" />
+      </svg>
+      Perfil olfativo
+    </h2>
+    <p class="taste-profile-subtitle">Un resumen visual de lo que más te atrae.</p>
 
-    @if (accordStats().length > 0) {
+    @if (radar(); as radarData) {
+      <div class="taste-profile-radar-row">
+        <svg class="taste-radar" viewBox="0 0 260 260" role="img" aria-label="Radar de acordes favoritos">
+          @for (ring of radarData.rings; track $index) {
+            <polygon [attr.points]="ring" class="taste-radar-ring" />
+          }
+          @for (axis of radarData.axes; track $index) {
+            <line x1="130" y1="130" [attr.x2]="axis.x2" [attr.y2]="axis.y2" class="taste-radar-axis" />
+          }
+          <polygon [attr.points]="radarData.polygonPoints" class="taste-radar-shape" />
+          @for (label of radarData.labels; track label.text) {
+            <text [attr.x]="label.x" [attr.y]="label.y" [attr.text-anchor]="label.anchor" class="taste-radar-label">
+              {{ label.text }}
+            </text>
+          }
+        </svg>
+
+        @if (accordStats().length > 0) {
+          <div class="taste-profile-section taste-profile-section--compact">
+            <span class="taste-profile-section-label">Tus acordes favoritos</span>
+            <div
+              class="taste-bars"
+              role="img"
+              [attr.aria-label]="'Acordes más frecuentes en tus favoritos'"
+            >
+              @for (stat of accordStats(); track stat.label) {
+                <div
+                  class="taste-bar-row"
+                  [attr.title]="
+                    stat.label + ': ' + stat.count + ' de ' + products().length + ' favoritos'
+                  "
+                >
+                  <span class="taste-bar-label">{{ stat.label }}</span>
+                  <div class="taste-bar-track">
+                    <div class="taste-bar-fill" [style.width.%]="stat.pct"></div>
+                  </div>
+                  <span class="taste-bar-value">{{ stat.pct }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (accordStats().length > 0) {
       <div class="taste-profile-section">
         <span class="taste-profile-section-label">Tus acordes favoritos</span>
         <div
@@ -31,7 +80,7 @@
 
     @if (styleStats().length > 0) {
       <div class="taste-profile-section">
-        <span class="taste-profile-section-label">Tus estilos</span>
+        <span class="taste-profile-section-label">Tus estilos preferidos</span>
         <div class="taste-profile-chips">
           @for (stat of styleStats(); track stat.id) {
             <span

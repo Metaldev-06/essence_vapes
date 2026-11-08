@@ -13,4 +13,9 @@ export const SCENT_STYLE_OPTIONS: readonly ScentStyleOption[] = [
   { id: 'elegante', emoji: '🕊️', label: 'Elegante' },
   { id: 'nocturno', emoji: '🌙', label: 'Nocturno' },
   { id: 'citrico', emoji: '🍋', label: 'Cítrico' },
+  { id: 'amaderado', emoji: '🌳', label: 'Amaderado' },
+  { id: 'tropical', emoji: '🌴', label: 'Tropical' },
+  { id: 'especiado', emoji: '🌶️', label: 'Especiado' },
+  { id: 'gourmand', emoji: '🍯', label: 'Gourmand' },
+  { id: 'floral', emoji: '🌸', label: 'Floral' },
 ];

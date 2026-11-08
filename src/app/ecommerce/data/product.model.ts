@@ -15,7 +15,18 @@ export const CATEGORY_SINGULAR_LABELS: Record<ProductCategory, string> = {
   esencias: 'Esencia',
 };
 
-export type ScentStyle = 'fresco' | 'dulce' | 'intenso' | 'elegante' | 'nocturno' | 'citrico';
+export type ScentStyle =
+  | 'fresco'
+  | 'dulce'
+  | 'intenso'
+  | 'elegante'
+  | 'nocturno'
+  | 'citrico'
+  | 'amaderado'
+  | 'tropical'
+  | 'especiado'
+  | 'gourmand'
+  | 'floral';
 
 export type SortOption = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre';
 

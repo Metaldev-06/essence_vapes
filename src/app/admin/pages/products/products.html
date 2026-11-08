@@ -196,6 +196,28 @@
                   </a>
                   <a
                     class="icon-button"
+                    [routerLink]="'/admin/productos/nuevo'"
+                    [queryParams]="{ desde: product.id }"
+                    [attr.aria-label]="'Duplicar ' + product.name"
+                    title="Duplicar (ej: para publicar un decant)"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="9" y="9" width="12" height="12" rx="2" />
+                      <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+                    </svg>
+                  </a>
+                  <a
+                    class="icon-button"
                     [href]="'/productos/' + product.id"
                     target="_blank"
                     rel="noopener"

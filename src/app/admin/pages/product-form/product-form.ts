@@ -213,6 +213,22 @@ function parseList(text: string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Prefills a new product from an existing one ("Duplicar"/"Publicar similar" en el listado) -
+ * ej. tener un perfume y querer publicar su decant sin re-tipear todo. Mantiene todo igual
+ * salvo lo que casi siempre cambia entre el original y la copia: el stock (arranca en 0, no
+ * hereda el del original) y `sourceProductId`, que se precarga con el id del original para que
+ * quede linkeado si la copia termina siendo un decant (el campo solo se envía si category
+ * queda en 'decants' - ver `buildPayload`).
+ */
+function modelFromProductForDuplicate(product: Product): ProductFormModel {
+  return {
+    ...modelFromProduct(product),
+    stock: 0,
+    sourceProductId: product.id,
+  };
+}
+
 function modelFromProduct(product: Product): ProductFormModel {
   return {
     brand: product.brand,
@@ -458,15 +474,20 @@ export default class ProductForm {
 
   protected readonly productId = this.route.snapshot.paramMap.get('id');
   protected readonly isEditMode = this.productId !== null;
+  /** `/admin/productos/nuevo?desde=<id>` - precarga el form con los datos de ese producto. */
+  private readonly duplicateFromId = this.isEditMode
+    ? null
+    : this.route.snapshot.queryParamMap.get('desde');
 
   private readonly model = signal<ProductFormModel>(emptyModel());
   protected readonly productForm = form(this.model, productSchema);
   protected readonly selectedStyles = signal<ReadonlySet<ScentStyle>>(new Set());
 
-  protected readonly isLoading = signal(this.isEditMode);
+  protected readonly isLoading = signal(this.isEditMode || this.duplicateFromId !== null);
   protected readonly isSaving = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly loadedProduct = signal<Product | null>(null);
+  protected readonly duplicateSource = signal<Product | null>(null);
   protected readonly savedMessage = signal<string | null>(null);
   private savedTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -486,6 +507,8 @@ export default class ProductForm {
   constructor() {
     if (this.productId) {
       void this.loadProduct(this.productId);
+    } else if (this.duplicateFromId) {
+      void this.loadDuplicateSource(this.duplicateFromId);
     }
   }
 
@@ -617,6 +640,24 @@ export default class ProductForm {
       this.selectedStyles.set(new Set(product.styles));
     } catch (error) {
       this.error.set(extractErrorMessage(error));
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  /** "Duplicar"/"Publicar similar" desde el listado - precarga el form, no edita nada todavía. */
+  private async loadDuplicateSource(id: string): Promise<void> {
+    this.isLoading.set(true);
+    this.error.set(null);
+    try {
+      const product = await this.productsAdminService.get(id);
+      this.duplicateSource.set(product);
+      this.model.set(modelFromProductForDuplicate(product));
+      this.selectedStyles.set(new Set(product.styles));
+    } catch (error) {
+      this.error.set(
+        `No se pudo cargar el producto a duplicar: ${extractErrorMessage(error)}`,
+      );
     } finally {
       this.isLoading.set(false);
     }

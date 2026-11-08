@@ -11,6 +11,11 @@
               {{ product.isActive ? 'Visible en la tienda' : 'Oculto' }}
             </span>
           </p>
+        } @else if (duplicateSource(); as source) {
+          <p class="product-form-subtitle">
+            Copiando "{{ source.brand }} · {{ source.name }}". Revisá categoría, ML y precio -
+            las imágenes y el stock no se copian.
+          </p>
         } @else if (!isEditMode) {
           <p class="product-form-subtitle">
             Completá los datos básicos; las imágenes se suben después de crearlo.

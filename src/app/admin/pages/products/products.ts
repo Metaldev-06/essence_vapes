@@ -2,6 +2,7 @@ import { Component, computed, debounced, effect, inject, signal, untracked } fro
 import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
+import { AdminProductsFiltersStore } from '../../data/admin-products-filters-store';
 import { extractErrorMessage } from '../../data/extract-error-message';
 import { ProductsAdminService } from '../../data/products-admin.service';
 import { Toast, type ToastMessage } from '../../shared/toast/toast';
@@ -29,6 +30,7 @@ interface CategoryOption {
 })
 export default class AdminProducts {
   private readonly productsAdminService = inject(ProductsAdminService);
+  private readonly filtersStore = inject(AdminProductsFiltersStore);
 
   protected readonly categories: readonly CategoryOption[] = [
     { id: 'todos', label: 'Todas' },
@@ -41,8 +43,10 @@ export default class AdminProducts {
   protected readonly lowStockThreshold = LOW_STOCK_THRESHOLD;
   protected readonly skeletonRows = [1, 2, 3, 4, 5, 6];
 
-  protected readonly search = signal('');
-  protected readonly category = signal<ProductCategory | 'todos'>('todos');
+  private readonly savedFilters = this.filtersStore.read();
+
+  protected readonly search = signal(this.savedFilters.search);
+  protected readonly category = signal<ProductCategory | 'todos'>(this.savedFilters.category);
   protected readonly offset = signal(0);
 
   private readonly debouncedSearch = debounced(this.search, 300);
@@ -66,6 +70,12 @@ export default class AdminProducts {
   protected readonly hasNext = computed(() => this.offset() + PAGE_SIZE < this.total());
 
   constructor() {
+    // Persists search + category on every change so a page refresh keeps the filter applied.
+    effect(() => {
+      const snapshot = { search: this.search(), category: this.category() };
+      untracked(() => this.filtersStore.write(snapshot));
+    });
+
     // Reacts only to the filters (not to `offset`) and snaps pagination back to page one.
     effect(() => {
       this.debouncedSearch.value();
@@ -93,6 +103,7 @@ export default class AdminProducts {
   protected clearFilters(): void {
     this.search.set('');
     this.category.set('todos');
+    this.filtersStore.clear();
   }
 
   /**

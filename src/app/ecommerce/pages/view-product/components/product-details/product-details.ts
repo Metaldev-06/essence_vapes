@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, model, signal } from '@angu
 import { CartService } from '../../../../../core/cart/cart.service';
 import { FavoritesService } from '../../../../../core/favorites/favorites.service';
 import { AgeVerificationService } from '../../../../../core/age-verification/age-verification.service';
+import { parseCapacityMl } from '../../../../data/parse-capacity-ml';
 import {
   CATEGORY_LABELS,
   CONCENTRATION_LABELS,
@@ -63,6 +64,25 @@ export class ProductDetails {
   });
 
   protected readonly isDecant = computed(() => this.product().category === 'decants');
+
+  /**
+   * `netContentMl`/`decantVolumeMl` are regulatory fields typed once on the Product - but a
+   * product with several size variants (e.g. a decant's 5ml/10ml pills) can't share one real
+   * value between them. Prefer the ml parsed straight from the selected variant's own label, and
+   * only fall back to the admin-entered product-level value for single-variant products or
+   * labels that aren't a plain "Xml" shape (vape puff counts, etc).
+   */
+  protected readonly displayedNetContentMl = computed(() => {
+    const product = this.product();
+    if (!this.showVariantPicker()) return product.netContentMl;
+    return parseCapacityMl(this.activeVariant().label) ?? product.netContentMl;
+  });
+
+  protected readonly displayedDecantVolumeMl = computed(() => {
+    const product = this.product();
+    if (!this.showVariantPicker()) return product.decantVolumeMl;
+    return parseCapacityMl(this.activeVariant().label) ?? product.decantVolumeMl;
+  });
 
   /** Edad real (fecha de nacimiento, no un checkbox) - ver Ley 26.687 y Disposición ANMAT 2543/2026. */
   protected readonly needsAgeVerification = computed(

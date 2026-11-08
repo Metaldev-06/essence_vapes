@@ -78,6 +78,7 @@
           <th scope="col">Precio</th>
           <th scope="col">Stock</th>
           <th scope="col">Visible</th>
+          <th scope="col">Destacado</th>
           <th scope="col"><span class="sr-only">Acciones</span></th>
         </tr>
       </thead>
@@ -98,12 +99,13 @@
               <td><span class="skeleton-block skeleton-line short"></span></td>
               <td><span class="skeleton-block skeleton-line short"></span></td>
               <td><span class="skeleton-block skeleton-switch"></span></td>
+              <td><span class="skeleton-block skeleton-switch"></span></td>
               <td></td>
             </tr>
           }
         } @else if (items().length === 0) {
           <tr class="empty-row">
-            <td colspan="6">
+            <td colspan="7">
               <div class="admin-products-empty">
                 <p class="admin-products-empty-title">No encontramos productos</p>
                 @if (hasFilters()) {
@@ -170,6 +172,14 @@
                 <span class="visibility-text" aria-hidden="true">
                   {{ product.isActive ? 'Visible' : 'Oculto' }}
                 </span>
+              </td>
+              <td class="cell-featured" data-label="Destacado">
+                <app-toggle-switch
+                  [checked]="!!product.featured"
+                  (checkedChange)="setFeatured(product, $event)"
+                  [busy]="togglingFeaturedIds().has(product.id)"
+                  [ariaLabel]="'Destacado: ' + product.name"
+                />
               </td>
               <td class="cell-actions">
                 <div class="row-actions">

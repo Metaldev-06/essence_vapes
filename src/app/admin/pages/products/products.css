@@ -301,8 +301,13 @@ tr.is-hidden .cell-stock {
   min-width: 128px;
 }
 
-.cell-visible app-toggle-switch {
+.cell-visible app-toggle-switch,
+.cell-featured app-toggle-switch {
   vertical-align: middle;
+}
+
+.cell-featured {
+  min-width: 92px;
 }
 
 .visibility-text {
@@ -489,7 +494,7 @@ tr:not(.is-hidden) .visibility-text {
     grid-template-areas:
       'product product product'
       'category price stock'
-      'visible visible actions';
+      'visible featured actions';
     align-items: center;
     gap: 10px 12px;
     padding: 14px;
@@ -549,6 +554,13 @@ tr:not(.is-hidden) .visibility-text {
 
   .cell-visible {
     grid-area: visible;
+    min-width: 0;
+    padding-top: 10px !important;
+    border-top: 1px solid var(--color-border-subtle) !important;
+  }
+
+  .cell-featured {
+    grid-area: featured;
     min-width: 0;
     padding-top: 10px !important;
     border-top: 1px solid var(--color-border-subtle) !important;

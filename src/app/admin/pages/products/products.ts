@@ -58,6 +58,8 @@ export default class AdminProducts {
   protected readonly deletingId = signal<string | null>(null);
   /** Ids whose visibility change is still in flight - their switch shows a busy state. */
   protected readonly togglingIds = signal<ReadonlySet<string>>(new Set());
+  /** Ids whose "destacado" change is still in flight - their switch shows a busy state. */
+  protected readonly togglingFeaturedIds = signal<ReadonlySet<string>>(new Set());
   protected readonly toast = signal<ToastMessage | null>(null);
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -126,6 +128,30 @@ export default class AdminProducts {
       this.showToast(`No se pudo cambiar la visibilidad: ${extractErrorMessage(error)}`, 'error');
     } finally {
       this.togglingIds.update((ids) => {
+        const next = new Set(ids);
+        next.delete(product.id);
+        return next;
+      });
+    }
+  }
+
+  /** Same optimistic-flip-then-confirm pattern as `setVisibility`, for the "Destacado" switch. */
+  protected async setFeatured(product: Product, featured: boolean): Promise<void> {
+    this.patchItem(product.id, { featured });
+    this.togglingFeaturedIds.update((ids) => new Set(ids).add(product.id));
+    try {
+      await this.productsAdminService.update(product.id, { featured });
+      this.showToast(
+        featured
+          ? `"${product.name}" ahora está destacado`
+          : `"${product.name}" ya no está destacado`,
+        'success',
+      );
+    } catch (error) {
+      this.patchItem(product.id, { featured: !featured });
+      this.showToast(`No se pudo cambiar el destacado: ${extractErrorMessage(error)}`, 'error');
+    } finally {
+      this.togglingFeaturedIds.update((ids) => {
         const next = new Set(ids);
         next.delete(product.id);
         return next;

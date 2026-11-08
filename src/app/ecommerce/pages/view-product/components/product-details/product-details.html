@@ -142,16 +142,16 @@
       @if (product().decantSourceDescription) {
         {{ product().decantSourceDescription }}
       }
-      @if (product().decantVolumeMl) {
-        Volumen: {{ product().decantVolumeMl }}ml.
+      @if (displayedDecantVolumeMl(); as volumeMl) {
+        Volumen: {{ volumeMl }}ml.
       }
     </div>
   }
 
   @if (hasRegulatoryInfo()) {
     <dl class="product-details-regulatory">
-      @if (product().netContentMl) {
-        <div><dt>Contenido neto</dt><dd>{{ product().netContentMl }}ml</dd></div>
+      @if (displayedNetContentMl(); as netContentMl) {
+        <div><dt>Contenido neto</dt><dd>{{ netContentMl }}ml</dd></div>
       }
       @if (concentrationLabel()) {
         <div><dt>Concentración</dt><dd>{{ concentrationLabel() }}</dd></div>

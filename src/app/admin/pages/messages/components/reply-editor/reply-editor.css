@@ -23,6 +23,10 @@
   gap: 10px;
 }
 
+.reply-editor-canned {
+  min-width: 0;
+}
+
 .link-btn {
   background: transparent;
   border: none;
@@ -34,6 +38,14 @@
 }
 
 .reply-editor-canned select {
+  /* El título de una plantilla puede ser largo - sin tope, el `<select>` toma el ancho de su
+     opción más larga y puede empujar la fila más ancha que el panel en mobile. El texto colapsado
+     se trunca; el dropdown abierto igual muestra cada opción completa. */
+  max-width: 100%;
+  width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 6px 10px;
   border-radius: 8px;
   background: var(--color-surface-elevated);

@@ -274,10 +274,22 @@
     height: 32px;
   }
 
+  /* 5 ítems con `flex:1` forzados a una sola fila nunca entraban en un celular (ni envolviendo
+     texto) - "Botón de arrepentimiento" solo ya pedía más ancho que el viewport, empujando todo
+     el resto (hasta la marca) fuera de pantalla. Ahora es un strip horizontal con scroll (mismo
+     patrón que las pestañas de /comparar): cada ítem mantiene su ancho natural en una sola línea,
+     sin envolver texto, y lo que no entra se desliza en vez de desbordar. */
   .sidebar-nav {
     grid-area: nav;
     flex-direction: row;
+    flex-wrap: nowrap;
     gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .sidebar-nav-heading,
@@ -287,11 +299,12 @@
   }
 
   .sidebar-nav a {
-    flex: 1;
+    flex-shrink: 0;
     justify-content: center;
     gap: 7px;
-    padding: 9px 8px;
+    padding: 9px 12px;
     font-size: 13px;
+    white-space: nowrap;
   }
 
   .sidebar-nav-external {

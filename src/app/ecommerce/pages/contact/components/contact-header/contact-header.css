@@ -6,6 +6,15 @@
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
+@media (max-width: 640px) {
+  .contact-header {
+    /* Margen extra de resguardo en mobile - el header queda transparente (sin fondo sólido)
+       hasta que se scrollea, así que cualquier superposición marginal con el título queda mucho
+       más visible ahí que en desktop (donde el header blureado tapa cualquier imprecisión). */
+    padding-block: calc(var(--header-height) + 56px) 32px;
+  }
+}
+
 .contact-header-glow {
   position: absolute;
   inset: 0;

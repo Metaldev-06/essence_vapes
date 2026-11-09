@@ -4,11 +4,25 @@
 
 .contact-card {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  /* `1fr` "pelado" es en realidad `minmax(auto, 1fr)` - la columna no se achica por debajo del
+     contenido más ancho que no pueda achicarse (ej. un `<select>` con una opción larga, que tiene
+     un quirk conocido de no respetar `min-width` como un texto normal). Con `overflow: hidden` en
+     esta misma tarjeta, eso terminaba corriendo la tarjeta entera más ancha que la pantalla y
+     recortando lo que sobraba a mitad de palabra en vez de ajustar el wrap. `minmax(0, 1fr)` saca
+     ese piso mínimo. */
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   border-radius: 24px;
   border: 1px solid var(--color-border-subtle);
   overflow: hidden;
   background: var(--color-surface);
+}
+
+/* Además de la columna (arriba), cada ITEM del grid tiene su propio `min-width: auto` por
+   default - sin esto, podría seguir resistiéndose a achicarse por su cuenta aunque la columna
+   ya lo permita. */
+.contact-card > app-contact-form,
+.contact-card > app-contact-info {
+  min-width: 0;
 }
 
 .contact-card > app-contact-info {
@@ -17,7 +31,7 @@
 
 @media (max-width: 860px) {
   .contact-card {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .contact-card > app-contact-info {

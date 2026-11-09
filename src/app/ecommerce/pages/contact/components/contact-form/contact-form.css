@@ -31,9 +31,21 @@
 .form-field input,
 .form-field select,
 .form-field textarea {
+  /* Sin esto, dependían de que el flex/grid anidado (`.contact-card` grid > `.contact-form` flex
+     > `.form-row--split` grid > `.form-field` flex > el input) los estirara solo al 100% - en
+     mobile no lo hacía del todo, y como `.contact-card` tiene `overflow:hidden`, el campo
+     quedaba cortado contra el borde derecho de la tarjeta en vez de desbordar visiblemente (por
+     eso solo se notaba el padding izquierdo). `box-sizing: border-box` para que el 100% ya
+     incluya el padding/border propio del campo, no se sume aparte. */
+  box-sizing: border-box;
+  width: 100%;
   padding: 12px 14px;
   border-radius: 12px;
-  background: var(--color-surface);
+  /* Antes era el mismo color que `.contact-card` (su contenedor) - sin contraste de fondo, cada
+     campo se reducía a un borde de 1px, y apilados se leían como líneas divisoras de una tabla en
+     vez de cajas de formulario. El login (storefront y admin) ya usa `--color-surface-elevated`
+     para esto - alineado acá. */
+  background: var(--color-surface-elevated);
   border: 1px solid var(--color-border-subtle);
   color: var(--color-text-primary);
   font-size: 14px;

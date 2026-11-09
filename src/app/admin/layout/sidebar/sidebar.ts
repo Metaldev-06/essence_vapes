@@ -3,12 +3,13 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AdminAuthService } from '../../data/admin-auth.service';
 import { MessagesAdminService } from '../../data/messages-admin.service';
+import { ConfirmDialog, type ConfirmDialogData } from '../../shared/confirm-dialog/confirm-dialog';
 
 const UNREAD_POLL_MS = 60_000;
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, ConfirmDialog],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
@@ -46,7 +47,25 @@ export class Sidebar {
     }
   }
 
-  protected logout(): void {
+  protected readonly logoutDialogOpen = signal(false);
+  protected readonly logoutDialogData: ConfirmDialogData = {
+    title: 'Cerrar sesión',
+    message: '¿Seguro que querés cerrar sesión?',
+    confirmLabel: 'Cerrar sesión',
+    cancelLabel: 'Cancelar',
+    tone: 'default',
+  };
+
+  protected askLogoutConfirmation(): void {
+    this.logoutDialogOpen.set(true);
+  }
+
+  protected cancelLogout(): void {
+    this.logoutDialogOpen.set(false);
+  }
+
+  protected confirmLogout(): void {
+    this.logoutDialogOpen.set(false);
     this.adminAuthService.logout();
     void this.router.navigateByUrl('/admin/login');
   }

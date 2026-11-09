@@ -131,7 +131,7 @@
         <span class="sidebar-admin-email">{{ adminAuthService.user()?.email }}</span>
       </div>
     </div>
-    <button type="button" class="sidebar-logout" (click)="logout()">
+    <button type="button" class="sidebar-logout" (click)="askLogoutConfirmation()">
       <svg
         width="15"
         height="15"
@@ -148,4 +148,10 @@
       <span class="sidebar-logout-text">Cerrar sesión</span>
     </button>
   </div>
+
+  <app-confirm-dialog
+    [data]="logoutDialogOpen() ? logoutDialogData : null"
+    (confirmed)="confirmLogout()"
+    (cancelled)="cancelLogout()"
+  />
 </aside>

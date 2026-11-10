@@ -9,6 +9,11 @@
   transition:
     transform 0.2s ease,
     border-color 0.2s ease;
+
+  -webkit-filter: blur(0.2px);
+  filter: blur(0.2px);
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
 }
 
 .product-card:hover {

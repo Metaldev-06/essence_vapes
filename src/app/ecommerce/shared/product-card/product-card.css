@@ -58,6 +58,8 @@
   object-fit: contain;
   filter: drop-shadow(0 12px 24px color-mix(in srgb, var(--accent-color) 35%, transparent));
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow-clip-margin: content-box;
+  overflow: clip;
 }
 
 .product-bottle {

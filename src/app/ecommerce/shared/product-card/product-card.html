@@ -85,8 +85,8 @@
       [class.active]="isComparing()"
       [disabled]="compareDisabled()"
       [attr.aria-pressed]="isComparing()"
-      [attr.aria-label]="isComparing() ? 'Quitar de comparación' : 'Agregar a comparación'"
-      [title]="compareDisabled() ? 'Ya tenés ' + maxCompareItems + ' productos para comparar' : ''"
+      [attr.aria-label]="compareTooltip()"
+      [attr.data-tooltip]="compareTooltip()"
       (click)="toggleCompare()"
     >
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -101,7 +101,8 @@
       class="product-card-favorite"
       [class.active]="isFavorite()"
       [attr.aria-pressed]="isFavorite()"
-      [attr.aria-label]="isFavorite() ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+      [attr.aria-label]="favoriteTooltip()"
+      [attr.data-tooltip]="favoriteTooltip()"
       (click)="toggleFavorite()"
     >
       <svg
@@ -155,7 +156,7 @@
         [attr.aria-label]="
           canAddToCart() ? 'Agregar ' + product().name + ' al carrito' : 'Sin stock disponible'
         "
-        [title]="canAddToCart() ? '' : 'Sin stock disponible'"
+        [attr.data-tooltip]="cartTooltip()"
         (click)="addToCart()"
       >
         <svg

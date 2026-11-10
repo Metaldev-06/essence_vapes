@@ -59,6 +59,19 @@ export class ProductCard {
     );
   });
 
+  protected readonly compareTooltip = computed(() => {
+    if (this.compareDisabled()) return `Ya tenés ${this.maxCompareItems} productos para comparar`;
+    return this.isComparing() ? 'Quitar de comparación' : 'Agregar a comparación';
+  });
+
+  protected readonly favoriteTooltip = computed(() =>
+    this.isFavorite() ? 'Quitar de favoritos' : 'Agregar a favoritos',
+  );
+
+  protected readonly cartTooltip = computed(() =>
+    this.canAddToCart() ? 'Agregar al carrito' : 'Sin stock disponible',
+  );
+
   protected toggleFavorite(): void {
     void this.favoritesService.toggle(this.product().id, this.product().variantId);
   }

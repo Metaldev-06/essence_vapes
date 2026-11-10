@@ -1,10 +1,6 @@
-import type { ScentStyle } from './product.model';
+import type { ProductStyleOption, ScentStyle } from './product.model';
 
-export interface ScentStyleOption {
-  readonly id: ScentStyle;
-  readonly emoji: string;
-  readonly label: string;
-}
+export type ScentStyleOption = ProductStyleOption<ScentStyle>;
 
 export const SCENT_STYLE_OPTIONS: readonly ScentStyleOption[] = [
   { id: 'fresco', emoji: '🌊', label: 'Fresco' },

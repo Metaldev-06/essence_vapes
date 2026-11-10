@@ -278,10 +278,10 @@
       </div>
 
       <div class="form-section">
-        <h2 class="form-section-title">Estilos olfativos</h2>
-        <p class="form-section-hint">Elegí al menos uno. Se usan para los filtros del catálogo.</p>
-        <div class="style-pills" role="group" aria-label="Estilos olfativos">
-          @for (option of styleOptions; track option.id) {
+        <h2 class="form-section-title">{{ styleSectionLabels().title }}</h2>
+        <p class="form-section-hint">{{ styleSectionLabels().hint }}</p>
+        <div class="style-pills" role="group" [attr.aria-label]="styleSectionLabels().title">
+          @for (option of styleOptions(); track option.id) {
             <button
               type="button"
               class="style-pill"

@@ -15,11 +15,12 @@ import {
   type ProductsSortField,
 } from '../../data/products.service';
 import { ProductsFiltersStore } from '../../data/products-filters-store';
+import { styleGroupForCategory, styleOptionsForGroup } from '../../data/style-group';
 import type {
   Gender,
   Product,
   ProductCategory,
-  ScentStyle,
+  ProductStyle,
   SortOption,
 } from '../../data/product.model';
 import { ProductsHeader } from './components/products-header/products-header';
@@ -67,9 +68,15 @@ export default class Products implements OnDestroy {
   protected readonly activeBrand = signal<string | 'todas'>(this.initialFilters.brand);
   protected readonly activeGender = signal<Gender | 'todos'>(this.initialFilters.gender);
   protected readonly sortBy = signal<SortOption>(this.initialFilters.sort);
-  protected readonly activeStyles = signal<ReadonlySet<ScentStyle>>(
+  protected readonly activeStyles = signal<ReadonlySet<ProductStyle>>(
     new Set(this.initialFilters.styles),
   );
+  /** Fragrance pills for perfumes/decants, flavor pills for vapes/esencias, none for "todos". */
+  protected readonly styleOptions = computed(() =>
+    styleOptionsForGroup(styleGroupForCategory(this.activeCategory())),
+  );
+  /** Not a signal on purpose - only read inside the effect below to detect a real group change. */
+  private lastStyleGroup = styleGroupForCategory(this.initialFilters.category);
   protected readonly activeCapacity = signal<number | 'todas'>(
     this.initialFilters.capacityMl ?? 'todas',
   );
@@ -92,6 +99,18 @@ export default class Products implements OnDestroy {
   protected readonly hasMore = computed(() => this.items().length < this.total());
 
   constructor() {
+    // Fragrance styles don't apply to vapes/esencias (and vice versa) - switching into a
+    // different style group drops whatever was selected under the previous one, so a stale
+    // filter from the other vocabulary never silently keeps narrowing the results.
+    effect(() => {
+      const group = styleGroupForCategory(this.activeCategory());
+      untracked(() => {
+        if (group === this.lastStyleGroup) return;
+        this.lastStyleGroup = group;
+        this.activeStyles.set(new Set());
+      });
+    });
+
     // Reacts only to filter changes (not to `offset`) and resets pagination back to page one.
     effect(() => {
       this.buildFilters();
@@ -138,7 +157,7 @@ export default class Products implements OnDestroy {
     this.offset.update((value) => value + PRODUCTS_PAGE_SIZE);
   }
 
-  protected toggleStyle(style: ScentStyle): void {
+  protected toggleStyle(style: ProductStyle): void {
     this.activeStyles.update((current) => {
       const next = new Set(current);
       if (next.has(style)) {

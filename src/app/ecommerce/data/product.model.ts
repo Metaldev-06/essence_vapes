@@ -28,6 +28,34 @@ export type ScentStyle =
   | 'gourmand'
   | 'floral';
 
+/** Flavor profile for vapes/esencias (e-liquids) - the `vapes`/`esencias` counterpart of `ScentStyle`. */
+export type FlavorStyle =
+  | 'frutal'
+  | 'mentolado'
+  | 'dulce'
+  | 'postre'
+  | 'citrico'
+  | 'tropical'
+  | 'bebidas'
+  | 'cremoso'
+  | 'caramelo'
+  | 'herbal'
+  | 'tabaco'
+  | 'ice';
+
+/**
+ * A product's `styles` holds one vocabulary or the other depending on its category - which one
+ * is shown/editable is a UI concern (see `scent-styles.ts`/`flavor-styles.ts` and
+ * `styleGroupForCategory` in `products-filters.ts`), not enforced by this type.
+ */
+export type ProductStyle = ScentStyle | FlavorStyle;
+
+export interface ProductStyleOption<T extends ProductStyle = ProductStyle> {
+  readonly id: T;
+  readonly emoji: string;
+  readonly label: string;
+}
+
 export type SortOption = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre';
 
 export type Gender = 'masculino' | 'femenino' | 'unisex';
@@ -113,7 +141,7 @@ export interface Product {
   /** Hex color (e.g. "#8b5cf6"), chosen with a color picker in the admin panel. */
   readonly accent: string;
   readonly category: ProductCategory;
-  readonly styles: readonly ScentStyle[];
+  readonly styles: readonly ProductStyle[];
   readonly featured?: boolean;
   readonly stock: number;
   readonly isActive: boolean;

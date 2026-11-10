@@ -25,6 +25,8 @@
   gap: 10px;
   flex-wrap: wrap;
   flex-shrink: 0;
+  /* Keeps it right-aligned even with no style pills sibling (category "todos") to push against. */
+  margin-left: auto;
 }
 
 .products-filters-styles {
@@ -93,6 +95,44 @@
 .clear-styles:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+.products-filters-placeholder {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 220px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.products-filters-placeholder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface-elevated));
+}
+
+.products-filters-placeholder-title {
+  margin: 0 0 2px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.products-filters-placeholder-hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
 }
 
 .products-search {

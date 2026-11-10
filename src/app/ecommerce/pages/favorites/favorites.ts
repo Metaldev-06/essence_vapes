@@ -4,7 +4,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
 import { FAVORITE_FILTER_CARDS } from '../../data/favorite-filters';
 import { SCENT_STYLE_OPTIONS } from '../../data/scent-styles';
-import type { ScentStyle } from '../../data/product.model';
+import type { ProductStyle, ScentStyle } from '../../data/product.model';
 import { ProductCard } from '../../shared/product-card/product-card';
 import { FavoritesFilters } from './components/favorites-filters/favorites-filters';
 import { TasteProfile } from './components/taste-profile/taste-profile';
@@ -74,7 +74,7 @@ export default class Favorites {
     if (products.length === 0) return null;
 
     const accordCounts = new Map<string, number>();
-    const styleCounts = new Map<ScentStyle, number>();
+    const styleCounts = new Map<ProductStyle, number>();
     for (const product of products) {
       for (const accord of product.accords ?? []) {
         accordCounts.set(accord, (accordCounts.get(accord) ?? 0) + 1);
@@ -89,7 +89,11 @@ export default class Favorites {
       .slice(0, 3)
       .map(([label]) => label);
 
+    // This stat is fragrance-only (flavor ids from a favorited vape/esencia just don't have a
+    // label here) - filter before slicing so 2 real fragrance styles come through when available,
+    // not cut short by an unlabeled flavor id winning a count tie.
     const topStyles = [...styleCounts.entries()]
+      .filter((entry): entry is [ScentStyle, number] => entry[0] in STYLE_LABELS)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 2)
       .map(([id]) => STYLE_LABELS[id]);

@@ -2,7 +2,7 @@ import { Injectable, Signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 
 import { API_BASE_URL } from '../../core/config/api.config';
-import type { Gender, Product, ProductCategory, ScentStyle } from './product.model';
+import type { Gender, Product, ProductCategory, ProductStyle } from './product.model';
 
 export type ProductsSortField =
   'name' | 'brand' | 'priceValue' | 'rating' | 'year' | 'createdAt' | 'featured';
@@ -12,7 +12,7 @@ export interface ProductsQuery {
   readonly category?: ProductCategory;
   readonly brand?: string;
   readonly gender?: Gender;
-  readonly styles?: readonly ScentStyle[];
+  readonly styles?: readonly ProductStyle[];
   readonly capacityMl?: readonly number[];
   readonly sort?: ProductsSortField;
   readonly order?: 'asc' | 'desc';

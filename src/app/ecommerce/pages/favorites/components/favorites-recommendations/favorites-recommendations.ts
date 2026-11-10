@@ -1,7 +1,7 @@
 import { Component, ElementRef, computed, inject, input, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ProductsService } from '../../../../data/products.service';
-import type { Product, ScentStyle } from '../../../../data/product.model';
+import type { Product, ProductStyle } from '../../../../data/product.model';
 import { ProductCard } from '../../../../shared/product-card/product-card';
 
 /**
@@ -22,8 +22,8 @@ export class FavoritesRecommendations {
 
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
 
-  private readonly topStyles = computed<ScentStyle[]>(() => {
-    const counts = new Map<ScentStyle, number>();
+  private readonly topStyles = computed<ProductStyle[]>(() => {
+    const counts = new Map<ProductStyle, number>();
     for (const product of this.favorites()) {
       for (const style of product.styles) {
         counts.set(style, (counts.get(style) ?? 0) + 1);

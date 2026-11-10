@@ -1,6 +1,5 @@
 import { Component, input, model, output } from '@angular/core';
-import { SCENT_STYLE_OPTIONS } from '../../../../data/scent-styles';
-import type { ScentStyle, SortOption } from '../../../../data/product.model';
+import type { ProductStyle, ProductStyleOption, SortOption } from '../../../../data/product.model';
 
 export interface FilterOption<T extends string> {
   readonly id: T;
@@ -14,15 +13,16 @@ export interface FilterOption<T extends string> {
   styleUrl: './products-filters.css',
 })
 export class ProductsFilters {
-  protected readonly styleOptions = SCENT_STYLE_OPTIONS;
+  /** Fragrance pills for perfumes/decants, flavor pills for vapes/esencias, or empty for "todos". */
+  readonly styleOptions = input.required<readonly ProductStyleOption[]>();
 
   readonly sortOptions = input.required<readonly FilterOption<SortOption>[]>();
-  readonly activeStyles = input<ReadonlySet<ScentStyle>>(new Set());
+  readonly activeStyles = input<ReadonlySet<ProductStyle>>(new Set());
 
   readonly sort = model.required<SortOption>();
   readonly search = model('');
 
-  readonly toggleStyle = output<ScentStyle>();
+  readonly toggleStyle = output<ProductStyle>();
   readonly clearStyles = output<void>();
 
   protected onSearchInput(event: Event): void {

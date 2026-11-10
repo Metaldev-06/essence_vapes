@@ -14,7 +14,7 @@ import {
   type Gender,
   type Longevity,
   type Product,
-  type ScentStyle,
+  type ProductStyle,
   type Sillage,
 } from '../../data/product.model';
 
@@ -35,7 +35,11 @@ const LONGEVITY_STEPS: readonly Longevity[] = ['2-4h', '4-6h', '6-8h', '8-12h', 
 
 const MAX_RATING = 5;
 
-const STYLE_META = new Map(SCENT_STYLE_OPTIONS.map((option) => [option.id, option]));
+// Keyed by plain string (not `ScentStyle`) so a vape/esencia product's flavor-style ids can be
+// looked up too - `.get()` just returns `undefined` for them, same as any other unknown id.
+const STYLE_META = new Map<string, (typeof SCENT_STYLE_OPTIONS)[number]>(
+  SCENT_STYLE_OPTIONS.map((option) => [option.id, option]),
+);
 
 type CompareTab = 'resumen' | 'notas' | 'acordes' | 'rendimiento' | 'cuando';
 
@@ -341,7 +345,7 @@ export default class Compare {
 
     const stylesA = new Set(a.styles);
     const stylesB = new Set(b.styles);
-    const allStyles = new Set<ScentStyle>([...stylesA, ...stylesB]);
+    const allStyles = new Set<ProductStyle>([...stylesA, ...stylesB]);
     for (const style of allStyles) {
       const inA = stylesA.has(style);
       const inB = stylesB.has(style);

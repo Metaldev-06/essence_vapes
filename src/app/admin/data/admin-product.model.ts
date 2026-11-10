@@ -6,8 +6,8 @@ import type {
   Longevity,
   OccasionRatings,
   ProductCategory,
+  ProductStyle,
   SaleAuthorizationStatus,
-  ScentStyle,
   SeasonUsage,
   Sillage,
 } from '../../ecommerce/data/product.model';
@@ -28,7 +28,7 @@ export interface AdminProductInput {
   badge?: string | null;
   accent: string;
   category: ProductCategory;
-  styles: ScentStyle[];
+  styles: ProductStyle[];
   featured?: boolean;
   year?: number;
   origin?: string;

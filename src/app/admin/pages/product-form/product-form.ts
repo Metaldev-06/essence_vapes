@@ -10,8 +10,8 @@ import type {
   AiProductSuggestion,
 } from '../../data/admin-product.model';
 import { ProductsAdminService } from '../../data/products-admin.service';
-import { SCENT_STYLE_OPTIONS } from '../../../ecommerce/data/scent-styles';
 import { findRestrictedVapePhrase } from '../../../ecommerce/data/vape-restricted-phrases';
+import { styleGroupForCategory, styleOptionsForGroup } from '../../../ecommerce/data/style-group';
 import {
   CATEGORY_LABELS,
   CONCENTRATION_LABELS,
@@ -20,8 +20,8 @@ import {
   type Longevity,
   type Product,
   type ProductCategory,
+  type ProductStyle,
   type SaleAuthorizationStatus,
-  type ScentStyle,
   type Sillage,
 } from '../../../ecommerce/data/product.model';
 import { MediaManager } from './components/media-manager/media-manager';
@@ -283,7 +283,7 @@ function modelFromProduct(product: Product): ProductFormModel {
   };
 }
 
-function buildPayload(model: ProductFormModel, styles: ReadonlySet<ScentStyle>): AdminProductInput {
+function buildPayload(model: ProductFormModel, styles: ReadonlySet<ProductStyle>): AdminProductInput {
   const payload: AdminProductInput = {
     brand: model.brand.trim(),
     name: model.name.trim(),
@@ -430,7 +430,16 @@ export default class ProductForm {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  protected readonly styleOptions = SCENT_STYLE_OPTIONS;
+  /** Fragrance pills for perfumes/decants, flavor pills for vapes/esencias (fragrance by default
+   *  before a category is chosen, matching this section's original look on a brand-new form). */
+  protected readonly styleOptions = computed(() =>
+    styleOptionsForGroup(styleGroupForCategory(this.model().category)),
+  );
+  protected readonly styleSectionLabels = computed(() =>
+    styleGroupForCategory(this.model().category) === 'flavor'
+      ? { title: 'Perfil de sabor', hint: 'Elegí al menos uno. Se usan para los filtros del catálogo.' }
+      : { title: 'Estilos olfativos', hint: 'Elegí al menos uno. Se usan para los filtros del catálogo.' },
+  );
   protected readonly categoryLabels = CATEGORY_LABELS;
   protected readonly genderLabels = GENDER_LABELS;
   protected readonly sillageLabels = SILLAGE_LABELS;
@@ -482,7 +491,7 @@ export default class ProductForm {
 
   private readonly model = signal<ProductFormModel>(emptyModel());
   protected readonly productForm = form(this.model, productSchema);
-  protected readonly selectedStyles = signal<ReadonlySet<ScentStyle>>(new Set());
+  protected readonly selectedStyles = signal<ReadonlySet<ProductStyle>>(new Set());
 
   protected readonly isLoading = signal(this.isEditMode || this.duplicateFromId !== null);
   protected readonly isSaving = signal(false);
@@ -516,18 +525,39 @@ export default class ProductForm {
    */
   private lastSyncedVariantLabel: string | null = null;
 
+  /**
+   * Same guard idea as `lastSyncedVariantLabel` above, for the fragrance/flavor style group -
+   * `null` until the initial model is in place, so the group-change effect below only reacts to
+   * the admin actually switching category, never to a `loadProduct`/`loadDuplicateSource` fetch
+   * silently wiping the styles it just loaded.
+   */
+  private lastSyncedStyleGroup: ReturnType<typeof styleGroupForCategory> | null = null;
+
   constructor() {
     if (this.productId) {
       void this.loadProduct(this.productId).then(() => {
         this.lastSyncedVariantLabel = this.model().variantLabel;
+        this.lastSyncedStyleGroup = styleGroupForCategory(this.model().category);
       });
     } else if (this.duplicateFromId) {
       void this.loadDuplicateSource(this.duplicateFromId).then(() => {
         this.lastSyncedVariantLabel = this.model().variantLabel;
+        this.lastSyncedStyleGroup = styleGroupForCategory(this.model().category);
       });
     } else {
       this.lastSyncedVariantLabel = this.model().variantLabel;
+      this.lastSyncedStyleGroup = styleGroupForCategory(this.model().category);
     }
+
+    // Fragrance styles don't apply to vapes/esencias (and vice versa) - switching category into a
+    // different style group drops whatever was selected under the previous one, so the admin
+    // can't accidentally save a product tagged with the wrong vocabulary's styles.
+    effect(() => {
+      const group = styleGroupForCategory(this.model().category);
+      if (this.lastSyncedStyleGroup === null || group === this.lastSyncedStyleGroup) return;
+      this.lastSyncedStyleGroup = group;
+      untracked(() => this.selectedStyles.set(new Set()));
+    });
 
     // Convenience sync: "Etiqueta de variante" ("5ml", "10ml"...) says the same ml the regulatory
     // "Contenido neto"/"Volumen exacto" fields need, so keep them following it to save a step -
@@ -598,7 +628,7 @@ export default class ProductForm {
     await this.onAiLookup();
   }
 
-  protected toggleStyle(style: ScentStyle): void {
+  protected toggleStyle(style: ProductStyle): void {
     this.selectedStyles.update((current) => {
       const next = new Set(current);
       if (next.has(style)) {
@@ -621,7 +651,9 @@ export default class ProductForm {
     if (!this.productForm().valid() || this.selectedStyles().size === 0) {
       this.error.set(
         this.selectedStyles().size === 0 && this.productForm().valid()
-          ? 'Elegí al menos un estilo olfativo'
+          ? `Elegí al menos ${
+              styleGroupForCategory(this.model().category) === 'flavor' ? 'un sabor' : 'un estilo olfativo'
+            }`
           : 'Revisá los campos marcados en rojo antes de guardar.',
       );
       this.focusFirstInvalidField();

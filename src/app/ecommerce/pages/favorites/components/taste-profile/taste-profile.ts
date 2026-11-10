@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { SCENT_STYLE_OPTIONS } from '../../../../data/scent-styles';
-import type { Product, ScentStyle } from '../../../../data/product.model';
+import type { Product, ProductStyle, ScentStyle } from '../../../../data/product.model';
 
 interface AccordStat {
   readonly label: string;
@@ -114,7 +114,7 @@ export class TasteProfile {
   });
 
   protected readonly styleStats = computed<readonly StyleStat[]>(() => {
-    const counts = new Map<ScentStyle, number>();
+    const counts = new Map<ProductStyle, number>();
     for (const product of this.products()) {
       for (const style of product.styles) {
         counts.set(style, (counts.get(style) ?? 0) + 1);

@@ -8,30 +8,36 @@
           <br />
           <em class="section-title-accent">necesitás</em>
         </h2>
+        <p class="section-subtitle">Fragancias, decants, vapes y esencias seleccionadas para cada estilo.</p>
       </div>
       <button type="button" class="btn btn-ghost" (click)="goToAll()">Ver todo →</button>
     </div>
 
     <div class="categories-grid">
       @for (category of categories; track category.id) {
-        <button
-          type="button"
-          [class]="'category-card ' + category.variantClass"
-          (click)="goToCategory(category.id)"
-        >
-          <span class="category-card-icon" aria-hidden="true">{{ category.icon }}</span>
-          <span class="category-card-body">
-            <span class="category-card-count">{{ category.count }}</span>
-            <span class="category-card-name-row">
-              <span class="category-card-name">{{ category.name }}</span>
-              <span class="category-card-arrow" aria-hidden="true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M7 17L17 7M17 7H7M17 7v10" />
-                </svg>
-              </span>
-            </span>
-          </span>
-        </button>
+        <article [class]="'category-card ' + category.variantClass">
+          <img
+            [ngSrc]="category.image"
+            [alt]="''"
+            [width]="category.imageWidth"
+            [height]="category.imageHeight"
+            class="category-card-image"
+          />
+
+          <div class="category-card-body">
+            @if (category.label) {
+              <span class="category-card-label">{{ category.label }}</span>
+            }
+            <h3 class="category-card-name">{{ category.name }}</h3>
+            <p class="category-card-description">{{ category.description }}</p>
+            <button type="button" class="category-card-cta" (click)="goToCategory(category.id)">
+              {{ category.ctaLabel }}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path d="M7 17L17 7M17 7H7M17 7v10" />
+              </svg>
+            </button>
+          </div>
+        </article>
       }
     </div>
   </div>

@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DEFAULT_PRODUCTS_FILTERS, ProductsFiltersStore } from '../../../../data/products-filters-store';
@@ -6,14 +7,19 @@ import type { ProductCategory } from '../../../../data/product.model';
 interface Category {
   readonly id: ProductCategory;
   readonly name: string;
-  readonly count: string;
-  readonly icon: string;
+  /** Small muted line above the title - only the main (Perfumes) card shows one. */
+  readonly label: string;
+  readonly description: string;
+  readonly ctaLabel: string;
+  readonly image: string;
+  readonly imageWidth: number;
+  readonly imageHeight: number;
   readonly variantClass: string;
 }
 
 @Component({
   selector: 'app-categories',
-  imports: [],
+  imports: [NgOptimizedImage],
   templateUrl: './categories.html',
   styleUrl: './categories.css',
 })
@@ -25,30 +31,46 @@ export class Categories {
     {
       id: 'perfumes',
       name: 'Perfumes',
-      count: 'Fragancias originales',
-      icon: '🌸',
+      label: 'Fragancias originales',
+      description: 'Descubrí una selección de fragancias originales de las mejores marcas, para cada ocasión.',
+      ctaLabel: 'Explorar perfumes',
+      image: 'images/categories/perfumes.png',
+      imageWidth: 1448,
+      imageHeight: 1086,
       variantClass: 'category-card--main category-card--violet',
     },
     {
       id: 'decants',
       name: 'Decants',
-      count: 'Desde 2ml',
-      icon: '💧',
-      variantClass: 'category-card--cyan',
+      label: '',
+      description: 'Probá tus fragancias favoritas en formatos más accesibles, ideales para conocer nuevas opciones.',
+      ctaLabel: 'Ver decants',
+      image: 'images/categories/decants.png',
+      imageWidth: 1448,
+      imageHeight: 1086,
+      variantClass: 'category-card--cyan category-card--wide',
     },
     {
       id: 'vapes',
       name: 'Vapes',
-      count: 'Modelos disponibles',
-      icon: '💨',
+      label: '',
+      description: 'Dispositivos modernos, seguros y con el mejor rendimiento.',
+      ctaLabel: 'Ver vapes',
+      image: 'images/categories/vapes.png',
+      imageWidth: 1448,
+      imageHeight: 1086,
       variantClass: 'category-card--emerald',
     },
     {
       id: 'esencias',
       name: 'Esencias',
-      count: 'Esencias seleccionadas',
-      icon: '✨',
-      variantClass: 'category-card--teal',
+      label: '',
+      description: 'Líquidos y sabores para dispositivos recargables. Gran variedad de gustos.',
+      ctaLabel: 'Ver esencias',
+      image: 'images/categories/esencias.png',
+      imageWidth: 1536,
+      imageHeight: 1024,
+      variantClass: 'category-card--violet',
     },
   ];
 

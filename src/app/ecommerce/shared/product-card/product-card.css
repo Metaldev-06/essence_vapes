@@ -9,11 +9,6 @@
   transition:
     transform 0.2s ease,
     border-color 0.2s ease;
-
-  -webkit-filter: blur(0.2px);
-  filter: blur(0.2px);
-  -webkit-backface-visibility: hidden;
-  -webkit-transform: translateZ(0);
 }
 
 .product-card:hover {
@@ -75,6 +70,10 @@
 .product-card:hover .product-card-photo,
 .product-card:hover .product-bottle {
   transform: scale(1.07);
+  -webkit-filter: blur(1.07px);
+  filter: blur(1.07px);
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
 }
 
 .product-bottle-cap {

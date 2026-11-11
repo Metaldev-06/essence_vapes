@@ -5,6 +5,7 @@ import { CartService } from '../../../core/cart/cart.service';
 import { CompareService } from '../../../core/compare/compare.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
 import { CATEGORY_SINGULAR_LABELS, type Gender, type Product } from '../../data/product.model';
+import { ProductsService } from '../../data/products.service';
 
 const GENDER_LABELS: Record<Gender, string> = {
   masculino: 'Masculino',
@@ -22,6 +23,7 @@ export class ProductCard {
   private readonly favoritesService = inject(FavoritesService);
   private readonly cartService = inject(CartService);
   private readonly compareService = inject(CompareService);
+  private readonly productsService = inject(ProductsService);
 
   readonly product = input.required<Product>();
   /** `'list'` lays the card out as a horizontal row (used by `/favoritos`' list view toggle). */
@@ -83,5 +85,12 @@ export class ProductCard {
   protected addToCart(): void {
     if (!this.canAddToCart()) return;
     void this.cartService.add(this.product(), 1);
+  }
+
+  /** Hover/focus on the card - warms its detail page's data before the click (see
+   *  `ProductsService.prefetchProduct`). The card always links to `/productos/:id` by `id`, not
+   *  `variantId`, so that's what gets prefetched too. */
+  protected prefetchDetail(): void {
+    this.productsService.prefetchProduct(this.product().id);
   }
 }

@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { CartService } from '../../../core/cart/cart.service';
+import { ProductsService } from '../../data/products.service';
 
 @Component({
   selector: 'app-header',
@@ -19,6 +20,7 @@ export class Header {
   protected readonly authService = inject(AuthService);
   protected readonly cartService = inject(CartService);
   protected readonly router = inject(Router);
+  private readonly productsService = inject(ProductsService);
 
   protected readonly userMenuOpen = signal(false);
   /** Mobile-only navigation dropdown; on desktop the links are always visible. */
@@ -41,6 +43,13 @@ export class Header {
 
   protected closeNav(): void {
     this.navOpen.set(false);
+  }
+
+  /** Hover/focus on the "Productos" nav link - warms the catalog's data before the user even
+   *  clicks into it (see `ProductsService.prefetchCatalog`). `focus` covers keyboard navigation,
+   *  which never fires `mouseenter`. */
+  protected prefetchProductsPage(): void {
+    this.productsService.prefetchCatalog();
   }
 
   protected closeMenus(): void {

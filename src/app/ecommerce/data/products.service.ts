@@ -1,5 +1,5 @@
-import { Injectable, Signal } from '@angular/core';
-import { httpResource } from '@angular/common/http';
+import { Injectable, Signal, inject } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
 
 import { API_BASE_URL } from '../../core/config/api.config';
 import type { Gender, Product, ProductCategory, ProductStyle } from './product.model';
@@ -42,6 +42,7 @@ export const PRODUCTS_PAGE_SIZE = 12;
 
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
+  private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/products`;
 
   private readonly featuredResource = httpResource<Product[]>(() => `${this.baseUrl}/featured`, {
@@ -51,20 +52,23 @@ export class ProductsService {
   readonly featured = this.featuredResource.value;
   readonly featuredLoading = this.featuredResource.isLoading;
 
-  private readonly capacitiesResource = httpResource<number[]>(
-    () => `${this.baseUrl}/capacities`,
-    { defaultValue: [] },
-  );
+  /**
+   * Distinct ml capacities currently in the catalog (e.g. [2, 5, 10, 100, 125, 200]) - only the
+   * `/productos` filters need this, so it's a lazy resource (like `list`/`byId` below) instead of
+   * an eager class field: `ProductsService` is a root singleton injected from several unrelated
+   * places (e.g. the home page, for `.featured` alone), and an eager `httpResource` field fires
+   * its request the moment the service is first constructed, regardless of whether anything ever
+   * reads it - that was firing a `/products/capacities` + `/products/brands` request on every
+   * page load, home included.
+   */
+  capacities() {
+    return httpResource<number[]>(() => `${this.baseUrl}/capacities`, { defaultValue: [] });
+  }
 
-  /** Distinct ml capacities currently in the catalog (e.g. [2, 5, 10, 100, 125, 200]). */
-  readonly capacities = this.capacitiesResource.value;
-
-  private readonly brandsResource = httpResource<string[]>(() => `${this.baseUrl}/brands`, {
-    defaultValue: [],
-  });
-
-  /** Distinct brand names currently in the catalog, sorted alphabetically. */
-  readonly brands = this.brandsResource.value;
+  /** Distinct brand names currently in the catalog, sorted alphabetically - same reasoning as `capacities()`. */
+  brands() {
+    return httpResource<string[]>(() => `${this.baseUrl}/brands`, { defaultValue: [] });
+  }
 
   list(query: () => ProductsQuery | undefined) {
     return httpResource<ProductsPage>(
@@ -79,6 +83,33 @@ export class ProductsService {
 
   byId(id: Signal<string>) {
     return httpResource<Product>(() => (id() ? `${this.baseUrl}/${id()}` : undefined));
+  }
+
+  private catalogPrefetched = false;
+  private readonly prefetchedProductIds = new Set<string>();
+
+  /**
+   * Fire-and-forget: warms the browser's HTTP cache for the catalog's default first page plus
+   * its filter option lists, so hovering/focusing the "Productos" nav link resolves before the
+   * click even lands (see `Header`). Fires at most once per session - repeated hovers would just
+   * re-request the exact same URLs for no benefit. Not wired through `httpResource`/`list()` on
+   * purpose: those bind to a component's reactive lifecycle, which the header isn't part of.
+   */
+  prefetchCatalog(): void {
+    if (this.catalogPrefetched) return;
+    this.catalogPrefetched = true;
+    this.http
+      .get(this.baseUrl, { params: { limit: PRODUCTS_PAGE_SIZE, offset: 0 } })
+      .subscribe({ error: () => {} });
+    this.http.get(`${this.baseUrl}/capacities`).subscribe({ error: () => {} });
+    this.http.get(`${this.baseUrl}/brands`).subscribe({ error: () => {} });
+  }
+
+  /** Same idea as `prefetchCatalog()`, per product - see `ProductCard`'s hover/focus handlers. */
+  prefetchProduct(id: string): void {
+    if (this.prefetchedProductIds.has(id)) return;
+    this.prefetchedProductIds.add(id);
+    this.http.get(`${this.baseUrl}/${id}`).subscribe({ error: () => {} });
   }
 
   private toParams(query: ProductsQuery): Record<string, string | number> {

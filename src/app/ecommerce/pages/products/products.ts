@@ -80,8 +80,10 @@ export default class Products implements OnDestroy {
   protected readonly activeCapacity = signal<number | 'todas'>(
     this.initialFilters.capacityMl ?? 'todas',
   );
-  protected readonly capacityOptions = this.productsService.capacities;
-  protected readonly brandOptions = this.productsService.brands;
+  private readonly capacitiesResource = this.productsService.capacities();
+  protected readonly capacityOptions = this.capacitiesResource.value;
+  private readonly brandsResource = this.productsService.brands();
+  protected readonly brandOptions = this.brandsResource.value;
 
   private readonly debouncedSearch = debounced(this.search, 300);
   private readonly offset = signal(0);

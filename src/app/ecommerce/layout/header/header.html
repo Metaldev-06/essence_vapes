@@ -25,7 +25,13 @@
           >
         </li>
         <li>
-          <a [routerLink]="'/productos'" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="closeNav()"
+          <a
+            [routerLink]="'/productos'"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            (click)="closeNav()"
+            (mouseenter)="prefetchProductsPage()"
+            (focus)="prefetchProductsPage()"
             >Productos</a
           >
         </li>

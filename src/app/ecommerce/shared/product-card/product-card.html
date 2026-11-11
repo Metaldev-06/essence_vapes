@@ -2,12 +2,14 @@
   class="product-card"
   [class.product-card--list]="layout() === 'list'"
   [style.--accent-color]="product().accent"
+  (mouseenter)="prefetchDetail()"
 >
   <a
     [routerLink]="['/productos', product().id]"
     [queryParams]="product().variantId !== 'base' ? { variant: product().variantId } : {}"
     class="product-card-cover-link"
     [attr.aria-label]="'Ver ' + product().name"
+    (focus)="prefetchDetail()"
   ></a>
 
   <div class="product-card-visual">

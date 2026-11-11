@@ -1,0 +1,115 @@
+<div class="admin-transactions">
+  <header class="admin-transactions-header">
+    <h1 class="admin-transactions-title">Transacciones</h1>
+    <p class="admin-transactions-subtitle">
+      {{ total() }} {{ total() === 1 ? 'intento de pago' : 'intentos de pago' }} registrados.
+    </p>
+  </header>
+
+  <div class="admin-transactions-filters">
+    <input
+      type="search"
+      placeholder="Buscar por cliente (nombre o email)..."
+      [value]="buyer()"
+      (input)="onBuyerInput($event)"
+      class="admin-transactions-search"
+    />
+    <input
+      type="search"
+      placeholder="Id de pedido..."
+      [value]="orderId()"
+      (input)="onOrderIdInput($event)"
+    />
+    <select (change)="onStatusChange($event)" aria-label="Estado">
+      @for (option of paymentStatusOptions; track option.id) {
+        <option [value]="option.id" [selected]="option.id === status()">{{ option.label }}</option>
+      }
+    </select>
+    <select (change)="onPaymentMethodChange($event)" aria-label="Medio de pago">
+      @for (option of paymentMethodOptions; track option.id) {
+        <option [value]="option.id" [selected]="option.id === paymentMethodType()">{{ option.label }}</option>
+      }
+    </select>
+    <input type="date" [value]="dateFrom()" (input)="onDateFromChange($event)" aria-label="Desde" />
+    <input type="date" [value]="dateTo()" (input)="onDateToChange($event)" aria-label="Hasta" />
+    <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">Limpiar filtros</button>
+  </div>
+
+  @if (error()) {
+    <p class="admin-transactions-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="admin-transactions-table-wrap" [attr.aria-busy]="isLoading()">
+    <table class="admin-transactions-table">
+      <caption class="sr-only">Listado de transacciones</caption>
+      <thead>
+        <tr>
+          <th scope="col">Transacción</th>
+          <th scope="col">Pedido</th>
+          <th scope="col">Cliente</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Importe</th>
+          <th scope="col">Medio de pago</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Referencia MP</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (items().length === 0) {
+          <tr class="empty-row">
+            <td colspan="8">
+              <p class="admin-transactions-empty">
+                {{ isLoading() ? 'Cargando...' : 'No hay transacciones para este filtro.' }}
+              </p>
+            </td>
+          </tr>
+        } @else {
+          @for (transaction of items(); track transaction.id) {
+            <tr>
+              <td class="cell-id mono">{{ transaction.id.slice(0, 8) }}</td>
+              <td class="cell-id mono">{{ transaction.orderId.slice(0, 8) }}</td>
+              <td data-label="Cliente">
+                @if (transaction.buyerName) {
+                  <span class="buyer-name">{{ transaction.buyerName }}</span>
+                  <span class="buyer-email">{{ transaction.buyerEmail }}</span>
+                } @else {
+                  —
+                }
+              </td>
+              <td data-label="Fecha">{{ transaction.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td data-label="Importe" class="cell-total">{{ transaction.amount || '—' }}</td>
+              <td data-label="Medio de pago">
+                {{ paymentMethodLabel(transaction.paymentMethodType) }}
+                @if (transaction.paymentMethodId) {
+                  <span class="payment-method-id">({{ transaction.paymentMethodId }})</span>
+                }
+              </td>
+              <td data-label="Estado">
+                <span class="payment-badge" [class]="'payment-badge-' + transaction.status">
+                  {{ paymentStatusLabel(transaction.status) }}
+                </span>
+              </td>
+              <td class="mono">
+                {{ transaction.mpOrderId || transaction.mpPaymentId || '—' }}
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (pageCount() > 1) {
+    <nav class="admin-transactions-pagination" aria-label="Paginación">
+      <span>Página {{ page() }} de {{ pageCount() }}</span>
+      <div class="admin-transactions-pagination-buttons">
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasPrev()" (click)="prevPage()">
+          ← Anterior
+        </button>
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasNext()" (click)="nextPage()">
+          Siguiente →
+        </button>
+      </div>
+    </nav>
+  }
+</div>

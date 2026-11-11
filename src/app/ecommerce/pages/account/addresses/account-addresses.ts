@@ -69,6 +69,7 @@ export default class AccountAddresses {
       province: model.province,
       postalCode: model.postalCode.trim(),
       ...(model.apartment.trim() ? { apartment: model.apartment.trim() } : {}),
+      ...(model.betweenStreets.trim() ? { betweenStreets: model.betweenStreets.trim() } : {}),
       ...(model.notes.trim() ? { notes: model.notes.trim() } : {}),
     };
 

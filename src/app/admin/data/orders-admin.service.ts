@@ -4,7 +4,14 @@ import { firstValueFrom } from 'rxjs';
 
 import { API_BASE_URL } from '../../core/config/api.config';
 import { IS_ADMIN_REQUEST } from '../../core/auth/admin-request.context';
-import type { Order, OrderStatus, PaginatedOrders, PaymentStatus } from '../../core/orders/order.model';
+import type {
+  DeliveryMethod,
+  LogisticsStatus,
+  Order,
+  OrderStatus,
+  PaginatedOrders,
+  PaymentStatus,
+} from '../../core/orders/order.model';
 
 const ADMIN_CONTEXT = new HttpContext().set(IS_ADMIN_REQUEST, true);
 
@@ -13,6 +20,8 @@ export interface OrdersAdminQuery {
   offset?: number;
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;
+  deliveryMethod?: DeliveryMethod;
+  logisticsStatus?: LogisticsStatus;
   search?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -24,6 +33,12 @@ export interface OrdersStats {
   pendingOrdersCount: number;
   rejectedPaymentsCount: number;
   totalOrdersCount: number;
+  pendingPreparationCount: number;
+  pendingShipmentCount: number;
+  readyForPickupCount: number;
+  deliveredCount: number;
+  refundedOrdersCount: number;
+  refundedAmountValue: number;
 }
 
 export interface PaymentAttemptRecord {
@@ -32,6 +47,8 @@ export interface PaymentAttemptRecord {
   idempotencyKey: string;
   mpOrderId: string | null;
   mpPaymentId: string | null;
+  paymentMethodType: string | null;
+  paymentMethodId: string | null;
   status: PaymentStatus;
   statusDetail: string | null;
   failureReason: string | null;
@@ -39,8 +56,18 @@ export interface PaymentAttemptRecord {
   updatedAt: string;
 }
 
-/** Panel admin "Ventas/Pedidos" - solo lectura (ver tarea: no se implementan reembolsos
- *  manuales todavía, hasta verificar permisos/procedimientos oficiales de Mercado Pago). */
+export interface OrderAuditLogRecord {
+  id: string;
+  adminId: string;
+  adminEmail: string;
+  action: string;
+  orderId: string;
+  detail: string | null;
+  createdAt: string;
+}
+
+/** Panel admin "Ventas/Pedidos" - lectura + acciones logísticas (ver tarea: reembolsos manuales
+ *  siguen sin implementarse, hasta verificar permisos/procedimientos oficiales de Mercado Pago). */
 @Injectable({ providedIn: 'root' })
 export class OrdersAdminService {
   private readonly http = inject(HttpClient);
@@ -54,6 +81,8 @@ export class OrdersAdminService {
     };
     if (query.status) params['status'] = query.status;
     if (query.paymentStatus) params['paymentStatus'] = query.paymentStatus;
+    if (query.deliveryMethod) params['deliveryMethod'] = query.deliveryMethod;
+    if (query.logisticsStatus) params['logisticsStatus'] = query.logisticsStatus;
     if (query.search) params['search'] = query.search;
     if (query.dateFrom) params['dateFrom'] = query.dateFrom;
     if (query.dateTo) params['dateTo'] = query.dateTo;
@@ -79,6 +108,25 @@ export class OrdersAdminService {
     return firstValueFrom(
       this.http.get<PaymentAttemptRecord[]>(
         `${this.paymentsBaseUrl}/admin/orders/${orderId}/attempts`,
+        { context: ADMIN_CONTEXT },
+      ),
+    );
+  }
+
+  updateLogisticsStatus(orderId: string, logisticsStatus: LogisticsStatus): Promise<Order> {
+    return firstValueFrom(
+      this.http.patch<Order>(
+        `${this.ordersBaseUrl}/admin/${orderId}/logistics-status`,
+        { logisticsStatus },
+        { context: ADMIN_CONTEXT },
+      ),
+    );
+  }
+
+  getAuditLog(orderId: string): Promise<OrderAuditLogRecord[]> {
+    return firstValueFrom(
+      this.http.get<OrderAuditLogRecord[]>(
+        `${this.ordersBaseUrl}/admin/${orderId}/audit-log`,
         { context: ADMIN_CONTEXT },
       ),
     );

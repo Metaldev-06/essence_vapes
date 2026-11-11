@@ -26,6 +26,29 @@
         <span class="stat-label">Total de órdenes</span>
         <span class="stat-value">{{ s.totalOrdersCount }}</span>
       </div>
+      <div class="stat-tile">
+        <span class="stat-label">Pendientes de preparación</span>
+        <span class="stat-value">{{ s.pendingPreparationCount }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-label">Pendientes de envío</span>
+        <span class="stat-value">{{ s.pendingShipmentCount }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-label">Listos para retiro</span>
+        <span class="stat-value">{{ s.readyForPickupCount }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-label">Entregados</span>
+        <span class="stat-value">{{ s.deliveredCount }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-label">Reembolsos</span>
+        <span class="stat-value">{{ s.refundedOrdersCount }}</span>
+        @if (s.refundedOrdersCount > 0) {
+          <span class="stat-meta">${{ s.refundedAmountValue | number: '1.0-0' }}</span>
+        }
+      </div>
     </div>
   }
 
@@ -47,6 +70,16 @@
         <option [value]="option.id" [selected]="option.id === paymentStatus()">{{ option.label }}</option>
       }
     </select>
+    <select (change)="onDeliveryMethodChange($event)" aria-label="Modalidad de entrega">
+      @for (option of deliveryMethodOptions; track option.id) {
+        <option [value]="option.id" [selected]="option.id === deliveryMethod()">{{ option.label }}</option>
+      }
+    </select>
+    <select (change)="onLogisticsStatusChange($event)" aria-label="Estado logístico">
+      @for (option of logisticsStatusOptions; track option.id) {
+        <option [value]="option.id" [selected]="option.id === logisticsStatus()">{{ option.label }}</option>
+      }
+    </select>
     <input type="date" [value]="dateFrom()" (input)="onDateFromChange($event)" aria-label="Desde" />
     <input type="date" [value]="dateTo()" (input)="onDateToChange($event)" aria-label="Hasta" />
     <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">Limpiar filtros</button>
@@ -63,16 +96,20 @@
         <tr>
           <th scope="col">Orden</th>
           <th scope="col">Cliente</th>
+          <th scope="col">Teléfono</th>
           <th scope="col">Fecha</th>
-          <th scope="col">Total</th>
-          <th scope="col">Estado</th>
+          <th scope="col">Entrega</th>
+          <th scope="col">Importe</th>
           <th scope="col">Pago</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Logística</th>
+          <th scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
         @if (items().length === 0) {
           <tr class="empty-row">
-            <td colspan="6">
+            <td colspan="10">
               <p class="admin-orders-empty">
                 {{ isLoading() ? 'Cargando...' : 'No hay órdenes para este filtro.' }}
               </p>
@@ -93,14 +130,26 @@
                 <span class="buyer-name">{{ order.buyerName }}</span>
                 <span class="buyer-email">{{ order.buyerEmail }}</span>
               </td>
+              <td data-label="Teléfono">{{ order.buyerPhone || '—' }}</td>
               <td data-label="Fecha">{{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-              <td data-label="Total" class="cell-total">{{ order.total }}</td>
+              <td data-label="Entrega">{{ deliveryMethodLabel(order.deliveryMethod) }}</td>
+              <td data-label="Importe" class="cell-total">{{ order.total }}</td>
+              <td data-label="Pago">{{ paymentStatusLabel(order.paymentStatus) }}</td>
               <td data-label="Estado">
                 <span class="order-badge" [class]="'order-badge-' + order.status">
                   {{ orderStatusLabel(order.status) }}
                 </span>
               </td>
-              <td data-label="Pago">{{ paymentStatusLabel(order.paymentStatus) }}</td>
+              <td data-label="Logística">
+                <span class="logistics-badge" [class]="'logistics-badge-' + order.logisticsStatus">
+                  {{ logisticsStatusLabel(order.logisticsStatus) }}
+                </span>
+              </td>
+              <td data-label="Acciones">
+                <button type="button" class="btn btn-sm btn-ghost" (click)="goToOrder(order.id); $event.stopPropagation()">
+                  Ver
+                </button>
+              </td>
             </tr>
           }
         }

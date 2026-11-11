@@ -3,7 +3,13 @@ import { Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { API_BASE_URL } from '../config/api.config';
-import type { CreateOrderResult, Order, PaginatedOrders, RemovedCartLine } from './order.model';
+import type {
+  CreateOrderParams,
+  CreateOrderResult,
+  Order,
+  PaginatedOrders,
+  RemovedCartLine,
+} from './order.model';
 
 export type OrderActionResult =
   | { success: true; order: Order; removedFromCart: RemovedCartLine[] }
@@ -28,10 +34,10 @@ export class OrdersService {
     this.currentOrderSignal.set(order);
   }
 
-  async createFromCart(addressId: string, acceptTerms: boolean): Promise<OrderActionResult> {
+  async createFromCart(params: CreateOrderParams): Promise<OrderActionResult> {
     try {
       const result = await firstValueFrom(
-        this.http.post<CreateOrderResult>(this.baseUrl, { addressId, acceptTerms }),
+        this.http.post<CreateOrderResult>(this.baseUrl, params),
       );
       this.currentOrderSignal.set(result.order);
       return { success: true, order: result.order, removedFromCart: result.removedFromCart };

@@ -4,7 +4,22 @@
   <p class="checkout-step-subtitle">Revisá todo antes de confirmar.</p>
 </header>
 
-@if (removedNotice(); as removed) {
+@if (shippingQuotePending()) {
+  <div class="checkout-notice" role="status">
+    <p>
+      Registramos tu pedido, pero todavía no tenemos una tarifa de envío definida para tu zona.
+      No te vamos a cobrar nada hasta coordinar y confirmar el costo con vos.
+    </p>
+    @if (supportWhatsAppLink(); as link) {
+      <a [href]="link" target="_blank" rel="noopener" class="btn btn-primary">
+        Coordinar por WhatsApp
+      </a>
+    } @else {
+      <p class="checkout-step-subtitle">Te vamos a escribir en breve para coordinarlo.</p>
+    }
+    <a [routerLink]="'/cuenta/pedidos'" class="btn btn-ghost">Ver mis compras</a>
+  </div>
+} @else if (removedNotice(); as removed) {
   <div class="checkout-notice checkout-notice-danger" role="alert">
     <p>Tu pedido se creó, pero quitamos estos productos porque ya no tenían stock suficiente:</p>
     <ul>
@@ -20,42 +35,74 @@
   <section class="card checkout-card">
     <h2 class="account-card-title">Productos</h2>
     <ul class="checkout-items">
-      @for (line of cartService.lines(); track line.productId + '::' + line.variantId) {
-        <li class="checkout-item">
-          <span class="checkout-item-name">
-            {{ line.quantity }} x {{ line.product.brand }} {{ line.product.name }}
-            @if (line.product.variantLabel) {
-              <span class="checkout-item-variant">({{ line.product.variantLabel }})</span>
-            }
-          </span>
-          <span class="checkout-item-price">{{ line.product.price }}</span>
-        </li>
+      @if (existingOrder(); as order) {
+        @for (item of order.items; track item.productId + '::' + item.variantId) {
+          <li class="checkout-item">
+            <span class="checkout-item-name">
+              {{ item.quantity }} x {{ item.productName }}
+              @if (item.variantLabel) {
+                <span class="checkout-item-variant">({{ item.variantLabel }})</span>
+              }
+            </span>
+            <span class="checkout-item-price">{{ item.lineTotal }}</span>
+          </li>
+        }
+      } @else {
+        @for (line of cartService.lines(); track line.productId + '::' + line.variantId) {
+          <li class="checkout-item">
+            <span class="checkout-item-name">
+              {{ line.quantity }} x {{ line.product.brand }} {{ line.product.name }}
+              @if (line.product.variantLabel) {
+                <span class="checkout-item-variant">({{ line.product.variantLabel }})</span>
+              }
+            </span>
+            <span class="checkout-item-price">{{ line.product.price }}</span>
+          </li>
+        }
       }
     </ul>
     <div class="checkout-summary-total">
       <span>Total</span>
-      <span>{{ subtotalLabel() }} ARS</span>
+      <span>{{ totalLabel() }} ARS</span>
     </div>
-    <p class="checkout-step-subtitle">
-      Todavía no hay costo de envío configurado en la tienda - se va a informar antes de
-      confirmar en cuanto esté disponible.
-    </p>
+    @if (deliverySelection()?.method === 'pickup') {
+      <p class="checkout-step-subtitle">Retirás en el local - sin costo de envío.</p>
+    } @else {
+      <p class="checkout-step-subtitle">
+        El costo de envío (si corresponde) todavía no está incluido acá - se te va a informar
+        antes de pagar en cuanto se defina.
+      </p>
+    }
   </section>
 
   <section class="card checkout-card">
-    <h2 class="account-card-title">Enviar a</h2>
-    @if (selectedAddress(); as address) {
-      <p class="checkout-address-summary">
-        {{ address.recipientName }} · {{ address.phone }}<br />
-        {{ address.street }} {{ address.streetNumber }}
-        @if (address.apartment) {
-          , {{ address.apartment }}
+    @if (deliverySelection()?.method === 'pickup') {
+      <h2 class="account-card-title">Retiro en el local</h2>
+      @if (deliverySelection(); as selection) {
+        @if (selection.method === 'pickup') {
+          <p class="checkout-address-summary">
+            {{ selection.pickupContactName }} · {{ selection.pickupPhone }}
+            @if (selection.pickupNotes) {
+              <br />{{ selection.pickupNotes }}
+            }
+          </p>
         }
-        <br />
-        {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
-      </p>
+      }
+    } @else {
+      <h2 class="account-card-title">Enviar a</h2>
+      @if (selectedAddress(); as address) {
+        <p class="checkout-address-summary">
+          {{ address.recipientName }} · {{ address.phone }}<br />
+          {{ address.street }} {{ address.streetNumber }}
+          @if (address.apartment) {
+            , {{ address.apartment }}
+          }
+          <br />
+          {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
+        </p>
+      }
     }
-    <a [routerLink]="'/checkout/direccion'" class="btn btn-sm btn-ghost">Cambiar dirección</a>
+    <a [routerLink]="'/checkout/direccion'" class="btn btn-sm btn-ghost">Cambiar modalidad</a>
   </section>
 
   @if (error()) {
@@ -65,7 +112,7 @@
   <div class="checkout-actions">
     <a [routerLink]="'/checkout/direccion'" class="btn btn-ghost">Volver</a>
     <button type="button" class="btn btn-primary" [disabled]="confirming()" (click)="confirm()">
-      {{ confirming() ? 'Confirmando...' : 'Confirmar pedido y continuar' }}
+      {{ existingOrder() ? 'Continuar al pago' : (confirming() ? 'Confirmando...' : 'Confirmar pedido y continuar') }}
     </button>
   </div>
 }

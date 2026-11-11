@@ -43,16 +43,26 @@
     </section>
 
     <section class="account-card card">
-      <h2 class="account-card-title">Enviado a</h2>
-      <p class="order-detail-address">
-        {{ o.shippingAddress.recipientName }} · {{ o.shippingAddress.phone }}<br />
-        {{ o.shippingAddress.street }} {{ o.shippingAddress.streetNumber }}
-        @if (o.shippingAddress.apartment) {
-          , {{ o.shippingAddress.apartment }}
-        }
-        <br />
-        {{ o.shippingAddress.city }}, {{ o.shippingAddress.province }} ({{ o.shippingAddress.postalCode }})
-      </p>
+      @if (o.deliveryMethod === 'pickup' && o.pickupDetails; as pickup) {
+        <h2 class="account-card-title">Retiro en el local</h2>
+        <p class="order-detail-address">
+          {{ pickup.contactName }} · {{ pickup.phone }}
+          @if (pickup.notes) {
+            <br />{{ pickup.notes }}
+          }
+        </p>
+      } @else if (o.shippingAddress; as address) {
+        <h2 class="account-card-title">Enviado a</h2>
+        <p class="order-detail-address">
+          {{ address.recipientName }} · {{ address.phone }}<br />
+          {{ address.street }} {{ address.streetNumber }}
+          @if (address.apartment) {
+            , {{ address.apartment }}
+          }
+          <br />
+          {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
+        </p>
+      }
     </section>
 
     @if (o.status === 'pending_payment') {

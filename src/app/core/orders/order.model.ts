@@ -1,4 +1,11 @@
-export type OrderStatus = 'pending_payment' | 'processing' | 'paid' | 'cancelled' | 'expired' | 'refunded';
+export type OrderStatus =
+  | 'awaiting_shipping_quote'
+  | 'pending_payment'
+  | 'processing'
+  | 'paid'
+  | 'cancelled'
+  | 'expired'
+  | 'refunded';
 
 export type PaymentStatus =
   | 'pending'
@@ -8,6 +15,21 @@ export type PaymentStatus =
   | 'cancelled'
   | 'refunded'
   | 'charged_back';
+
+export type DeliveryMethod = 'home_delivery' | 'pickup';
+
+export type ShippingCostMode = 'free' | 'fixed' | 'by_province' | 'to_coordinate';
+
+export type LogisticsStatus =
+  | 'pending_preparation'
+  | 'in_preparation'
+  | 'ready_to_ship'
+  | 'dispatched'
+  | 'in_transit'
+  | 'delivered'
+  | 'delivery_issue'
+  | 'ready_for_pickup'
+  | 'picked_up';
 
 export interface OrderShippingAddress {
   recipientName: string;
@@ -19,6 +41,13 @@ export interface OrderShippingAddress {
   province: string;
   postalCode: string;
   country: string;
+  betweenStreets?: string | null;
+  notes?: string | null;
+}
+
+export interface OrderPickupDetails {
+  contactName: string;
+  phone: string;
   notes?: string | null;
 }
 
@@ -46,12 +75,32 @@ export interface Order {
   buyerName: string;
   buyerEmail: string;
   buyerPhone?: string;
-  shippingAddress: OrderShippingAddress;
+  deliveryMethod: DeliveryMethod;
+  shippingAddress?: OrderShippingAddress;
+  pickupDetails?: OrderPickupDetails;
+  logisticsStatus: LogisticsStatus;
+  logisticsCompletedAt?: string;
+  shippingCostMode?: ShippingCostMode;
+  shippingCostValue?: number;
+  shippingCost?: string;
+  /** `true` = envío "a coordinar" sin tarifa definida todavía - `totalValue` NO es el total final. */
+  shippingCostPending: boolean;
   expiresAt?: string;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
 }
+
+/** Body de `POST /orders` - discriminado por `deliveryMethod` (ver `CreateOrderDto` backend). */
+export type CreateOrderParams =
+  | { deliveryMethod: 'home_delivery'; addressId: string; acceptTerms: boolean }
+  | {
+      deliveryMethod: 'pickup';
+      pickupContactName: string;
+      pickupPhone: string;
+      pickupNotes?: string;
+      acceptTerms: boolean;
+    };
 
 /** Línea de carrito quitada al crear la orden (ya no tenía stock suficiente) - mismo shape que
  *  devuelve `CartService.validate` en el backend. */

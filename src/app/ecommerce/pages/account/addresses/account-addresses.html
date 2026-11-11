@@ -47,6 +47,9 @@
               <br />
               {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
             </p>
+            @if (address.betweenStreets) {
+              <p class="address-card-notes">Entre calles: {{ address.betweenStreets }}</p>
+            }
             @if (address.notes) {
               <p class="address-card-notes">{{ address.notes }}</p>
             }
@@ -190,11 +193,21 @@
         </div>
 
         <div class="form-field">
+          <label for="address-between-streets">Entre calles <span class="form-optional">(opcional)</span></label>
+          <input
+            id="address-between-streets"
+            type="text"
+            placeholder="Ej: entre San Martín y Belgrano"
+            [formField]="addressForm.betweenStreets"
+          />
+        </div>
+
+        <div class="form-field">
           <label for="address-notes">Referencias de entrega <span class="form-optional">(opcional)</span></label>
           <input
             id="address-notes"
             type="text"
-            placeholder="Entre calles, timbre, horario..."
+            placeholder="Timbre, horario, punto de referencia..."
             [formField]="addressForm.notes"
           />
         </div>

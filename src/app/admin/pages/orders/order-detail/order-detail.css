@@ -64,6 +64,7 @@
   background: color-mix(in srgb, var(--color-aurora-emerald) 16%, transparent);
 }
 
+.order-badge-awaiting_shipping_quote,
 .order-badge-pending_payment,
 .order-badge-processing {
   color: var(--color-accent);
@@ -120,6 +121,20 @@
   font-size: 12.5px;
 }
 
+.admin-order-totals-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-subtle);
+  font-size: 12.5px;
+}
+
+.admin-order-subtotal-row {
+  display: flex;
+  justify-content: space-between;
+}
+
 .admin-order-total {
   display: flex;
   justify-content: space-between;
@@ -127,11 +142,92 @@
   font-weight: 800;
   color: var(--color-text-primary);
   padding-top: 12px;
+  margin-top: 6px;
   border-top: 1px solid var(--color-border-subtle);
+}
+
+.admin-order-shipping-pending-note {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--color-accent);
 }
 
 .admin-order-address {
   line-height: 1.6;
+}
+
+.admin-order-delivery-mode {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.admin-order-delivery-completed {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--color-aurora-emerald);
+}
+
+.admin-order-whatsapp-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.admin-order-logistics-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.admin-order-logistics-editor label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.admin-order-logistics-editor-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-order-logistics-editor-row select {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.admin-order-audit-log {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.admin-order-audit-log-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.admin-order-audit-log ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 
 .admin-order-no-attempts {

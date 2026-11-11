@@ -10,6 +10,7 @@ export interface Address {
   readonly province: string;
   readonly postalCode: string;
   readonly country: string;
+  readonly betweenStreets: string | null;
   readonly notes: string | null;
   readonly isDefault: boolean;
   readonly createdAt: string;
@@ -27,6 +28,7 @@ export interface AddressInput {
   city: string;
   province: string;
   postalCode: string;
+  betweenStreets?: string;
   notes?: string;
   isDefault?: boolean;
 }

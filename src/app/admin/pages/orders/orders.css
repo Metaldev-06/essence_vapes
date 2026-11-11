@@ -51,6 +51,11 @@
   color: var(--color-text-primary);
 }
 
+.stat-meta {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}
+
 .admin-orders-filters {
   display: flex;
   gap: 10px;
@@ -159,6 +164,7 @@
   background: color-mix(in srgb, var(--color-aurora-emerald) 16%, transparent);
 }
 
+.order-badge-awaiting_shipping_quote,
 .order-badge-pending_payment,
 .order-badge-processing {
   color: var(--color-accent);
@@ -174,6 +180,43 @@
 .order-badge-refunded {
   color: var(--color-text-muted);
   background: color-mix(in srgb, var(--color-text-muted) 16%, transparent);
+}
+
+.logistics-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.logistics-badge-pending_preparation {
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-text-muted) 16%, transparent);
+}
+
+.logistics-badge-in_preparation,
+.logistics-badge-ready_to_ship,
+.logistics-badge-ready_for_pickup {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+}
+
+.logistics-badge-dispatched,
+.logistics-badge-in_transit {
+  color: var(--color-aurora-violet);
+  background: color-mix(in srgb, var(--color-aurora-violet) 16%, transparent);
+}
+
+.logistics-badge-delivered,
+.logistics-badge-picked_up {
+  color: var(--color-aurora-emerald);
+  background: color-mix(in srgb, var(--color-aurora-emerald) 16%, transparent);
+}
+
+.logistics-badge-delivery_issue {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
 }
 
 .admin-orders-empty {

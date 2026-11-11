@@ -1,50 +1,123 @@
 <header class="checkout-step-header">
   <span class="section-label">Paso 1 de 4</span>
-  <h1 class="section-title">Dirección de envío</h1>
-  <p class="checkout-step-subtitle">Elegí dónde recibís tu pedido.</p>
+  <h1 class="section-title">Entrega</h1>
+  <p class="checkout-step-subtitle">Elegí cómo vas a recibir tu pedido.</p>
 </header>
 
 @if (!showNewAddressForm()) {
-  @if (addressesService.addresses().length === 0 && !addressesService.isLoading()) {
-    <div class="card checkout-card checkout-empty">
-      <p>Todavía no guardaste ninguna dirección.</p>
-      <button type="button" class="btn btn-primary" (click)="openNewAddressForm()">
-        Agregar dirección
-      </button>
-    </div>
-  } @else {
-    <div class="checkout-address-list">
-      @for (address of addressesService.addresses(); track address.id) {
-        <label class="card checkout-address-option" [class.selected]="selectedId() === address.id">
-          <input
-            type="radio"
-            name="checkout-address"
-            [checked]="selectedId() === address.id"
-            (change)="select(address)"
-          />
-          <span class="checkout-address-option-body">
-            <span class="checkout-address-option-title">
-              {{ address.label }}
-              @if (address.isDefault) {
-                <span class="account-badge account-badge-verified">Predeterminada</span>
-              }
-            </span>
-            <span class="checkout-address-option-lines">
-              {{ address.recipientName }} · {{ address.phone }}<br />
-              {{ address.street }} {{ address.streetNumber }}
-              @if (address.apartment) {
-                , {{ address.apartment }}
-              }
-              , {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
-            </span>
-          </span>
-        </label>
-      }
-    </div>
+  <div class="checkout-method-options">
+    <label class="card checkout-method-option" [class.selected]="deliveryMethod() === 'home_delivery'">
+      <input
+        type="radio"
+        name="checkout-delivery-method"
+        [checked]="deliveryMethod() === 'home_delivery'"
+        (change)="selectMethod('home_delivery')"
+      />
+      <span class="checkout-method-option-body">
+        <span class="checkout-method-option-title">Envío a domicilio</span>
+        <span class="checkout-method-option-desc">
+          Coordinamos la entrega con vos directamente - Essence Vapes no usa Mercado Envíos.
+        </span>
+      </span>
+    </label>
+    <label class="card checkout-method-option" [class.selected]="deliveryMethod() === 'pickup'">
+      <input
+        type="radio"
+        name="checkout-delivery-method"
+        [checked]="deliveryMethod() === 'pickup'"
+        (change)="selectMethod('pickup')"
+      />
+      <span class="checkout-method-option-body">
+        <span class="checkout-method-option-title">Retiro en el local</span>
+        <span class="checkout-method-option-desc">
+          Coordinamos el día y horario de retiro con vos por los canales de contacto.
+        </span>
+      </span>
+    </label>
+  </div>
 
-    <button type="button" class="btn btn-ghost checkout-add-address" (click)="openNewAddressForm()">
-      + Agregar otra dirección
-    </button>
+  @if (deliveryMethod() === 'home_delivery') {
+    @if (addressesService.addresses().length === 0 && !addressesService.isLoading()) {
+      <div class="card checkout-card checkout-empty">
+        <p>Todavía no guardaste ninguna dirección.</p>
+        <button type="button" class="btn btn-primary" (click)="openNewAddressForm()">
+          Agregar dirección
+        </button>
+      </div>
+    } @else {
+      <div class="checkout-address-list">
+        @for (address of addressesService.addresses(); track address.id) {
+          <label class="card checkout-address-option" [class.selected]="selectedId() === address.id">
+            <input
+              type="radio"
+              name="checkout-address"
+              [checked]="selectedId() === address.id"
+              (change)="select(address)"
+            />
+            <span class="checkout-address-option-body">
+              <span class="checkout-address-option-title">
+                {{ address.label }}
+                @if (address.isDefault) {
+                  <span class="account-badge account-badge-verified">Predeterminada</span>
+                }
+              </span>
+              <span class="checkout-address-option-lines">
+                {{ address.recipientName }} · {{ address.phone }}<br />
+                {{ address.street }} {{ address.streetNumber }}
+                @if (address.apartment) {
+                  , {{ address.apartment }}
+                }
+                , {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
+              </span>
+            </span>
+          </label>
+        }
+      </div>
+
+      <button type="button" class="btn btn-ghost checkout-add-address" (click)="openNewAddressForm()">
+        + Agregar otra dirección
+      </button>
+    }
+  } @else {
+    <section class="card checkout-card">
+      <h2 class="account-card-title">Datos para el retiro</h2>
+
+      <div class="form-field">
+        <label for="checkout-pickup-name">Nombre y apellido de quien retira</label>
+        <input
+          id="checkout-pickup-name"
+          type="text"
+          [value]="pickupContactName()"
+          (input)="onPickupContactNameInput($event)"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="checkout-pickup-phone">Teléfono de contacto</label>
+        <input
+          id="checkout-pickup-phone"
+          type="tel"
+          [value]="pickupPhone()"
+          (input)="onPickupPhoneInput($event)"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="checkout-pickup-notes">Observaciones <span class="form-optional">(opcional)</span></label>
+        <input
+          id="checkout-pickup-notes"
+          type="text"
+          placeholder="Horario preferido, quién retira si cambia, etc."
+          [value]="pickupNotes()"
+          (input)="onPickupNotesInput($event)"
+        />
+      </div>
+
+      <p class="checkout-step-subtitle">
+        No hay costo de envío en esta modalidad. Te vamos a contactar para coordinar el día y
+        horario de retiro.
+      </p>
+    </section>
   }
 
   <div class="card checkout-card checkout-terms">
@@ -62,7 +135,7 @@
     <button
       type="button"
       class="btn btn-primary"
-      [disabled]="!selectedId() || !acceptTerms()"
+      [disabled]="!canContinue()"
       (click)="continue()"
     >
       Continuar al resumen
@@ -130,6 +203,29 @@
         <div class="form-field">
           <label for="checkout-address-postal">Código postal</label>
           <input id="checkout-address-postal" type="text" [formField]="addressForm.postalCode" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="checkout-address-between-streets">
+            Entre calles <span class="form-optional">(opcional)</span>
+          </label>
+          <input
+            id="checkout-address-between-streets"
+            type="text"
+            placeholder="Ej: entre San Martín y Belgrano"
+            [formField]="addressForm.betweenStreets"
+          />
+        </div>
+        <div class="form-field">
+          <label for="checkout-address-notes">Referencias <span class="form-optional">(opcional)</span></label>
+          <input
+            id="checkout-address-notes"
+            type="text"
+            placeholder="Timbre, horario, punto de referencia..."
+            [formField]="addressForm.notes"
+          />
         </div>
       </div>
 

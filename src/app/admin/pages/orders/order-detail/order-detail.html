@@ -19,7 +19,8 @@
 
     <section class="admin-order-card">
       <h2 class="admin-order-card-title">Cliente</h2>
-      <p>{{ o.buyerName }} · {{ o.buyerEmail }}</p>
+      <p>{{ o.buyerName }}</p>
+      <p>{{ o.buyerEmail }}</p>
       @if (o.buyerPhone) {
         <p>{{ o.buyerPhone }}</p>
       }
@@ -40,23 +41,121 @@
           </li>
         }
       </ul>
+      <div class="admin-order-totals-breakdown">
+        <div class="admin-order-subtotal-row">
+          <span>Subtotal</span>
+          <span>{{ o.subtotal }}</span>
+        </div>
+        <div class="admin-order-subtotal-row">
+          <span>Costo de envío</span>
+          @if (o.deliveryMethod === 'pickup') {
+            <span>Sin costo (retiro)</span>
+          } @else if (o.shippingCostPending) {
+            <span>A definir</span>
+          } @else {
+            <span>{{ o.shippingCost }}</span>
+          }
+        </div>
+      </div>
       <div class="admin-order-total">
         <span>Total</span>
         <span>{{ o.total }} {{ o.currency }}</span>
       </div>
+      @if (o.shippingCostPending) {
+        <p class="admin-order-shipping-pending-note">
+          El envío todavía no tiene costo definido - el total de arriba no incluye envío y la
+          orden no admite pago hasta fijarlo.
+        </p>
+      }
     </section>
 
     <section class="admin-order-card">
-      <h2 class="admin-order-card-title">Dirección de envío</h2>
-      <p class="admin-order-address">
-        {{ o.shippingAddress.recipientName }} · {{ o.shippingAddress.phone }}<br />
-        {{ o.shippingAddress.street }} {{ o.shippingAddress.streetNumber }}
-        @if (o.shippingAddress.apartment) {
-          , {{ o.shippingAddress.apartment }}
+      <h2 class="admin-order-card-title">Entrega</h2>
+
+      @if (o.deliveryMethod === 'pickup' && o.pickupDetails; as pickup) {
+        <p class="admin-order-delivery-mode">Retiro en el local</p>
+        <p class="admin-order-address">
+          {{ pickup.contactName }} · {{ pickup.phone }}
+          @if (pickup.notes) {
+            <br />{{ pickup.notes }}
+          }
+        </p>
+      } @else if (o.shippingAddress; as address) {
+        <p class="admin-order-delivery-mode">Envío a domicilio</p>
+        <p class="admin-order-address">
+          {{ address.recipientName }} · {{ address.phone }}<br />
+          {{ address.street }} {{ address.streetNumber }}
+          @if (address.apartment) {
+            , {{ address.apartment }}
+          }
+          @if (address.betweenStreets) {
+            <br />Entre calles: {{ address.betweenStreets }}
+          }
+          <br />
+          {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
+          @if (address.notes) {
+            <br />{{ address.notes }}
+          }
+        </p>
+      }
+
+      @if (o.logisticsCompletedAt) {
+        <p class="admin-order-delivery-completed">
+          {{ o.deliveryMethod === 'pickup' ? 'Retirado' : 'Entregado' }} el
+          {{ o.logisticsCompletedAt | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
+      }
+
+      @if (whatsAppActions().length > 0) {
+        <div class="admin-order-whatsapp-actions">
+          @for (action of whatsAppActions(); track action.label) {
+            <a [href]="action.href" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">
+              {{ action.label }}
+            </a>
+          }
+        </div>
+      }
+
+      <div class="admin-order-logistics-editor">
+        <label for="logistics-status-select">Estado de preparación/entrega</label>
+        <div class="admin-order-logistics-editor-row">
+          <select
+            id="logistics-status-select"
+            (change)="onLogisticsStatusChange($event)"
+          >
+            @for (statusOption of allowedLogisticsStatuses(); track statusOption) {
+              <option [value]="statusOption" [selected]="statusOption === o.logisticsStatus">
+                {{ logisticsStatusLabel(statusOption) }}
+              </option>
+            }
+          </select>
+          <button
+            type="button"
+            class="btn btn-sm btn-primary"
+            [disabled]="!logisticsStatusDirty() || savingLogisticsStatus()"
+            (click)="saveLogisticsStatus()"
+          >
+            {{ savingLogisticsStatus() ? 'Guardando...' : 'Actualizar' }}
+          </button>
+        </div>
+        @if (logisticsError()) {
+          <p class="admin-order-error" role="alert">{{ logisticsError() }}</p>
         }
-        <br />
-        {{ o.shippingAddress.city }}, {{ o.shippingAddress.province }} ({{ o.shippingAddress.postalCode }})
-      </p>
+      </div>
+
+      @if (auditLog().length > 0) {
+        <div class="admin-order-audit-log">
+          <h3 class="admin-order-audit-log-title">Historial de cambios</h3>
+          <ul>
+            @for (entry of auditLog(); track entry.id) {
+              <li>
+                {{ entry.createdAt | date: 'dd/MM/yyyy HH:mm' }} · {{ entry.adminEmail }} ·
+                {{ entry.detail }}
+              </li>
+            }
+          </ul>
+        </div>
+      }
     </section>
 
     <section class="admin-order-card">
@@ -69,6 +168,7 @@
             <thead>
               <tr>
                 <th scope="col">Fecha</th>
+                <th scope="col">Medio de pago</th>
                 <th scope="col">Estado</th>
                 <th scope="col">Detalle</th>
                 <th scope="col">Order MP</th>
@@ -79,6 +179,16 @@
               @for (attempt of attempts(); track attempt.id) {
                 <tr>
                   <td>{{ attempt.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    @if (attempt.paymentMethodType) {
+                      {{ attempt.paymentMethodType === 'credit_card' ? 'Tarjeta de crédito' : 'Tarjeta de débito' }}
+                      @if (attempt.paymentMethodId) {
+                        ({{ attempt.paymentMethodId }})
+                      }
+                    } @else {
+                      —
+                    }
+                  </td>
                   <td>{{ paymentStatusLabel(attempt.status) }}</td>
                   <td>{{ attempt.statusDetail || attempt.failureReason || '—' }}</td>
                   <td class="mono">{{ attempt.mpOrderId || '—' }}</td>

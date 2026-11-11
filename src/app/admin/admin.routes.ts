@@ -46,6 +46,11 @@ export const adminRoutes: Routes = [
         title: 'Detalle de orden | Admin Essence Vapes',
       },
       {
+        path: 'transacciones',
+        loadComponent: () => import('./pages/transactions/transactions'),
+        title: 'Transacciones | Admin Essence Vapes',
+      },
+      {
         path: 'arrepentimientos',
         loadComponent: () => import('./pages/withdrawal-requests/withdrawal-requests'),
         title: 'Botón de arrepentimiento | Admin Essence Vapes',

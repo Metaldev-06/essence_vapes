@@ -18,18 +18,19 @@ export function buildShippingContent(legal: LegalInfo): LegalContent {
       {
         heading: '2. Modalidades de entrega',
         paragraphs: [
-          'Envío a domicilio a través de un transportista a coordinar, o retiro en punto a' +
-            ' coordinar cuando esté disponible para tu zona. La modalidad y el transportista' +
-            ' se confirman por los canales de contacto al momento de tu pedido - todavía no' +
-            ' hay un cálculo ni una reserva automática dentro del sitio.',
+          'Desde el checkout del sitio elegís entre envío a domicilio o retiro en nuestro' +
+            ' local. No usamos Mercado Envíos ni ningún transportista integrado al sitio:' +
+            ' coordinamos la entrega o el retiro directamente con vos por los canales de' +
+            ' contacto.',
         ],
       },
       {
         heading: '3. Cálculo de costos',
         paragraphs: [
-          'El costo de envío depende de tu ubicación y del tamaño/peso del pedido, y se te' +
-            ' informa antes de confirmar la compra - nunca se agrega como un cargo oculto' +
-            ' después de confirmado el pedido.',
+          'El costo de envío (si corresponde) se te muestra siempre antes de pagar. El' +
+            ' retiro en el local nunca tiene costo de envío. Si todavía no definimos una' +
+            ' tarifa para tu caso, tu pedido queda a la espera de que te confirmemos el costo' +
+            ' antes de avanzar al pago - nunca se cobra un importe que no viste primero.',
         ],
       },
       {
@@ -60,9 +61,9 @@ export function buildShippingContent(legal: LegalInfo): LegalContent {
       {
         heading: '7. Retiro en sucursal',
         paragraphs: [
-          'Todavía no tenemos un punto de retiro propio habilitado de forma general. Si en tu' +
-            ' caso particular coordinamos un retiro, te lo confirmamos expresamente antes de' +
-            ' tu compra.',
+          'Podés elegir "Retiro en el local" directamente en el checkout. Te confirmamos la' +
+            ' dirección exacta y el horario de retiro al coordinar tu pedido por los canales' +
+            ' de contacto.',
         ],
       },
       {

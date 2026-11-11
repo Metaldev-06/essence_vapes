@@ -40,6 +40,7 @@ export interface AddressFormModel {
   city: string;
   province: string;
   postalCode: string;
+  betweenStreets: string;
   notes: string;
 }
 
@@ -54,6 +55,7 @@ export function emptyAddressModel(): AddressFormModel {
     city: '',
     province: '',
     postalCode: '',
+    betweenStreets: '',
     notes: '',
   };
 }
@@ -69,6 +71,7 @@ export function addressToModel(address: Address): AddressFormModel {
     city: address.city,
     province: address.province,
     postalCode: address.postalCode,
+    betweenStreets: address.betweenStreets ?? '',
     notes: address.notes ?? '',
   };
 }

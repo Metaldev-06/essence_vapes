@@ -2,8 +2,19 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, debounced, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 
-import type { Order, OrderStatus, PaymentStatus } from '../../../core/orders/order.model';
-import { orderStatusLabel, paymentStatusLabel } from '../../../core/orders/order-status-labels';
+import type {
+  DeliveryMethod,
+  LogisticsStatus,
+  Order,
+  OrderStatus,
+  PaymentStatus,
+} from '../../../core/orders/order.model';
+import {
+  deliveryMethodLabel,
+  logisticsStatusLabel,
+  orderStatusLabel,
+  paymentStatusLabel,
+} from '../../../core/orders/order-status-labels';
 import { extractErrorMessage } from '../../data/extract-error-message';
 import { OrdersAdminService, type OrdersStats } from '../../data/orders-admin.service';
 
@@ -11,6 +22,7 @@ const PAGE_SIZE = 20;
 
 const ORDER_STATUS_OPTIONS: readonly { id: OrderStatus | 'todos'; label: string }[] = [
   { id: 'todos', label: 'Todos' },
+  { id: 'awaiting_shipping_quote', label: 'Esperando costo de envío' },
   { id: 'pending_payment', label: 'Esperando pago' },
   { id: 'processing', label: 'Pago en revisión' },
   { id: 'paid', label: 'Pagado' },
@@ -30,7 +42,26 @@ const PAYMENT_STATUS_OPTIONS: readonly { id: PaymentStatus | 'todos'; label: str
   { id: 'charged_back', label: 'Contracargo' },
 ];
 
-/** `/admin/ventas` - panel de solo lectura sobre las órdenes reales (ver `OrdersAdminService`). */
+const DELIVERY_METHOD_OPTIONS: readonly { id: DeliveryMethod | 'todos'; label: string }[] = [
+  { id: 'todos', label: 'Todas' },
+  { id: 'home_delivery', label: 'Envío a domicilio' },
+  { id: 'pickup', label: 'Retiro en el local' },
+];
+
+const LOGISTICS_STATUS_OPTIONS: readonly { id: LogisticsStatus | 'todos'; label: string }[] = [
+  { id: 'todos', label: 'Todos' },
+  { id: 'pending_preparation', label: 'Pendiente de preparación' },
+  { id: 'in_preparation', label: 'En preparación' },
+  { id: 'ready_to_ship', label: 'Listo para despachar' },
+  { id: 'dispatched', label: 'Despachado' },
+  { id: 'in_transit', label: 'En camino' },
+  { id: 'delivered', label: 'Entregado' },
+  { id: 'delivery_issue', label: 'Incidencia de entrega' },
+  { id: 'ready_for_pickup', label: 'Listo para retirar' },
+  { id: 'picked_up', label: 'Retirado' },
+];
+
+/** `/admin/ventas` - panel sobre las órdenes reales (ver `OrdersAdminService`). */
 @Component({
   selector: 'app-admin-orders',
   imports: [DatePipe, DecimalPipe],
@@ -43,11 +74,17 @@ export default class AdminOrders {
 
   protected readonly orderStatusOptions = ORDER_STATUS_OPTIONS;
   protected readonly paymentStatusOptions = PAYMENT_STATUS_OPTIONS;
+  protected readonly deliveryMethodOptions = DELIVERY_METHOD_OPTIONS;
+  protected readonly logisticsStatusOptions = LOGISTICS_STATUS_OPTIONS;
   protected readonly orderStatusLabel = orderStatusLabel;
   protected readonly paymentStatusLabel = paymentStatusLabel;
+  protected readonly deliveryMethodLabel = deliveryMethodLabel;
+  protected readonly logisticsStatusLabel = logisticsStatusLabel;
 
   protected readonly status = signal<OrderStatus | 'todos'>('todos');
   protected readonly paymentStatus = signal<PaymentStatus | 'todos'>('todos');
+  protected readonly deliveryMethod = signal<DeliveryMethod | 'todos'>('todos');
+  protected readonly logisticsStatus = signal<LogisticsStatus | 'todos'>('todos');
   protected readonly search = signal('');
   protected readonly dateFrom = signal('');
   protected readonly dateTo = signal('');
@@ -72,6 +109,8 @@ export default class AdminOrders {
     effect(() => {
       this.status();
       this.paymentStatus();
+      this.deliveryMethod();
+      this.logisticsStatus();
       this.debouncedSearch.value();
       this.dateFrom();
       this.dateTo();
@@ -81,11 +120,25 @@ export default class AdminOrders {
     effect(() => {
       const status = this.status();
       const paymentStatus = this.paymentStatus();
+      const deliveryMethod = this.deliveryMethod();
+      const logisticsStatus = this.logisticsStatus();
       const search = this.debouncedSearch.value();
       const dateFrom = this.dateFrom();
       const dateTo = this.dateTo();
       const offset = this.offset();
-      untracked(() => void this.load(status, paymentStatus, search, dateFrom, dateTo, offset));
+      untracked(
+        () =>
+          void this.load(
+            status,
+            paymentStatus,
+            deliveryMethod,
+            logisticsStatus,
+            search,
+            dateFrom,
+            dateTo,
+            offset,
+          ),
+      );
     });
   }
 
@@ -113,6 +166,14 @@ export default class AdminOrders {
     this.paymentStatus.set((event.target as HTMLSelectElement).value as PaymentStatus | 'todos');
   }
 
+  protected onDeliveryMethodChange(event: Event): void {
+    this.deliveryMethod.set((event.target as HTMLSelectElement).value as DeliveryMethod | 'todos');
+  }
+
+  protected onLogisticsStatusChange(event: Event): void {
+    this.logisticsStatus.set((event.target as HTMLSelectElement).value as LogisticsStatus | 'todos');
+  }
+
   protected onDateFromChange(event: Event): void {
     this.dateFrom.set((event.target as HTMLInputElement).value);
   }
@@ -124,6 +185,8 @@ export default class AdminOrders {
   protected clearFilters(): void {
     this.status.set('todos');
     this.paymentStatus.set('todos');
+    this.deliveryMethod.set('todos');
+    this.logisticsStatus.set('todos');
     this.search.set('');
     this.dateFrom.set('');
     this.dateTo.set('');
@@ -140,6 +203,8 @@ export default class AdminOrders {
   private async load(
     status: OrderStatus | 'todos',
     paymentStatus: PaymentStatus | 'todos',
+    deliveryMethod: DeliveryMethod | 'todos',
+    logisticsStatus: LogisticsStatus | 'todos',
     search: string,
     dateFrom: string,
     dateTo: string,
@@ -151,6 +216,8 @@ export default class AdminOrders {
       const page = await this.ordersAdminService.list({
         status: status === 'todos' ? undefined : status,
         paymentStatus: paymentStatus === 'todos' ? undefined : paymentStatus,
+        deliveryMethod: deliveryMethod === 'todos' ? undefined : deliveryMethod,
+        logisticsStatus: logisticsStatus === 'todos' ? undefined : logisticsStatus,
         search: search.trim() || undefined,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,

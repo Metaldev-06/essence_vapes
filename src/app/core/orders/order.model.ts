@@ -1,5 +1,4 @@
 export type OrderStatus =
-  | 'awaiting_shipping_quote'
   | 'pending_payment'
   | 'processing'
   | 'paid'
@@ -83,7 +82,8 @@ export interface Order {
   shippingCostMode?: ShippingCostMode;
   shippingCostValue?: number;
   shippingCost?: string;
-  /** `true` = envío "a coordinar" sin tarifa definida todavía - `totalValue` NO es el total final. */
+  /** `true` = todavía no hay tarifa de envío sugerida - solo informativo, nunca bloquea el pago
+   *  (el envío se coordina y se cobra aparte por WhatsApp después de pagar el subtotal). */
   shippingCostPending: boolean;
   expiresAt?: string;
   createdAt: string;

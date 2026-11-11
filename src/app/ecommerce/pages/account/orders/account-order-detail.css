@@ -87,7 +87,6 @@
   background: color-mix(in srgb, var(--color-aurora-emerald) 16%, transparent);
 }
 
-.order-badge-awaiting_shipping_quote,
 .order-badge-pending_payment,
 .order-badge-processing {
   color: var(--color-accent);

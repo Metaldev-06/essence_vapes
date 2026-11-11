@@ -4,8 +4,6 @@ import type { DeliveryMethod, LogisticsStatus, OrderStatus, PaymentStatus } from
  *  fuente de las etiquetas en español para los mismos enums que usa el backend. */
 export const orderStatusLabel = (status: OrderStatus): string => {
   switch (status) {
-    case 'awaiting_shipping_quote':
-      return 'Esperando costo de envío';
     case 'pending_payment':
       return 'Esperando pago';
     case 'processing':

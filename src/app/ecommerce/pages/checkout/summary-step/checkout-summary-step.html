@@ -4,22 +4,7 @@
   <p class="checkout-step-subtitle">Revisá todo antes de confirmar.</p>
 </header>
 
-@if (shippingQuotePending()) {
-  <div class="checkout-notice" role="status">
-    <p>
-      Registramos tu pedido, pero todavía no tenemos una tarifa de envío definida para tu zona.
-      No te vamos a cobrar nada hasta coordinar y confirmar el costo con vos.
-    </p>
-    @if (supportWhatsAppLink(); as link) {
-      <a [href]="link" target="_blank" rel="noopener" class="btn btn-primary">
-        Coordinar por WhatsApp
-      </a>
-    } @else {
-      <p class="checkout-step-subtitle">Te vamos a escribir en breve para coordinarlo.</p>
-    }
-    <a [routerLink]="'/cuenta/pedidos'" class="btn btn-ghost">Ver mis compras</a>
-  </div>
-} @else if (removedNotice(); as removed) {
+@if (removedNotice(); as removed) {
   <div class="checkout-notice checkout-notice-danger" role="alert">
     <p>Tu pedido se creó, pero quitamos estos productos porque ya no tenían stock suficiente:</p>
     <ul>
@@ -62,15 +47,15 @@
       }
     </ul>
     <div class="checkout-summary-total">
-      <span>Total</span>
-      <span>{{ totalLabel() }} ARS</span>
+      <span>Subtotal</span>
+      <span>{{ subtotalLabel() }} ARS</span>
     </div>
     @if (deliverySelection()?.method === 'pickup') {
       <p class="checkout-step-subtitle">Retirás en el local - sin costo de envío.</p>
     } @else {
       <p class="checkout-step-subtitle">
-        El costo de envío (si corresponde) todavía no está incluido acá - se te va a informar
-        antes de pagar en cuanto se defina.
+        Esto es lo que pagás ahora. El costo de envío (si corresponde) no se cobra acá - lo
+        coordinamos y confirmamos directamente por WhatsApp.
       </p>
     }
   </section>

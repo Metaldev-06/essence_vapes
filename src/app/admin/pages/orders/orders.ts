@@ -22,7 +22,6 @@ const PAGE_SIZE = 20;
 
 const ORDER_STATUS_OPTIONS: readonly { id: OrderStatus | 'todos'; label: string }[] = [
   { id: 'todos', label: 'Todos' },
-  { id: 'awaiting_shipping_quote', label: 'Esperando costo de envío' },
   { id: 'pending_payment', label: 'Esperando pago' },
   { id: 'processing', label: 'Pago en revisión' },
   { id: 'paid', label: 'Pagado' },

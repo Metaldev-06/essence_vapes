@@ -1,0 +1,170 @@
+.admin-order-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.back-link {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.admin-order-loading {
+  color: var(--color-text-secondary);
+  font-size: 13.5px;
+}
+
+.admin-order-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+
+.admin-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-order-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.admin-order-subtitle {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.admin-order-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.order-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.order-badge-paid {
+  color: var(--color-aurora-emerald);
+  background: color-mix(in srgb, var(--color-aurora-emerald) 16%, transparent);
+}
+
+.order-badge-pending_payment,
+.order-badge-processing {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+}
+
+.order-badge-cancelled,
+.order-badge-expired {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
+.order-badge-refunded {
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-text-muted) 16%, transparent);
+}
+
+.admin-order-payment-status {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.admin-order-card {
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+}
+
+.admin-order-card-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+}
+
+.admin-order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.admin-order-item {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-primary);
+}
+
+.admin-order-item-variant {
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+}
+
+.admin-order-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.admin-order-address {
+  line-height: 1.6;
+}
+
+.admin-order-no-attempts {
+  color: var(--color-text-muted);
+}
+
+.admin-order-attempts-wrap {
+  overflow-x: auto;
+}
+
+.admin-order-attempts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.admin-order-attempts-table th,
+.admin-order-attempts-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-subtle);
+  white-space: nowrap;
+}
+
+.admin-order-attempts-table th {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+}
+
+.mono {
+  font-family: ui-monospace, monospace;
+  font-size: 11.5px;
+}

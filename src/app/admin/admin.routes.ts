@@ -36,6 +36,16 @@ export const adminRoutes: Routes = [
         title: 'Editar producto | Admin Essence Vapes',
       },
       {
+        path: 'ventas',
+        loadComponent: () => import('./pages/orders/orders'),
+        title: 'Ventas / Pedidos | Admin Essence Vapes',
+      },
+      {
+        path: 'ventas/:id',
+        loadComponent: () => import('./pages/orders/order-detail/order-detail'),
+        title: 'Detalle de orden | Admin Essence Vapes',
+      },
+      {
         path: 'arrepentimientos',
         loadComponent: () => import('./pages/withdrawal-requests/withdrawal-requests'),
         title: 'Botón de arrepentimiento | Admin Essence Vapes',

@@ -1,0 +1,150 @@
+<header class="checkout-step-header">
+  <span class="section-label">Paso 1 de 4</span>
+  <h1 class="section-title">Dirección de envío</h1>
+  <p class="checkout-step-subtitle">Elegí dónde recibís tu pedido.</p>
+</header>
+
+@if (!showNewAddressForm()) {
+  @if (addressesService.addresses().length === 0 && !addressesService.isLoading()) {
+    <div class="card checkout-card checkout-empty">
+      <p>Todavía no guardaste ninguna dirección.</p>
+      <button type="button" class="btn btn-primary" (click)="openNewAddressForm()">
+        Agregar dirección
+      </button>
+    </div>
+  } @else {
+    <div class="checkout-address-list">
+      @for (address of addressesService.addresses(); track address.id) {
+        <label class="card checkout-address-option" [class.selected]="selectedId() === address.id">
+          <input
+            type="radio"
+            name="checkout-address"
+            [checked]="selectedId() === address.id"
+            (change)="select(address)"
+          />
+          <span class="checkout-address-option-body">
+            <span class="checkout-address-option-title">
+              {{ address.label }}
+              @if (address.isDefault) {
+                <span class="account-badge account-badge-verified">Predeterminada</span>
+              }
+            </span>
+            <span class="checkout-address-option-lines">
+              {{ address.recipientName }} · {{ address.phone }}<br />
+              {{ address.street }} {{ address.streetNumber }}
+              @if (address.apartment) {
+                , {{ address.apartment }}
+              }
+              , {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
+            </span>
+          </span>
+        </label>
+      }
+    </div>
+
+    <button type="button" class="btn btn-ghost checkout-add-address" (click)="openNewAddressForm()">
+      + Agregar otra dirección
+    </button>
+  }
+
+  <div class="card checkout-card checkout-terms">
+    <label class="checkout-terms-label">
+      <input type="checkbox" [checked]="acceptTerms()" (change)="acceptTerms.set(!acceptTerms())" />
+      <span>
+        Acepto los <a [routerLink]="'/legales/terminos'" target="_blank">Términos y condiciones</a>
+        y conozco mi <a [routerLink]="'/legales/cambios-y-devoluciones'" target="_blank">derecho de arrepentimiento</a>.
+      </span>
+    </label>
+  </div>
+
+  <div class="checkout-actions">
+    <a [routerLink]="'/carrito'" class="btn btn-ghost">Volver al carrito</a>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="!selectedId() || !acceptTerms()"
+      (click)="continue()"
+    >
+      Continuar al resumen
+    </button>
+  </div>
+} @else {
+  <section class="card checkout-card">
+    <h2 class="account-card-title">Nueva dirección</h2>
+
+    <form class="account-form" novalidate (submit)="submitNewAddress($event)">
+      <div class="form-field">
+        <label for="checkout-address-label">Nombre de la dirección</label>
+        <input
+          id="checkout-address-label"
+          type="text"
+          placeholder="Casa, Trabajo..."
+          [formField]="addressForm.label"
+          [class.invalid]="addressForm.label().touched() && addressForm.label().invalid()"
+        />
+        @if (addressForm.label().touched() && addressForm.label().invalid()) {
+          <span class="form-error">{{ addressForm.label().errors()[0]?.message }}</span>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="checkout-address-recipient">Quién recibe</label>
+          <input id="checkout-address-recipient" type="text" [formField]="addressForm.recipientName" />
+        </div>
+        <div class="form-field">
+          <label for="checkout-address-phone">Teléfono de contacto</label>
+          <input id="checkout-address-phone" type="tel" [formField]="addressForm.phone" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field checkout-address-street">
+          <label for="checkout-address-street">Calle</label>
+          <input id="checkout-address-street" type="text" [formField]="addressForm.street" />
+        </div>
+        <div class="form-field">
+          <label for="checkout-address-number">Número</label>
+          <input id="checkout-address-number" type="text" [formField]="addressForm.streetNumber" />
+        </div>
+        <div class="form-field">
+          <label for="checkout-address-apartment">Piso/depto <span class="form-optional">(opcional)</span></label>
+          <input id="checkout-address-apartment" type="text" [formField]="addressForm.apartment" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="checkout-address-city">Ciudad/localidad</label>
+          <input id="checkout-address-city" type="text" [formField]="addressForm.city" />
+        </div>
+        <div class="form-field">
+          <label for="checkout-address-province">Provincia</label>
+          <select id="checkout-address-province" [formField]="addressForm.province">
+            <option value="" disabled selected>Elegí una provincia</option>
+            @for (province of provinces; track province) {
+              <option [value]="province">{{ province }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="checkout-address-postal">Código postal</label>
+          <input id="checkout-address-postal" type="text" [formField]="addressForm.postalCode" />
+        </div>
+      </div>
+
+      @if (formError()) {
+        <p class="account-error" role="alert">{{ formError() }}</p>
+      }
+
+      <div class="account-form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+          {{ submitting() ? 'Guardando...' : 'Guardar y continuar' }}
+        </button>
+        <button type="button" class="btn btn-ghost" (click)="showNewAddressForm.set(false)">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </section>
+}

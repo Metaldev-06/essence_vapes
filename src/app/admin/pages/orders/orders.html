@@ -1,0 +1,124 @@
+<div class="admin-orders">
+  <header class="admin-orders-header">
+    <h1 class="admin-orders-title">Ventas / Pedidos</h1>
+    <p class="admin-orders-subtitle">{{ total() }} {{ total() === 1 ? 'orden' : 'órdenes' }} en total.</p>
+  </header>
+
+  @if (stats(); as s) {
+    <div class="admin-orders-stats">
+      <div class="stat-tile">
+        <span class="stat-label">Ventas confirmadas</span>
+        <span class="stat-value">{{ s.confirmedOrdersCount }}</span>
+      </div>
+      <div class="stat-tile stat-tile-highlight">
+        <span class="stat-label">Facturación confirmada</span>
+        <span class="stat-value">${{ s.confirmedRevenueValue | number: '1.0-0' }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-label">Pendientes</span>
+        <span class="stat-value">{{ s.pendingOrdersCount }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-label">Pagos rechazados</span>
+        <span class="stat-value">{{ s.rejectedPaymentsCount }}</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-label">Total de órdenes</span>
+        <span class="stat-value">{{ s.totalOrdersCount }}</span>
+      </div>
+    </div>
+  }
+
+  <div class="admin-orders-filters">
+    <input
+      type="search"
+      placeholder="Buscar por id, nombre o email..."
+      [value]="search()"
+      (input)="onSearchInput($event)"
+      class="admin-orders-search"
+    />
+    <select (change)="onStatusChange($event)">
+      @for (option of orderStatusOptions; track option.id) {
+        <option [value]="option.id" [selected]="option.id === status()">{{ option.label }}</option>
+      }
+    </select>
+    <select (change)="onPaymentStatusChange($event)">
+      @for (option of paymentStatusOptions; track option.id) {
+        <option [value]="option.id" [selected]="option.id === paymentStatus()">{{ option.label }}</option>
+      }
+    </select>
+    <input type="date" [value]="dateFrom()" (input)="onDateFromChange($event)" aria-label="Desde" />
+    <input type="date" [value]="dateTo()" (input)="onDateToChange($event)" aria-label="Hasta" />
+    <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">Limpiar filtros</button>
+  </div>
+
+  @if (error()) {
+    <p class="admin-orders-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="admin-orders-table-wrap" [attr.aria-busy]="isLoading()">
+    <table class="admin-orders-table">
+      <caption class="sr-only">Listado de órdenes</caption>
+      <thead>
+        <tr>
+          <th scope="col">Orden</th>
+          <th scope="col">Cliente</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Total</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Pago</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (items().length === 0) {
+          <tr class="empty-row">
+            <td colspan="6">
+              <p class="admin-orders-empty">
+                {{ isLoading() ? 'Cargando...' : 'No hay órdenes para este filtro.' }}
+              </p>
+            </td>
+          </tr>
+        } @else {
+          @for (order of items(); track order.id) {
+            <tr
+              class="order-row"
+              role="link"
+              tabindex="0"
+              [attr.aria-label]="'Ver orden ' + order.id.slice(0, 8)"
+              (click)="goToOrder(order.id)"
+              (keydown.enter)="goToOrder(order.id)"
+            >
+              <td class="cell-id">{{ order.id.slice(0, 8) }}</td>
+              <td data-label="Cliente">
+                <span class="buyer-name">{{ order.buyerName }}</span>
+                <span class="buyer-email">{{ order.buyerEmail }}</span>
+              </td>
+              <td data-label="Fecha">{{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td data-label="Total" class="cell-total">{{ order.total }}</td>
+              <td data-label="Estado">
+                <span class="order-badge" [class]="'order-badge-' + order.status">
+                  {{ orderStatusLabel(order.status) }}
+                </span>
+              </td>
+              <td data-label="Pago">{{ paymentStatusLabel(order.paymentStatus) }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (pageCount() > 1) {
+    <nav class="admin-orders-pagination" aria-label="Paginación">
+      <span>Página {{ page() }} de {{ pageCount() }}</span>
+      <div class="admin-orders-pagination-buttons">
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasPrev()" (click)="prevPage()">
+          ← Anterior
+        </button>
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasNext()" (click)="nextPage()">
+          Siguiente →
+        </button>
+      </div>
+    </nav>
+  }
+</div>

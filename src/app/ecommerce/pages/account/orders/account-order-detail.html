@@ -1,0 +1,62 @@
+<div class="account-content">
+  <header class="account-content-header">
+    <a [routerLink]="'/cuenta/pedidos'" class="order-detail-back">← Mis compras</a>
+    <h1 class="account-content-title">Detalle del pedido</h1>
+  </header>
+
+  @if (notFound()) {
+    <section class="account-card card account-empty">
+      <p class="account-empty-title">No encontramos ese pedido</p>
+      <a class="btn btn-primary" [routerLink]="'/cuenta/pedidos'">Volver a mis compras</a>
+    </section>
+  } @else if (order(); as o) {
+    <section class="account-card card">
+      <div class="order-detail-header">
+        <div>
+          <p class="order-detail-id">Pedido #{{ o.id.slice(0, 8) }}</p>
+          <p class="order-detail-date">{{ o.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <div class="order-detail-badges">
+          <span class="order-badge" [class]="'order-badge-' + o.status">{{ orderStatusLabel(o.status) }}</span>
+          <span class="order-detail-payment">{{ paymentStatusLabel(o.paymentStatus) }}</span>
+        </div>
+      </div>
+
+      <h2 class="account-card-title">Productos</h2>
+      <ul class="order-detail-items">
+        @for (item of o.items; track item.productId + '::' + item.variantId) {
+          <li class="order-detail-item">
+            <span>
+              {{ item.quantity }} x {{ item.productName }}
+              @if (item.variantLabel) {
+                <span class="order-detail-item-variant">({{ item.variantLabel }})</span>
+              }
+            </span>
+            <span>{{ item.lineTotal }}</span>
+          </li>
+        }
+      </ul>
+      <div class="order-detail-total">
+        <span>Total</span>
+        <span>{{ o.total }} {{ o.currency }}</span>
+      </div>
+    </section>
+
+    <section class="account-card card">
+      <h2 class="account-card-title">Enviado a</h2>
+      <p class="order-detail-address">
+        {{ o.shippingAddress.recipientName }} · {{ o.shippingAddress.phone }}<br />
+        {{ o.shippingAddress.street }} {{ o.shippingAddress.streetNumber }}
+        @if (o.shippingAddress.apartment) {
+          , {{ o.shippingAddress.apartment }}
+        }
+        <br />
+        {{ o.shippingAddress.city }}, {{ o.shippingAddress.province }} ({{ o.shippingAddress.postalCode }})
+      </p>
+    </section>
+
+    @if (o.status === 'pending_payment') {
+      <button type="button" class="btn btn-primary" (click)="goToPayment(o)">Completar el pago</button>
+    }
+  }
+</div>

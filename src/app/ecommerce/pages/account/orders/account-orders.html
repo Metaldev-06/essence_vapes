@@ -1,19 +1,52 @@
 <div class="account-content">
   <header class="account-content-header">
-    <h1 class="account-content-title">Pedidos</h1>
-    <p class="account-content-subtitle">El historial de tus compras.</p>
+    <h1 class="account-content-title">Mis compras</h1>
+    <p class="account-content-subtitle">El historial de tus pedidos.</p>
   </header>
 
-  <section class="account-card card account-empty">
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M3 8l9-4 9 4-9 4-9-4Z" />
-      <path d="M3 8v9l9 4 9-4V8" />
-      <path d="M12 12v9" />
-    </svg>
-    <p class="account-empty-title">Todavía no tenés pedidos</p>
-    <p class="account-empty-subtitle">
-      Cuando compres en Essence Vapes, vas a ver el estado y el historial de tus pedidos acá.
-    </p>
-    <a class="btn btn-primary" [routerLink]="'/productos'">Ver catálogo</a>
-  </section>
+  @if (!isLoading() && orders().length === 0) {
+    <section class="account-card card account-empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 8l9-4 9 4-9 4-9-4Z" />
+        <path d="M3 8v9l9 4 9-4V8" />
+        <path d="M12 12v9" />
+      </svg>
+      <p class="account-empty-title">Todavía no tenés pedidos</p>
+      <p class="account-empty-subtitle">
+        Cuando compres en Essence Vapes, vas a ver el estado y el historial de tus pedidos acá.
+      </p>
+      <a class="btn btn-primary" [routerLink]="'/productos'">Ver catálogo</a>
+    </section>
+  } @else {
+    <div class="orders-list">
+      @for (order of orders(); track order.id) {
+        <a class="account-card card order-card" [routerLink]="'/cuenta/pedidos/' + order.id">
+          <div class="order-card-header">
+            <span class="order-card-date">{{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+            <span class="order-badge" [class]="'order-badge-' + order.status">
+              {{ orderStatusLabel(order.status) }}
+            </span>
+          </div>
+          <p class="order-card-items">
+            {{ order.items.length }} producto{{ order.items.length === 1 ? '' : 's' }}
+          </p>
+          <div class="order-card-footer">
+            <span class="order-card-total">{{ order.total }} ARS</span>
+            <span class="order-card-payment">{{ paymentStatusLabel(order.paymentStatus) }}</span>
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (hasPrev() || hasNext()) {
+      <div class="orders-pagination">
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasPrev()" (click)="prevPage()">
+          Anterior
+        </button>
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasNext()" (click)="nextPage()">
+          Siguiente
+        </button>
+      </div>
+    }
+  }
 </div>

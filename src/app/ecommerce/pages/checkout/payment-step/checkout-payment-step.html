@@ -1,0 +1,33 @@
+<header class="checkout-step-header">
+  <span class="section-label">Paso 3 de 4</span>
+  <h1 class="section-title">Pago</h1>
+  <p class="checkout-step-subtitle">Pagá con tarjeta de crédito o débito, de forma segura.</p>
+</header>
+
+@if (notConfigured) {
+  <div class="card checkout-card checkout-not-configured" role="alert">
+    <p>El pago online todavía no está disponible en esta tienda.</p>
+    <p class="checkout-step-subtitle">
+      Tu pedido ya quedó registrado - nos vamos a poner en contacto para coordinar el pago.
+    </p>
+    <a [routerLink]="'/cuenta/pedidos'" class="btn btn-primary">Ver mi pedido</a>
+  </div>
+} @else {
+  @if (brickError()) {
+    <p class="account-error" role="alert">{{ brickError() }}</p>
+  }
+
+  @if (loadingBrick()) {
+    <p class="checkout-brick-loading">Cargando formulario de pago...</p>
+  }
+
+  <div class="card checkout-card checkout-brick-card">
+    <div [id]="containerId"></div>
+  </div>
+
+  <p class="checkout-payment-trust">🔒 Pago procesado de forma segura por Mercado Pago. Essence Vapes nunca ve ni guarda los datos de tu tarjeta.</p>
+
+  <div class="checkout-actions">
+    <a [routerLink]="'/checkout/resumen'" class="btn btn-ghost">Volver al resumen</a>
+  </div>
+}

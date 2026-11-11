@@ -1,0 +1,94 @@
+<div class="admin-order-detail">
+  <a [routerLink]="'/admin/ventas'" class="back-link">← Ventas / Pedidos</a>
+
+  @if (error()) {
+    <p class="admin-order-error" role="alert">{{ error() }}</p>
+  } @else if (isLoading()) {
+    <p class="admin-order-loading">Cargando...</p>
+  } @else if (order(); as o) {
+    <header class="admin-order-header">
+      <div>
+        <h1 class="admin-order-title">Orden #{{ o.id.slice(0, 8) }}</h1>
+        <p class="admin-order-subtitle">{{ o.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+      <div class="admin-order-badges">
+        <span class="order-badge" [class]="'order-badge-' + o.status">{{ orderStatusLabel(o.status) }}</span>
+        <span class="admin-order-payment-status">{{ paymentStatusLabel(o.paymentStatus) }}</span>
+      </div>
+    </header>
+
+    <section class="admin-order-card">
+      <h2 class="admin-order-card-title">Cliente</h2>
+      <p>{{ o.buyerName }} · {{ o.buyerEmail }}</p>
+      @if (o.buyerPhone) {
+        <p>{{ o.buyerPhone }}</p>
+      }
+    </section>
+
+    <section class="admin-order-card">
+      <h2 class="admin-order-card-title">Productos</h2>
+      <ul class="admin-order-items">
+        @for (item of o.items; track item.productId + '::' + item.variantId) {
+          <li class="admin-order-item">
+            <span>
+              {{ item.quantity }} x {{ item.productName }}
+              @if (item.variantLabel) {
+                <span class="admin-order-item-variant">({{ item.variantLabel }})</span>
+              }
+            </span>
+            <span>{{ item.lineTotal }}</span>
+          </li>
+        }
+      </ul>
+      <div class="admin-order-total">
+        <span>Total</span>
+        <span>{{ o.total }} {{ o.currency }}</span>
+      </div>
+    </section>
+
+    <section class="admin-order-card">
+      <h2 class="admin-order-card-title">Dirección de envío</h2>
+      <p class="admin-order-address">
+        {{ o.shippingAddress.recipientName }} · {{ o.shippingAddress.phone }}<br />
+        {{ o.shippingAddress.street }} {{ o.shippingAddress.streetNumber }}
+        @if (o.shippingAddress.apartment) {
+          , {{ o.shippingAddress.apartment }}
+        }
+        <br />
+        {{ o.shippingAddress.city }}, {{ o.shippingAddress.province }} ({{ o.shippingAddress.postalCode }})
+      </p>
+    </section>
+
+    <section class="admin-order-card">
+      <h2 class="admin-order-card-title">Intentos de pago</h2>
+      @if (attempts().length === 0) {
+        <p class="admin-order-no-attempts">Todavía no hubo ningún intento de pago.</p>
+      } @else {
+        <div class="admin-order-attempts-wrap">
+          <table class="admin-order-attempts-table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Detalle</th>
+                <th scope="col">Order MP</th>
+                <th scope="col">Pago MP</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (attempt of attempts(); track attempt.id) {
+                <tr>
+                  <td>{{ attempt.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ paymentStatusLabel(attempt.status) }}</td>
+                  <td>{{ attempt.statusDetail || attempt.failureReason || '—' }}</td>
+                  <td class="mono">{{ attempt.mpOrderId || '—' }}</td>
+                  <td class="mono">{{ attempt.mpPaymentId || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

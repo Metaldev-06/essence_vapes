@@ -1,0 +1,71 @@
+<header class="checkout-step-header">
+  <span class="section-label">Paso 2 de 4</span>
+  <h1 class="section-title">Resumen de tu compra</h1>
+  <p class="checkout-step-subtitle">Revisá todo antes de confirmar.</p>
+</header>
+
+@if (removedNotice(); as removed) {
+  <div class="checkout-notice checkout-notice-danger" role="alert">
+    <p>Tu pedido se creó, pero quitamos estos productos porque ya no tenían stock suficiente:</p>
+    <ul>
+      @for (line of removed; track line.productId + '::' + line.variantId) {
+        <li>{{ line.product?.brand }} {{ line.product?.name }}</li>
+      }
+    </ul>
+    <button type="button" class="btn btn-primary" (click)="continueAfterNotice()">
+      Continuar al pago
+    </button>
+  </div>
+} @else {
+  <section class="card checkout-card">
+    <h2 class="account-card-title">Productos</h2>
+    <ul class="checkout-items">
+      @for (line of cartService.lines(); track line.productId + '::' + line.variantId) {
+        <li class="checkout-item">
+          <span class="checkout-item-name">
+            {{ line.quantity }} x {{ line.product.brand }} {{ line.product.name }}
+            @if (line.product.variantLabel) {
+              <span class="checkout-item-variant">({{ line.product.variantLabel }})</span>
+            }
+          </span>
+          <span class="checkout-item-price">{{ line.product.price }}</span>
+        </li>
+      }
+    </ul>
+    <div class="checkout-summary-total">
+      <span>Total</span>
+      <span>{{ subtotalLabel() }} ARS</span>
+    </div>
+    <p class="checkout-step-subtitle">
+      Todavía no hay costo de envío configurado en la tienda - se va a informar antes de
+      confirmar en cuanto esté disponible.
+    </p>
+  </section>
+
+  <section class="card checkout-card">
+    <h2 class="account-card-title">Enviar a</h2>
+    @if (selectedAddress(); as address) {
+      <p class="checkout-address-summary">
+        {{ address.recipientName }} · {{ address.phone }}<br />
+        {{ address.street }} {{ address.streetNumber }}
+        @if (address.apartment) {
+          , {{ address.apartment }}
+        }
+        <br />
+        {{ address.city }}, {{ address.province }} ({{ address.postalCode }})
+      </p>
+    }
+    <a [routerLink]="'/checkout/direccion'" class="btn btn-sm btn-ghost">Cambiar dirección</a>
+  </section>
+
+  @if (error()) {
+    <p class="account-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="checkout-actions">
+    <a [routerLink]="'/checkout/direccion'" class="btn btn-ghost">Volver</a>
+    <button type="button" class="btn btn-primary" [disabled]="confirming()" (click)="confirm()">
+      {{ confirming() ? 'Confirmando...' : 'Confirmar pedido y continuar' }}
+    </button>
+  </div>
+}

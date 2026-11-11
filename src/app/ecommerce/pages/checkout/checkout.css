@@ -1,0 +1,8 @@
+.checkout-page {
+  min-height: 60vh;
+}
+
+.checkout-container {
+  max-width: 720px;
+  margin: 0 auto;
+}

@@ -1,0 +1,197 @@
+.admin-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-orders-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.admin-orders-subtitle {
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.admin-orders-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
+  min-width: 0;
+}
+
+.stat-tile-highlight {
+  border-color: var(--color-accent);
+}
+
+.stat-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.admin-orders-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-orders-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.admin-orders-filters input,
+.admin-orders-filters select {
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.admin-orders-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+
+.admin-orders-table-wrap {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
+}
+
+.admin-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.admin-orders-table th,
+.admin-orders-table td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.admin-orders-table th {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.order-row {
+  cursor: pointer;
+}
+
+.order-row:hover,
+.order-row:focus-visible {
+  background: var(--color-surface-elevated);
+}
+
+.order-row:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+.cell-id {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.buyer-name {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.buyer-email {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.cell-total {
+  font-weight: 700;
+}
+
+.order-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.order-badge-paid {
+  color: var(--color-aurora-emerald);
+  background: color-mix(in srgb, var(--color-aurora-emerald) 16%, transparent);
+}
+
+.order-badge-pending_payment,
+.order-badge-processing {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+}
+
+.order-badge-cancelled,
+.order-badge-expired {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
+.order-badge-refunded {
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-text-muted) 16%, transparent);
+}
+
+.admin-orders-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.admin-orders-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.admin-orders-pagination-buttons {
+  display: flex;
+  gap: 8px;
+}

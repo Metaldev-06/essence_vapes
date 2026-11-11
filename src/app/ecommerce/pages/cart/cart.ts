@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import type { CartLine as CartLineModel } from '../../../core/cart/cart.model';
 import { CartService } from '../../../core/cart/cart.service';
@@ -15,9 +15,9 @@ import { CartLine } from './components/cart-line/cart-line';
 export default class Cart {
   protected readonly cartService = inject(CartService);
   protected readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected readonly checking = signal(false);
-  protected readonly checkoutReady = signal(false);
   protected readonly removedLines = signal<readonly CartLineModel[] | null>(null);
 
   protected readonly subtotalLabel = computed(() => formatPrice(this.cartService.subtotalValue()));
@@ -29,8 +29,12 @@ export default class Cart {
   }
 
   protected async checkout(): Promise<void> {
+    if (!this.authService.isAuthenticated()) {
+      void this.router.navigate(['/auth/login'], { queryParams: { returnUrl: '/carrito' } });
+      return;
+    }
+
     this.checking.set(true);
-    this.checkoutReady.set(false);
 
     const removed = await this.cartService.validateBeforeCheckout();
 
@@ -42,6 +46,6 @@ export default class Cart {
     }
 
     this.removedLines.set(null);
-    this.checkoutReady.set(true);
+    void this.router.navigateByUrl('/checkout/direccion');
   }
 }

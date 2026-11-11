@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authOnlyGuard } from '../core/auth/auth-only.guard';
 import { guestOnlyGuard } from '../core/auth/guest-only.guard';
 import { Ecommerce } from './ecommerce';
+import { CheckoutService } from './pages/checkout/checkout.service';
 
 export const ecommerceRoutes: Routes = [
   {
@@ -120,8 +121,14 @@ export const ecommerceRoutes: Routes = [
           {
             path: 'pedidos',
             loadComponent: () => import('./pages/account/orders/account-orders'),
-            title: 'Pedidos | Essence Vapes',
+            title: 'Mis compras | Essence Vapes',
             data: { description: 'El historial de tus compras.' },
+          },
+          {
+            path: 'pedidos/:id',
+            loadComponent: () => import('./pages/account/orders/account-order-detail'),
+            title: 'Detalle del pedido | Essence Vapes',
+            data: { description: 'Detalle y estado de tu pedido.' },
           },
           {
             path: 'seguridad',
@@ -147,6 +154,41 @@ export const ecommerceRoutes: Routes = [
         data: {
           description: 'Revisá tu carrito de compras antes de continuar al pago.',
         },
+      },
+      {
+        path: 'checkout',
+        loadComponent: () => import('./pages/checkout/checkout'),
+        canActivate: [authOnlyGuard],
+        // Una sola instancia de `CheckoutService` compartida por los 4 pasos, que se recrea
+        // (se resetea) cada vez que se entra de nuevo a /checkout - ver ese servicio.
+        providers: [CheckoutService],
+        children: [
+          { path: '', redirectTo: 'direccion', pathMatch: 'full' },
+          {
+            path: 'direccion',
+            loadComponent: () => import('./pages/checkout/address-step/checkout-address-step'),
+            title: 'Dirección de envío | Essence Vapes',
+            data: { description: 'Elegí la dirección donde recibís tu pedido.' },
+          },
+          {
+            path: 'resumen',
+            loadComponent: () => import('./pages/checkout/summary-step/checkout-summary-step'),
+            title: 'Resumen de tu compra | Essence Vapes',
+            data: { description: 'Revisá tu pedido antes de pagar.' },
+          },
+          {
+            path: 'pago',
+            loadComponent: () => import('./pages/checkout/payment-step/checkout-payment-step'),
+            title: 'Pago | Essence Vapes',
+            data: { description: 'Pagá tu pedido de forma segura con Mercado Pago.' },
+          },
+          {
+            path: 'resultado',
+            loadComponent: () => import('./pages/checkout/result-step/checkout-result-step'),
+            title: 'Resultado del pago | Essence Vapes',
+            data: { description: 'Estado de tu pago.' },
+          },
+        ],
       },
       {
         path: 'arrepentimiento',

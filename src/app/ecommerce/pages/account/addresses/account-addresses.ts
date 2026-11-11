@@ -1,90 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormField, form, required, schema } from '@angular/forms/signals';
+import { FormField, form } from '@angular/forms/signals';
 
+import {
+  ARGENTINA_PROVINCES,
+  addressSchema,
+  addressToModel,
+  emptyAddressModel,
+  type AddressFormModel,
+} from '../../../../core/addresses/address-form';
 import { AddressesService } from '../../../../core/addresses/addresses.service';
 import type { Address, AddressInput } from '../../../../core/addresses/address.model';
-
-/** 24 provincias (CABA incluida) - lista fija, no vale la pena traerla del backend. */
-export const ARGENTINA_PROVINCES: readonly string[] = [
-  'Buenos Aires',
-  'Catamarca',
-  'Chaco',
-  'Chubut',
-  'Ciudad Autónoma de Buenos Aires',
-  'Córdoba',
-  'Corrientes',
-  'Entre Ríos',
-  'Formosa',
-  'Jujuy',
-  'La Pampa',
-  'La Rioja',
-  'Mendoza',
-  'Misiones',
-  'Neuquén',
-  'Río Negro',
-  'Salta',
-  'San Juan',
-  'San Luis',
-  'Santa Cruz',
-  'Santa Fe',
-  'Santiago del Estero',
-  'Tierra del Fuego',
-  'Tucumán',
-];
-
-interface AddressFormModel {
-  label: string;
-  recipientName: string;
-  phone: string;
-  street: string;
-  streetNumber: string;
-  apartment: string;
-  city: string;
-  province: string;
-  postalCode: string;
-  notes: string;
-}
-
-function emptyAddressModel(): AddressFormModel {
-  return {
-    label: '',
-    recipientName: '',
-    phone: '',
-    street: '',
-    streetNumber: '',
-    apartment: '',
-    city: '',
-    province: '',
-    postalCode: '',
-    notes: '',
-  };
-}
-
-function addressToModel(address: Address): AddressFormModel {
-  return {
-    label: address.label,
-    recipientName: address.recipientName,
-    phone: address.phone,
-    street: address.street,
-    streetNumber: address.streetNumber,
-    apartment: address.apartment ?? '',
-    city: address.city,
-    province: address.province,
-    postalCode: address.postalCode,
-    notes: address.notes ?? '',
-  };
-}
-
-const addressSchema = schema<AddressFormModel>((path) => {
-  required(path.label, { message: 'Dale un nombre a esta dirección' });
-  required(path.recipientName, { message: 'Ingresá quién recibe el envío' });
-  required(path.phone, { message: 'Ingresá un teléfono de contacto' });
-  required(path.street, { message: 'Ingresá la calle' });
-  required(path.streetNumber, { message: 'Ingresá el número' });
-  required(path.city, { message: 'Ingresá la ciudad/localidad' });
-  required(path.province, { message: 'Elegí la provincia' });
-  required(path.postalCode, { message: 'Ingresá el código postal' });
-});
 
 type FormMode = 'closed' | 'new' | 'edit';
 

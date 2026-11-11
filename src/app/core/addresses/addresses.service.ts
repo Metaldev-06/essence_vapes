@@ -9,6 +9,9 @@ import type { Address, AddressInput } from './address.model';
 export interface AddressResult {
   readonly success: boolean;
   readonly message?: string;
+  /** Solo en `create`/`update` exitosos - evita que un caller tenga que adivinar cuál de
+   *  `addresses()` es la que se acaba de crear/editar. */
+  readonly address?: Address;
 }
 
 /**
@@ -63,7 +66,7 @@ export class AddressesService {
     try {
       const address = await firstValueFrom(this.http.post<Address>(this.baseUrl, input));
       this.absorb(address);
-      return { success: true };
+      return { success: true, address };
     } catch (error) {
       return { success: false, message: this.extractErrorMessage(error) };
     }
@@ -75,7 +78,7 @@ export class AddressesService {
         this.http.patch<Address>(`${this.baseUrl}/${id}`, input),
       );
       this.absorb(address);
-      return { success: true };
+      return { success: true, address };
     } catch (error) {
       return { success: false, message: this.extractErrorMessage(error) };
     }

@@ -61,9 +61,36 @@
 .decants-showcase {
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1 / 1;
+}
+
+/* One per photo (current + the one sliding out) - absolutely stacked so both occupy the exact
+ * same spot while they cross each other. Handles the X-axis slide; `.decant-photo` below keeps
+ * its own Y-axis float untouched (nested elements animate `transform` independently). */
+.decant-photo-slide-layer {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.decant-photo-slide-layer.decant-photo--exit-to-left {
+  animation: decant-slide-to-left 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.decant-photo-slide-layer.decant-photo--exit-to-right {
+  animation: decant-slide-to-right 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.decant-photo-slide-layer.decant-photo--enter-from-right {
+  animation: decant-slide-from-right 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.decant-photo-slide-layer.decant-photo--enter-from-left {
+  animation: decant-slide-from-left 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .decant-photo {
@@ -176,10 +203,45 @@
   }
 }
 
+@keyframes decant-slide-to-left {
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes decant-slide-to-right {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes decant-slide-from-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes decant-slide-from-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .decants-ring,
   .decant-photo {
     animation: none;
+  }
+
+  /* Can't drop these to `animation: none` like the ones above - `onExitAnimationEnd()` relies on
+   * `animationend` firing to remove the outgoing photo. Shrinking the duration keeps that cleanup
+   * working while the motion itself is effectively imperceptible. */
+  .decant-photo-slide-layer {
+    animation-duration: 0.01ms !important;
   }
 }
 

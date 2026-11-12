@@ -7,14 +7,32 @@
         <div class="decants-ring decants-ring--inner"></div>
 
         <div class="decants-showcase">
-          <img
-            [ngSrc]="selectedPhoto()"
-            [alt]="'Decant de ' + selectedSize() + 'ml'"
-            width="500"
-            height="500"
-            class="decant-photo"
-            priority
-          />
+          @for (layer of exitingLayers(); track layer.id) {
+            <div
+              class="decant-photo-slide-layer"
+              [class.decant-photo--exit-to-left]="layer.dir === 'next'"
+              [class.decant-photo--exit-to-right]="layer.dir === 'prev'"
+              (animationend)="onExitAnimationEnd()"
+            >
+              <img [ngSrc]="layer.url" alt="" width="500" height="500" class="decant-photo" />
+            </div>
+          }
+          @for (layer of currentLayers(); track layer.id) {
+            <div
+              class="decant-photo-slide-layer"
+              [class.decant-photo--enter-from-right]="layer.dir === 'next'"
+              [class.decant-photo--enter-from-left]="layer.dir === 'prev'"
+            >
+              <img
+                [ngSrc]="layer.url"
+                [alt]="'Decant de ' + layer.size + 'ml'"
+                width="500"
+                height="500"
+                class="decant-photo"
+                priority
+              />
+            </div>
+          }
         </div>
       </div>
 

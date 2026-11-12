@@ -54,7 +54,7 @@
             <div class="compare-bar-chip" [style.--series-color]="seriesColor(i)">
               <span class="compare-bar-dot" aria-hidden="true"></span>
               @if (product.images[0]; as cover) {
-                <img [ngSrc]="cover.url" [alt]="product.name" width="22" height="22" class="compare-bar-thumb" />
+                <img [ngSrc]="cloudinaryUrl(cover.url, 44)" [alt]="product.name" width="22" height="22" class="compare-bar-thumb" />
               }
               <span class="compare-bar-chip-text">{{ product.brand }} · {{ product.name }}</span>
               @if (product.variantLabel) {
@@ -113,7 +113,7 @@
               <div class="compare-product-main">
                 <div class="compare-product-visual">
                   @if (product.images[0]; as cover) {
-                    <img [ngSrc]="cover.url" [alt]="product.name" width="120" height="120" class="compare-photo" />
+                    <img [ngSrc]="cloudinaryUrl(cover.url, 240)" [alt]="product.name" width="120" height="120" class="compare-photo" />
                   } @else {
                     <span class="compare-photo compare-photo--empty" aria-hidden="true">🧴</span>
                   }
@@ -222,7 +222,7 @@
                     @for (product of products(); track product.id + '::' + product.variantId; let i = $index) {
                       <div class="compare-cell compare-fact-header" [style.--series-color]="seriesColor(i)">
                         @if (product.images[0]; as cover) {
-                          <img [ngSrc]="cover.url" [alt]="product.name" width="26" height="26" class="compare-fact-photo" />
+                          <img [ngSrc]="cloudinaryUrl(cover.url, 52)" [alt]="product.name" width="26" height="26" class="compare-fact-photo" />
                         }
                         <span>{{ product.name }}</span>
                       </div>

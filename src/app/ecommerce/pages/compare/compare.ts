@@ -2,6 +2,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CompareService } from '../../../core/compare/compare.service';
+import { cloudinaryUrl } from '../../data/cloudinary-url.helper';
 import { SCENT_STYLE_OPTIONS } from '../../data/scent-styles';
 import { CompareDotRows } from './components/compare-dot-rows/compare-dot-rows';
 import { CompareMetricRows } from './components/compare-metric-rows/compare-metric-rows';
@@ -72,6 +73,9 @@ const MAX_RADAR_AXES = 6;
 export default class Compare {
   protected readonly compareService = inject(CompareService);
   private readonly destroyRef = inject(DestroyRef);
+  /** Bound as-is for the template - every `[ngSrc]` here reads a different product's photo per
+   *  `@for` iteration, so it can't be a single component-wide `computed()`. */
+  protected readonly cloudinaryUrl = cloudinaryUrl;
 
   protected readonly categoryLabels = CATEGORY_SINGULAR_LABELS;
   protected readonly concentrationLabels = CONCENTRATION_LABELS;

@@ -13,9 +13,9 @@
   ></a>
 
   <div class="product-card-visual">
-    @if (coverImage(); as cover) {
+    @if (coverImageUrl(); as coverUrl) {
       <div class="product-card-photo-frame">
-        <img [ngSrc]="cover.url" [alt]="product().name" fill class="product-card-photo" />
+        <img [ngSrc]="coverUrl" [alt]="product().name" fill class="product-card-photo" />
       </div>
     } @else {
       <!-- Placeholder silhouette, shaped after the product type. -->

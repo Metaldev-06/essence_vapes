@@ -18,7 +18,7 @@
           <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m11 0h3a2 2 0 0 0 2-2v-3" />
         </svg>
       </a>
-      <img [ngSrc]="image.url" [alt]="product().name" fill priority class="product-gallery-photo" />
+      <img [ngSrc]="mainImageUrl(image.url)" [alt]="product().name" fill priority class="product-gallery-photo" />
     } @else {
       <svg class="product-gallery-bottle" viewBox="0 0 100 180" aria-hidden="true">
         <rect x="38" y="8" width="24" height="14" rx="4" class="product-gallery-bottle-cap" />
@@ -39,7 +39,7 @@
           [attr.aria-label]="'Ver imagen ' + (i + 1) + ' de ' + product().images.length"
           (click)="selectImage(i)"
         >
-          <img [ngSrc]="image.url" alt="" width="64" height="64" />
+          <img [ngSrc]="thumbUrl(image.url)" alt="" width="64" height="64" />
         </button>
       }
     </div>

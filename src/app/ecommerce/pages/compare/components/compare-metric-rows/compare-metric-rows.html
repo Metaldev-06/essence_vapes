@@ -10,7 +10,7 @@
           @for (bar of row.bars; track $index) {
             <div class="compare-metric-bar-line">
               @if (products()[$index].images[0]; as cover) {
-                <img [ngSrc]="cover.url" [alt]="products()[$index].name" width="18" height="18" class="compare-metric-photo" [style.--series-color]="seriesColor($index)" />
+                <img [ngSrc]="cloudinaryUrl(cover.url, 36)" [alt]="products()[$index].name" width="18" height="18" class="compare-metric-photo" [style.--series-color]="seriesColor($index)" />
               } @else {
                 <span class="compare-dot" [style.--series-color]="seriesColor($index)" aria-hidden="true"></span>
               }

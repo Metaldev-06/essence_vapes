@@ -1,4 +1,14 @@
-import { Component, computed, debounced, effect, inject, signal, untracked } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  computed,
+  debounced,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -62,6 +72,7 @@ const PRIORITY_OPTIONS: readonly ThreadPriority[] = ['baja', 'media', 'alta'];
 })
 export default class Messages {
   private readonly messagesAdminService = inject(MessagesAdminService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly navItems = NAV_ITEMS;
   protected readonly inboxLabels = INBOX_LABELS;
@@ -132,17 +143,21 @@ export default class Messages {
       untracked(() => void this.loadStats(period));
     });
 
-    const subscription = this.messagesAdminService.watchEvents().subscribe({
-      next: (event) => this.onRealtimeEvent(event),
-      error: () => {
-        /* La conexión SSE se corta sola en algún momento (deploy, reinicio) - no hay retry
-           automático en esta primera versión; recargar la página la reconecta. */
-      },
-    });
-    // No hay un `DestroyRef` inyectado explícito acá porque este componente vive mientras el
-    // admin está en `/admin/mensajes` - Angular limpia la suscripción del `Observable` cuando el
-    // router destruye el componente, ya que `watchEvents()` aborta el `fetch` en su `teardown`.
-    void subscription;
+    // `takeUntilDestroyed` es lo que realmente cierra la conexión SSE al salir de la página -
+    // antes NO se cerraba sola (el comentario que decía eso era incorrecto): el teardown de
+    // `watchEvents()` (que aborta el `fetch`) solo corre cuando algo llama `.unsubscribe()`, y acá
+    // nada lo hacía. Cada visita a `/admin/mensajes` dejaba una conexión más abierta (confirmado
+    // en la auditoría de performance, 2026-11-11 - ver `02-frontend-performance.md`).
+    this.messagesAdminService
+      .watchEvents()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (event) => this.onRealtimeEvent(event),
+        error: () => {
+          /* La conexión SSE se corta sola en algún momento (deploy, reinicio) - no hay retry
+             automático en esta primera versión; recargar la página la reconecta. */
+        },
+      });
   }
 
   // --- Navegación / listado ---------------------------------------------------------------

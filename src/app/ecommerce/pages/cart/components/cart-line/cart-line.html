@@ -8,8 +8,8 @@
     class="cart-line-visual"
     [attr.aria-label]="'Ver ' + line().product.name"
   >
-    @if (coverImage(); as cover) {
-      <img [ngSrc]="cover.url" [alt]="line().product.name" fill class="cart-line-photo" />
+    @if (coverImageUrl(); as coverUrl) {
+      <img [ngSrc]="coverUrl" [alt]="line().product.name" fill class="cart-line-photo" />
     } @else {
       <svg class="cart-line-bottle" viewBox="0 0 100 180" aria-hidden="true">
         <rect x="38" y="8" width="24" height="14" rx="4" class="cart-line-bottle-cap" />

@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { AdminAuthService } from '../../data/admin-auth.service';
 import { ProductsAdminService } from '../../data/products-admin.service';
+import { cloudinaryUrl } from '../../../ecommerce/data/cloudinary-url.helper';
 import type { Product } from '../../../ecommerce/data/product.model';
 
 const LOW_STOCK_THRESHOLD = 5;
@@ -20,6 +21,7 @@ export default class Dashboard {
 
   protected readonly lowStockThreshold = LOW_STOCK_THRESHOLD;
   protected readonly skeletonTiles = [1, 2, 3, 4];
+  protected readonly cloudinaryUrl = cloudinaryUrl;
 
   protected readonly isLoading = signal(true);
   protected readonly error = signal<string | null>(null);

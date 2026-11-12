@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { AdminProductsFiltersStore } from '../../data/admin-products-filters-store';
 import { extractErrorMessage } from '../../data/extract-error-message';
 import { ProductsAdminService } from '../../data/products-admin.service';
+import { cloudinaryUrl } from '../../../ecommerce/data/cloudinary-url.helper';
 import { ConfirmDialog, type ConfirmDialogData } from '../../shared/confirm-dialog/confirm-dialog';
 import { Toast, type ToastMessage } from '../../shared/toast/toast';
 import { ToggleSwitch } from '../../shared/toggle-switch/toggle-switch';
@@ -32,6 +33,7 @@ interface CategoryOption {
 export default class AdminProducts {
   private readonly productsAdminService = inject(ProductsAdminService);
   private readonly filtersStore = inject(AdminProductsFiltersStore);
+  protected readonly cloudinaryUrl = cloudinaryUrl;
 
   protected readonly categories: readonly CategoryOption[] = [
     { id: 'todos', label: 'Todas' },

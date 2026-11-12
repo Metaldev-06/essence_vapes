@@ -45,12 +45,18 @@ export class ProductsService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/products`;
 
-  private readonly featuredResource = httpResource<Product[]>(() => `${this.baseUrl}/featured`, {
-    defaultValue: [],
-  });
-
-  readonly featured = this.featuredResource.value;
-  readonly featuredLoading = this.featuredResource.isLoading;
+  /**
+   * Productos destacados (home) - perezoso por el mismo motivo que `capacities()`/`brands()`
+   * abajo: `ProductsService` es un singleton inyectado desde lugares que no muestran destacados
+   * (el header, para el prefetch-on-hover de "Productos"; `ProductCard` en cualquier página, para
+   * `prefetchProduct()`). Como campo de clase `httpResource` eager, esto estaba disparando
+   * `/products/featured` en TODAS las páginas del sitio (confirmado en la auditoría de
+   * performance, 2026-11-11 - ver `03-http-requests.md` §5.2), incluidas login/registro/favoritos
+   * que nunca lo necesitan. Solo `FeaturedProducts` (home) debe llamar a este método.
+   */
+  featured() {
+    return httpResource<Product[]>(() => `${this.baseUrl}/featured`, { defaultValue: [] });
+  }
 
   /**
    * Distinct ml capacities currently in the catalog (e.g. [2, 5, 10, 100, 125, 200]) - only the

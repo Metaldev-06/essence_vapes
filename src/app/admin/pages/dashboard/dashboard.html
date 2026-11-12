@@ -156,7 +156,7 @@
               <a class="attention-item" [routerLink]="['/admin/productos', product.id, 'editar']">
                 <span class="attention-thumb">
                   @if (product.images[0]; as image) {
-                    <img [ngSrc]="image.url" alt="" width="40" height="40" />
+                    <img [ngSrc]="cloudinaryUrl(image.url, 80)" alt="" width="40" height="40" />
                   } @else {
                     <span aria-hidden="true">{{ product.brand.charAt(0) }}</span>
                   }

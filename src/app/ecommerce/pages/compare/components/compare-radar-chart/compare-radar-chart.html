@@ -19,7 +19,7 @@
   @for (product of products(); track product.id + '::' + product.variantId; let i = $index) {
     <span class="compare-radar-legend-item" [style.--series-color]="seriesColor(i)">
       @if (product.images[0]; as cover) {
-        <img [ngSrc]="cover.url" [alt]="product.name" width="18" height="18" class="compare-legend-photo" />
+        <img [ngSrc]="cloudinaryUrl(cover.url, 36)" [alt]="product.name" width="18" height="18" class="compare-legend-photo" />
       } @else {
         <span class="compare-dot" aria-hidden="true"></span>
       }

@@ -11,6 +11,7 @@ import { ProductCard } from '../../../../shared/product-card/product-card';
 })
 export class FeaturedProducts {
   private readonly productsService = inject(ProductsService);
+  private readonly featuredResource = this.productsService.featured();
 
-  protected readonly products = this.productsService.featured;
+  protected readonly products = this.featuredResource.value;
 }

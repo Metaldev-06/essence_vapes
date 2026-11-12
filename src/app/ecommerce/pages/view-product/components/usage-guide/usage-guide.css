@@ -179,8 +179,14 @@
   background: var(--color-accent);
 }
 
-/* Weak (0-1/5): kept legible, visually recessive - still clearly labeled, not just dim. */
-.occasion-tile--weak {
+/* Weak (0-1/5): kept legible, visually recessive - still clearly labeled, not just dim.
+ * Scoped to icon/dots only (not the label): `opacity` on the whole tile used to compound with
+ * `.occasion-tile-label`'s own translucent `--color-text-muted`, dropping its contrast to 3.27:1
+ * against the panel background - confirmed by Lighthouse accessibility audit (`color-contrast`,
+ * 2026-11-11 performance audit). The label now stays at `--color-text-muted`'s own ~60% alpha,
+ * no further multiplication. */
+.occasion-tile--weak .occasion-tile-icon,
+.occasion-tile--weak .occasion-tile-dots {
   opacity: 0.6;
 }
 

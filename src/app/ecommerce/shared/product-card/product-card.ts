@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
 import { CompareService } from '../../../core/compare/compare.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
+import { cloudinaryUrl } from '../../data/cloudinary-url.helper';
 import { CATEGORY_SINGULAR_LABELS, type Gender, type Product } from '../../data/product.model';
 import { ProductsService } from '../../data/products.service';
 
@@ -39,6 +40,13 @@ export class ProductCard {
 
   /** First uploaded photo, if any - falls back to the decorative SVG bottle otherwise. */
   protected readonly coverImage = computed(() => this.product().images[0]);
+
+  /** `f_auto,q_auto,w_480` - see `cloudinaryUrl`'s docblock. 480 comfortably covers this card's
+   *  photo frame at retina density without serving the full-resolution original. */
+  protected readonly coverImageUrl = computed(() => {
+    const cover = this.coverImage();
+    return cover ? cloudinaryUrl(cover.url, 480) : undefined;
+  });
 
   protected readonly isFavorite = computed(() =>
     this.favoritesService.isFavorite(this.product().id, this.product().variantId),

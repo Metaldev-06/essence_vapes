@@ -2,6 +2,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../../../../core/cart/cart.service';
+import { cloudinaryUrl } from '../../../../data/cloudinary-url.helper';
 import { formatPrice } from '../../../../data/format-price';
 import type { CartLine as CartLineModel } from '../../../../../core/cart/cart.model';
 
@@ -18,6 +19,11 @@ export class CartLine {
 
   /** First uploaded photo, if any - falls back to the decorative SVG bottle otherwise. */
   protected readonly coverImage = computed(() => this.line().product.images[0]);
+  /** `f_auto,q_auto,w_160` - this is a small cart thumbnail, never needs the full original. */
+  protected readonly coverImageUrl = computed(() => {
+    const cover = this.coverImage();
+    return cover ? cloudinaryUrl(cover.url, 160) : undefined;
+  });
   protected readonly subtotal = computed(() =>
     formatPrice(this.line().product.priceValue * this.line().quantity),
   );

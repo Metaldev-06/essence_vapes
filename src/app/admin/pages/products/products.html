@@ -129,7 +129,7 @@
                 <div class="product-cell">
                   <span class="product-thumb">
                     @if (product.images[0]; as image) {
-                      <img [ngSrc]="image.url" alt="" width="44" height="44" />
+                      <img [ngSrc]="cloudinaryUrl(image.url, 88)" alt="" width="44" height="44" />
                     } @else {
                       <span aria-hidden="true">{{ product.brand.charAt(0) }}</span>
                     }

@@ -36,7 +36,11 @@ export default class CheckoutPaymentStep implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     const order = this.ordersService.currentOrder();
-    if (!order) {
+    // Mismo chequeo que el paso "resumen": una orden que ya no está en `pending_payment` (en
+    // revisión, pagada, cancelada, etc) nunca admite un nuevo intento de pago - volver a
+    // "resumen" para que cree una orden nueva a partir del carrito actual en vez de mostrar acá
+    // el error del backend.
+    if (!order || order.status !== 'pending_payment') {
       void this.router.navigateByUrl('/checkout/resumen');
       return;
     }

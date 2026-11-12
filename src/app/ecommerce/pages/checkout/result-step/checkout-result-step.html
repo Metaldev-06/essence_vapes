@@ -20,8 +20,8 @@
         <span class="checkout-result-icon">✕</span>
         <h1 class="section-title">No pudimos procesar el pago</h1>
         <p class="checkout-step-subtitle">
-          @if (result.statusDetail) {
-            Motivo: {{ result.statusDetail }}.
+          @if (rejectionReason()) {
+            {{ rejectionReason() }}
           }
           Tu pedido sigue reservado, podés intentar de nuevo con otro medio de pago.
         </p>

@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 import { OrdersService } from '../../../../core/orders/orders.service';
+import { statusDetailLabel } from '../../../../core/payments/status-detail-label';
 import { CheckoutService } from '../checkout.service';
 
 type ResultKind = 'approved' | 'pending' | 'rejected' | 'unknown';
@@ -39,6 +40,10 @@ export default class CheckoutResultStep {
 
   protected readonly canRetry = computed(
     () => this.kind() === 'rejected' && this.order?.status === 'pending_payment',
+  );
+
+  protected readonly rejectionReason = computed(() =>
+    statusDetailLabel(this.result?.statusDetail),
   );
 
   constructor() {

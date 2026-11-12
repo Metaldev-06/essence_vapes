@@ -28,7 +28,18 @@ export default class CheckoutSummaryStep implements OnInit {
   // Si ya existe una orden para este checkout (se volvió acá desde "Pago", con un error de pago
   // o por "Volver al resumen"), el carrito ya se vació cuando se confirmó la primera vez - este
   // paso pasa a mostrar esa orden ya creada en vez de intentar leer un carrito vacío.
-  protected readonly existingOrder = this.ordersService.currentOrder;
+  //
+  // Solo es "reusable" si sigue en `pending_payment` - una vez que Mercado Pago la mueve a
+  // `processing`/`paid`/etc (incluso un intento "en revisión", no solo aprobado), ya no admite
+  // un nuevo intento de pago (ver `OrdersService.getPayableOrderOrThrow` en el backend). Antes de
+  // este fix, `currentOrder` (un signal global que vive mientras dure la pestaña) se reusaba acá
+  // sin mirar su estado: si el comprador iniciaba una compra nueva después de que la anterior
+  // quedara "en revisión", este paso la reutilizaba igual y el pago de la compra nueva fallaba
+  // con "Esta orden ya no admite un nuevo intento de pago".
+  protected readonly existingOrder = computed(() => {
+    const order = this.ordersService.currentOrder();
+    return order?.status === 'pending_payment' ? order : null;
+  });
 
   protected readonly selectedAddress = computed(() => {
     const selection = this.deliverySelection();
@@ -50,6 +61,15 @@ export default class CheckoutSummaryStep implements OnInit {
   ngOnInit(): void {
     if (!this.checkoutService.deliverySelection() || !this.checkoutService.acceptedTerms()) {
       void this.router.navigateByUrl('/checkout/direccion');
+      return;
+    }
+
+    // Limpieza de la orden vieja si ya no es reusable (ver `existingOrder` arriba) - no solo
+    // afecta a este paso: si quedara colgada en el signal global, un acceso directo a
+    // `/checkout/pago` (sin pasar por acá) también la vería e intentaría cobrarla de nuevo.
+    const stale = this.ordersService.currentOrder();
+    if (stale && stale.status !== 'pending_payment') {
+      this.ordersService.setCurrentOrder(null);
     }
   }
 

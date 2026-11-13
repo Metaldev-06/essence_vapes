@@ -49,6 +49,22 @@ export class DecantsBanner {
   ]);
   protected readonly exitingLayers = signal<readonly PhotoLayer[]>([]);
 
+  constructor() {
+    this.preloadSizePhotos();
+  }
+
+  /**
+   * Warms the browser's image cache for every size up front. Without this, the 5ml/10ml photos
+   * are only ever requested the moment their `<img>` first enters the DOM - which is the exact
+   * instant their slide-in animation starts - so on a fresh page load the first switch to a size
+   * not seen yet shows the photo popping in mid-animation instead of sliding in already loaded.
+   */
+  private preloadSizePhotos(): void {
+    for (const url of Object.values(SIZE_PHOTOS)) {
+      new Image().src = url;
+    }
+  }
+
   protected selectSize(ml: number): void {
     const current = this.selectedSize();
     if (ml === current) return;

@@ -16,6 +16,12 @@ import {
 } from '../../data/products.service';
 import { ProductsFiltersStore } from '../../data/products-filters-store';
 import { styleGroupForCategory, styleOptionsForGroup } from '../../data/style-group';
+import {
+  brandGroupKey,
+  capacitySuffixFor,
+  capacityUnitForCategory,
+  showsGenderFilter,
+} from '../../data/catalog-filter-groups';
 import type {
   Gender,
   Product,
@@ -80,10 +86,28 @@ export default class Products implements OnDestroy {
   protected readonly activeCapacity = signal<number | 'todas'>(
     this.initialFilters.capacityMl ?? 'todas',
   );
-  private readonly capacitiesResource = this.productsService.capacities();
+  /** Not a signal on purpose - same "detect a real change" role as `lastStyleGroup` above. */
+  private lastCapacityUnit = capacityUnitForCategory(this.initialFilters.category);
+  private lastBrandGroup = brandGroupKey(this.initialFilters.category);
+  private readonly capacitiesResource = this.productsService.capacities(() => {
+    const category = this.activeCategory();
+    return category === 'todos' ? undefined : category;
+  });
   protected readonly capacityOptions = this.capacitiesResource.value;
-  private readonly brandsResource = this.productsService.brands();
+  /** Perfumes/decants comparten marcas; vapes y esencias tienen cada uno el suyo propio - ver
+   *  `brandCategoriesFor` en el backend. */
+  private readonly brandsResource = this.productsService.brands(() => {
+    const category = this.activeCategory();
+    return category === 'todos' ? undefined : category;
+  });
   protected readonly brandOptions = this.brandsResource.value;
+  /** "Todos" no tiene una unidad única (ml vs. puffs) - el filtro de Capacidad se oculta por
+   *  completo hasta elegir una categoría puntual (`capacityOptions()` queda vacío igual). */
+  protected readonly showGender = computed(() => showsGenderFilter(this.activeCategory()));
+  protected readonly capacitySuffix = computed(() => {
+    const unit = capacityUnitForCategory(this.activeCategory());
+    return unit ? capacitySuffixFor(unit) : 'ml';
+  });
 
   private readonly debouncedSearch = debounced(this.search, 300);
   private readonly offset = signal(0);
@@ -110,6 +134,39 @@ export default class Products implements OnDestroy {
         if (group === this.lastStyleGroup) return;
         this.lastStyleGroup = group;
         this.activeStyles.set(new Set());
+      });
+    });
+
+    // Una marca elegida en perfumes/decants no necesariamente existe en vapes/esencias (cada uno
+    // tiene su propio universo de marcas) - se limpia al cruzar de grupo, mismo criterio que los
+    // estilos arriba.
+    effect(() => {
+      const group = brandGroupKey(this.activeCategory());
+      untracked(() => {
+        if (group === this.lastBrandGroup) return;
+        this.lastBrandGroup = group;
+        this.activeBrand.set('todas');
+      });
+    });
+
+    // La capacidad elegida deja de tener sentido al cambiar de unidad (ml vs. puffs, o al volver
+    // a "todos", que no tiene una unidad única) - mismo criterio que los estilos arriba.
+    effect(() => {
+      const unit = capacityUnitForCategory(this.activeCategory());
+      untracked(() => {
+        if (unit === this.lastCapacityUnit) return;
+        this.lastCapacityUnit = unit;
+        this.activeCapacity.set('todas');
+      });
+    });
+
+    // El género no aplica a vapes/esencias - se limpia al entrar a una categoría donde el
+    // filtro ya no se muestra, para que no siga acotando resultados sin que se vea el control.
+    effect(() => {
+      const shows = showsGenderFilter(this.activeCategory());
+      untracked(() => {
+        if (shows || this.activeGender() === 'todos') return;
+        this.activeGender.set('todos');
       });
     });
 

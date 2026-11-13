@@ -5,7 +5,9 @@
     <app-products-sidebar
       [categories]="categories"
       [genderOptions]="genderOptions"
+      [showGender]="showGender()"
       [capacityOptions]="capacityOptions()"
+      [capacitySuffix]="capacitySuffix()"
       [brandOptions]="brandOptions()"
       [(category)]="activeCategory"
       [(gender)]="activeGender"

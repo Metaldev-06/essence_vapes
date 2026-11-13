@@ -59,21 +59,44 @@ export class ProductsService {
   }
 
   /**
-   * Distinct ml capacities currently in the catalog (e.g. [2, 5, 10, 100, 125, 200]) - only the
-   * `/productos` filters need this, so it's a lazy resource (like `list`/`byId` below) instead of
-   * an eager class field: `ProductsService` is a root singleton injected from several unrelated
-   * places (e.g. the home page, for `.featured` alone), and an eager `httpResource` field fires
-   * its request the moment the service is first constructed, regardless of whether anything ever
-   * reads it - that was firing a `/products/capacities` + `/products/brands` request on every
-   * page load, home included.
+   * Distinct capacities currently in the catalog (ml or puffs depending on `category` - see
+   * `/productos`'s `capacityUnitFor`) - only the `/productos` filters need this, so it's a lazy
+   * resource (like `list`/`byId` below) instead of an eager class field: `ProductsService` is a
+   * root singleton injected from several unrelated places (e.g. the home page, for `.featured`
+   * alone), and an eager `httpResource` field fires its request the moment the service is first
+   * constructed, regardless of whether anything ever reads it - that was firing a
+   * `/products/capacities` + `/products/brands` request on every page load, home included.
+   *
+   * `category` is an optional reactive accessor (same shape as `list()`'s `query`) so the
+   * resource re-fetches when the storefront's chosen category changes - each category has its
+   * own real range of sizes (ver tarea del usuario: no tiene sentido mezclar ml de perfumes con
+   * ml de decants, y vapes se mide en puffs, no en ml). Omitted entirely for callers that want
+   * the historical unscoped behaviour (e.g. admin reports' brand list).
    */
-  capacities() {
-    return httpResource<number[]>(() => `${this.baseUrl}/capacities`, { defaultValue: [] });
+  capacities(category?: () => ProductCategory | undefined) {
+    return httpResource<number[]>(
+      () => {
+        const cat = category?.();
+        // Pasado un accessor, "sin categoría" (ej. "todos") no tiene una unidad única que
+        // mostrar (ml vs. puffs) - se salta el pedido entero en vez de traer una lista mezclada.
+        if (category && !cat) return undefined;
+        return { url: `${this.baseUrl}/capacities`, params: this.categoryParam(cat) };
+      },
+      { defaultValue: [] },
+    );
   }
 
-  /** Distinct brand names currently in the catalog, sorted alphabetically - same reasoning as `capacities()`. */
-  brands() {
-    return httpResource<string[]>(() => `${this.baseUrl}/brands`, { defaultValue: [] });
+  /** Distinct brand names currently in the catalog, sorted alphabetically - same reasoning and
+   *  `category` shape as `capacities()`. */
+  brands(category?: () => ProductCategory | undefined) {
+    return httpResource<string[]>(
+      () => ({ url: `${this.baseUrl}/brands`, params: this.categoryParam(category?.()) }),
+      { defaultValue: [] },
+    );
+  }
+
+  private categoryParam(category: ProductCategory | undefined): Record<string, string> {
+    return category ? { category } : {};
   }
 
   list(query: () => ProductsQuery | undefined) {

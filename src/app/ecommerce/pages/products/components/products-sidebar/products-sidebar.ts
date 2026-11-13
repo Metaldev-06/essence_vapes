@@ -11,7 +11,9 @@ import type { Gender, ProductCategory } from '../../../../data/product.model';
 export class ProductsSidebar {
   readonly categories = input.required<readonly FilterOption<ProductCategory | 'todos'>[]>();
   readonly genderOptions = input.required<readonly FilterOption<Gender | 'todos'>[]>();
+  readonly showGender = input<boolean>(true);
   readonly capacityOptions = input<readonly number[]>([]);
+  readonly capacitySuffix = input<string>('ml');
   readonly brandOptions = input<readonly string[]>([]);
 
   readonly category = model.required<ProductCategory | 'todos'>();

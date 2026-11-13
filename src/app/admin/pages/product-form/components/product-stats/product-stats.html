@@ -1,0 +1,62 @@
+<div class="product-stats">
+  <div class="product-stats-header">
+    <span class="product-stats-period">{{ dateRange().label }}</span>
+    <app-date-range-picker [(value)]="dateRange" />
+  </div>
+
+  @if (loading() && variantRows().length === 0) {
+    <p class="product-stats-loading">Cargando estadísticas...</p>
+  } @else if (error()) {
+    <div class="product-stats-error" role="alert">
+      <span>{{ error() }}</span>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="retry()">Reintentar</button>
+    </div>
+  } @else if (variantRows().length === 0) {
+    <app-empty-state title="Sin ventas en este período" />
+  } @else {
+    <div class="product-stats-summary">
+      <div class="product-stats-metric">
+        <span class="product-stats-metric-value">{{ totalUnits() }}</span>
+        <span class="product-stats-metric-label">Unidades vendidas</span>
+      </div>
+      <div class="product-stats-metric">
+        <span class="product-stats-metric-value">{{ formatPrice(totalRevenue()) }}</span>
+        <span class="product-stats-metric-label">Ingresos generados</span>
+      </div>
+      <div class="product-stats-metric">
+        <span class="product-stats-metric-value">{{ currentStock() }}</span>
+        <span class="product-stats-metric-label">Stock actual (todas las variantes)</span>
+      </div>
+      <div class="product-stats-metric">
+        <span class="product-stats-metric-value">{{ lastSaleLabel() ?? 'Sin ventas' }}</span>
+        <span class="product-stats-metric-label">Última venta en el período</span>
+      </div>
+    </div>
+
+    <app-sales-evolution-chart [points]="timeseries()" metric="approvedValue" granularity="day" />
+
+    <div class="product-stats-variants">
+      <h3 class="product-stats-variants-title">Ventas por variante</h3>
+      <table class="product-stats-table">
+        <thead>
+          <tr>
+            <th>Variante</th>
+            <th>Unidades</th>
+            <th>Ingresos</th>
+            <th>Stock actual</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of variantRows(); track row.variantId) {
+            <tr>
+              <td>{{ row.variantLabel ?? 'Base' }}</td>
+              <td>{{ row.unitsSold }}</td>
+              <td>{{ formatPrice(row.revenueValue) }}</td>
+              <td>{{ row.currentStock ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

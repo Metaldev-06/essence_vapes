@@ -89,6 +89,9 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
+  /** Nota interna del admin (ver tarea, punto 7.4) - solo presente en respuestas admin, nunca en
+   *  "Mis compras" del comprador. */
+  internalNotes?: string | null;
 }
 
 /** Body de `POST /orders` - discriminado por `deliveryMethod` (ver `CreateOrderDto` backend). */

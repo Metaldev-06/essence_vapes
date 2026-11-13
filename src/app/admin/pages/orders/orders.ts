@@ -87,6 +87,9 @@ export default class AdminOrders {
   protected readonly search = signal('');
   protected readonly dateFrom = signal('');
   protected readonly dateTo = signal('');
+  protected readonly minAmount = signal('');
+  protected readonly maxAmount = signal('');
+  protected readonly paymentMethodType = signal<'credit_card' | 'debit_card' | 'todos'>('todos');
   protected readonly offset = signal(0);
   private readonly debouncedSearch = debounced(this.search, 300);
 
@@ -113,6 +116,9 @@ export default class AdminOrders {
       this.debouncedSearch.value();
       this.dateFrom();
       this.dateTo();
+      this.minAmount();
+      this.maxAmount();
+      this.paymentMethodType();
       untracked(() => this.offset.set(0));
     });
 
@@ -124,6 +130,9 @@ export default class AdminOrders {
       const search = this.debouncedSearch.value();
       const dateFrom = this.dateFrom();
       const dateTo = this.dateTo();
+      const minAmount = this.minAmount();
+      const maxAmount = this.maxAmount();
+      const paymentMethodType = this.paymentMethodType();
       const offset = this.offset();
       untracked(
         () =>
@@ -135,6 +144,9 @@ export default class AdminOrders {
             search,
             dateFrom,
             dateTo,
+            minAmount,
+            maxAmount,
+            paymentMethodType,
             offset,
           ),
       );
@@ -181,6 +193,20 @@ export default class AdminOrders {
     this.dateTo.set((event.target as HTMLInputElement).value);
   }
 
+  protected onMinAmountChange(event: Event): void {
+    this.minAmount.set((event.target as HTMLInputElement).value);
+  }
+
+  protected onMaxAmountChange(event: Event): void {
+    this.maxAmount.set((event.target as HTMLInputElement).value);
+  }
+
+  protected onPaymentMethodTypeChange(event: Event): void {
+    this.paymentMethodType.set(
+      (event.target as HTMLSelectElement).value as 'credit_card' | 'debit_card' | 'todos',
+    );
+  }
+
   protected clearFilters(): void {
     this.status.set('todos');
     this.paymentStatus.set('todos');
@@ -189,6 +215,9 @@ export default class AdminOrders {
     this.search.set('');
     this.dateFrom.set('');
     this.dateTo.set('');
+    this.minAmount.set('');
+    this.maxAmount.set('');
+    this.paymentMethodType.set('todos');
   }
 
   private async loadStats(): Promise<void> {
@@ -207,6 +236,9 @@ export default class AdminOrders {
     search: string,
     dateFrom: string,
     dateTo: string,
+    minAmount: string,
+    maxAmount: string,
+    paymentMethodType: 'credit_card' | 'debit_card' | 'todos',
     offset: number,
   ): Promise<void> {
     this.isLoading.set(true);
@@ -220,6 +252,9 @@ export default class AdminOrders {
         search: search.trim() || undefined,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
+        minAmount: minAmount.trim() ? Number(minAmount) : undefined,
+        maxAmount: maxAmount.trim() ? Number(maxAmount) : undefined,
+        paymentMethodType: paymentMethodType === 'todos' ? undefined : paymentMethodType,
         limit: PAGE_SIZE,
         offset,
       });

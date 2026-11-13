@@ -125,6 +125,9 @@ export interface VariantSummary {
   readonly stock: number;
   readonly images: readonly MediaAsset[];
   readonly featured: boolean;
+  /** Costo de adquisición de ESTA variante - solo presente cuando viene de la ruta admin
+   *  (`GET /products/:id/admin`); la ruta pública nunca lo expone. */
+  readonly costValue?: number | null;
 }
 
 export interface Product {
@@ -137,6 +140,9 @@ export interface Product {
   readonly priceValue: number;
   readonly oldPrice?: string;
   readonly oldPriceValue?: number;
+  /** Costo de adquisición del producto base - solo presente cuando viene de la ruta admin
+   *  (`GET /products/:id/admin`); la ruta pública nunca lo expone (ver tarea, punto 4.3). */
+  readonly costValue?: number | null;
   readonly badge?: string;
   /** Hex color (e.g. "#8b5cf6"), chosen with a color picker in the admin panel. */
   readonly accent: string;

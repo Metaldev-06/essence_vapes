@@ -1,0 +1,88 @@
+<div class="date-range-picker">
+  <button
+    type="button"
+    class="date-range-trigger"
+    [attr.aria-expanded]="open()"
+    (click)="toggleOpen()"
+  >
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M16 2v4M8 2v4M3 10h18" />
+    </svg>
+    {{ value().label }}
+    <svg
+      class="date-range-trigger-caret"
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  </button>
+
+  @if (open()) {
+    <button
+      type="button"
+      class="date-range-backdrop"
+      aria-label="Cerrar selector de período"
+      (click)="close()"
+    ></button>
+
+    <div class="date-range-panel" role="dialog" aria-label="Elegir período">
+      <ul class="date-range-presets">
+        @for (preset of presets; track preset) {
+          <li>
+            <button
+              type="button"
+              class="date-range-preset"
+              [class.active]="value().preset === preset"
+              (click)="selectPreset(preset)"
+            >
+              {{ presetLabels[preset] }}
+            </button>
+          </li>
+        }
+      </ul>
+
+      <div class="date-range-custom" [class.active]="isCustom()">
+        <span class="date-range-custom-label">Rango personalizado</span>
+        <div class="date-range-custom-inputs">
+          <label class="sr-only" for="date-range-from">Desde</label>
+          <input
+            id="date-range-from"
+            type="date"
+            [value]="customFrom()"
+            (change)="onCustomFromChange($event)"
+          />
+          <span aria-hidden="true">–</span>
+          <label class="sr-only" for="date-range-to">Hasta</label>
+          <input
+            id="date-range-to"
+            type="date"
+            [value]="customTo()"
+            (change)="onCustomToChange($event)"
+          />
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" (click)="applyCustomRange()">
+          Aplicar
+        </button>
+      </div>
+    </div>
+  }
+</div>

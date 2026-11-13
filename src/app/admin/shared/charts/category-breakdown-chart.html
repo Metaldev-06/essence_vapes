@@ -1,0 +1,7 @@
+@if (points().length === 0) {
+  <app-empty-state title="Sin ventas en este período" />
+} @else {
+  <div class="chart-container">
+    <canvas baseChart [data]="chartData()" [options]="chartOptions" type="doughnut"></canvas>
+  </div>
+}

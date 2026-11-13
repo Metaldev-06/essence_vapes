@@ -19,6 +19,10 @@
               <input type="number" min="0" #priceInput [value]="variant.priceValue" />
             </label>
             <label class="variant-field">
+              <span>Costo (opcional)</span>
+              <input type="number" min="0" #costInput [value]="variant.costValue ?? ''" />
+            </label>
+            <label class="variant-field">
               <span>Stock</span>
               <input type="number" min="0" #stockInput [value]="variant.stock" />
             </label>
@@ -34,7 +38,9 @@
                 type="button"
                 class="btn btn-sm btn-primary"
                 [disabled]="savingId() === variant.id"
-                (click)="saveVariant(variant.id, labelInput.value, priceInput.value, stockInput.value)"
+                (click)="
+                  saveVariant(variant.id, labelInput.value, priceInput.value, costInput.value, stockInput.value)
+                "
               >
                 {{ savingId() === variant.id ? 'Guardando...' : 'Guardar' }}
               </button>
@@ -95,6 +101,10 @@
         <input type="number" min="0" #newPrice />
       </label>
       <label class="variant-field">
+        <span>Costo (opcional)</span>
+        <input type="number" min="0" #newCost />
+      </label>
+      <label class="variant-field">
         <span>Stock</span>
         <input type="number" min="0" #newStock value="0" />
       </label>
@@ -103,7 +113,7 @@
           type="button"
           class="btn btn-sm btn-primary"
           [disabled]="savingNew()"
-          (click)="addVariant(newLabel.value, newPrice.value, newStock.value)"
+          (click)="addVariant(newLabel.value, newPrice.value, newCost.value, newStock.value)"
         >
           {{ savingNew() ? 'Agregando...' : 'Agregar' }}
         </button>

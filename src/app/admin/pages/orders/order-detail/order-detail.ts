@@ -13,9 +13,11 @@ import { extractErrorMessage } from '../../../data/extract-error-message';
 import {
   OrdersAdminService,
   type OrderAuditLogRecord,
+  type OrderReconciliationReport,
   type PaymentAttemptRecord,
 } from '../../../data/orders-admin.service';
 import { buildWhatsAppActions, type WhatsAppAction } from '../../../data/whatsapp.helper';
+import { buildOrderTimeline, type TimelineEvent } from './build-order-timeline.helper';
 
 /** `/admin/ventas/:id` - detalle + acción manual de estado logístico (ver tarea: reembolsos
  *  siguen sin implementarse, hasta verificar permisos/procedimientos oficiales de Mercado Pago). */
@@ -49,12 +51,28 @@ export default class AdminOrderDetail {
     return order ? buildWhatsAppActions(order) : [];
   });
 
+  /** Línea de tiempo unificada (ver tarea, punto 7.3) - fusiona creación + intentos de pago +
+   *  auditoría logística, ya traídos por `load()`, sin pedir nada nuevo al backend. */
+  protected readonly timeline = computed<readonly TimelineEvent[]>(() => {
+    const order = this.order();
+    return order ? buildOrderTimeline(order, this.attempts(), this.auditLog()) : [];
+  });
+
   protected readonly selectedLogisticsStatus = signal<LogisticsStatus | null>(null);
   protected readonly logisticsStatusDirty = computed(
     () => this.selectedLogisticsStatus() !== (this.order()?.logisticsStatus ?? null),
   );
   protected readonly savingLogisticsStatus = signal(false);
   protected readonly logisticsError = signal<string | null>(null);
+
+  protected readonly notesDraft = signal('');
+  protected readonly notesDirty = computed(() => this.notesDraft() !== (this.order()?.internalNotes ?? ''));
+  protected readonly savingNotes = signal(false);
+  protected readonly notesError = signal<string | null>(null);
+
+  protected readonly reconciling = signal(false);
+  protected readonly reconciliationError = signal<string | null>(null);
+  protected readonly reconciliationReport = signal<OrderReconciliationReport | null>(null);
 
   private orderId: string | null = null;
 
@@ -90,6 +108,41 @@ export default class AdminOrderDetail {
     }
   }
 
+  protected onNotesInput(event: Event): void {
+    this.notesDraft.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  protected async saveNotes(): Promise<void> {
+    const id = this.orderId;
+    if (!id) return;
+
+    this.savingNotes.set(true);
+    this.notesError.set(null);
+    try {
+      const updated = await this.ordersAdminService.updateInternalNotes(id, this.notesDraft());
+      this.order.set(updated);
+    } catch (error) {
+      this.notesError.set(extractErrorMessage(error));
+    } finally {
+      this.savingNotes.set(false);
+    }
+  }
+
+  protected async checkReconciliation(): Promise<void> {
+    const id = this.orderId;
+    if (!id) return;
+
+    this.reconciling.set(true);
+    this.reconciliationError.set(null);
+    try {
+      this.reconciliationReport.set(await this.ordersAdminService.reconcileOrder(id));
+    } catch (error) {
+      this.reconciliationError.set(extractErrorMessage(error));
+    } finally {
+      this.reconciling.set(false);
+    }
+  }
+
   private async load(id: string): Promise<void> {
     this.isLoading.set(true);
     this.error.set(null);
@@ -103,6 +156,7 @@ export default class AdminOrderDetail {
       this.attempts.set(attempts);
       this.auditLog.set(auditLog);
       this.selectedLogisticsStatus.set(order.logisticsStatus);
+      this.notesDraft.set(order.internalNotes ?? '');
     } catch (error) {
       this.error.set(extractErrorMessage(error));
     } finally {

@@ -18,6 +18,27 @@
     </header>
 
     <section class="admin-order-card">
+      <h2 class="admin-order-card-title">Historial</h2>
+      <ol class="order-timeline">
+        @for (event of timeline(); track event.id) {
+          <li class="order-timeline-item">
+            <span class="order-timeline-marker" aria-hidden="true"></span>
+            <div class="order-timeline-content">
+              <div class="order-timeline-row">
+                <span class="order-timeline-title">{{ event.title }}</span>
+                <span class="order-timeline-at">{{ event.at | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <span class="order-timeline-meta">{{ event.actor }} · {{ event.origin }}</span>
+              @if (event.detail) {
+                <span class="order-timeline-detail">{{ event.detail }}</span>
+              }
+            </div>
+          </li>
+        }
+      </ol>
+    </section>
+
+    <section class="admin-order-card">
       <h2 class="admin-order-card-title">Cliente</h2>
       <p>{{ o.buyerName }}</p>
       <p>{{ o.buyerEmail }}</p>
@@ -142,19 +163,30 @@
           <p class="admin-order-error" role="alert">{{ logisticsError() }}</p>
         }
       </div>
+    </section>
 
-      @if (auditLog().length > 0) {
-        <div class="admin-order-audit-log">
-          <h3 class="admin-order-audit-log-title">Historial de cambios</h3>
-          <ul>
-            @for (entry of auditLog(); track entry.id) {
-              <li>
-                {{ entry.createdAt | date: 'dd/MM/yyyy HH:mm' }} · {{ entry.adminEmail }} ·
-                {{ entry.detail }}
-              </li>
-            }
-          </ul>
-        </div>
+    <section class="admin-order-card">
+      <h2 class="admin-order-card-title">Notas internas</h2>
+      <p class="admin-order-notes-hint">Solo las ve el equipo - nunca aparecen para el comprador.</p>
+      <textarea
+        class="admin-order-notes-input"
+        rows="3"
+        placeholder="Ej: cliente pidió coordinar entrega después de las 18hs..."
+        [value]="notesDraft()"
+        (input)="onNotesInput($event)"
+      ></textarea>
+      <div class="admin-order-notes-actions">
+        <button
+          type="button"
+          class="btn btn-sm btn-primary"
+          [disabled]="!notesDirty() || savingNotes()"
+          (click)="saveNotes()"
+        >
+          {{ savingNotes() ? 'Guardando...' : 'Guardar nota' }}
+        </button>
+      </div>
+      @if (notesError()) {
+        <p class="admin-order-error" role="alert">{{ notesError() }}</p>
       }
     </section>
 
@@ -199,6 +231,33 @@
           </table>
         </div>
       }
+
+      <div class="admin-order-reconcile">
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="reconciling()" (click)="checkReconciliation()">
+          {{ reconciling() ? 'Consultando Mercado Pago...' : 'Verificar contra Mercado Pago' }}
+        </button>
+        @if (reconciliationError()) {
+          <p class="admin-order-error" role="alert">{{ reconciliationError() }}</p>
+        }
+        @if (reconciliationReport(); as report) {
+          @if (!report.checked) {
+            <p class="admin-order-reconcile-note">{{ report.reason }}</p>
+          } @else if (report.matches) {
+            <p class="admin-order-reconcile-ok">
+              ✓ Coincide con Mercado Pago (verificado {{ report.checkedAt | date: 'dd/MM/yyyy HH:mm' }}).
+            </p>
+          } @else {
+            <div class="admin-order-reconcile-mismatch">
+              <p>⚠ Diferencias encontradas (verificado {{ report.checkedAt | date: 'dd/MM/yyyy HH:mm' }}):</p>
+              <ul>
+                @for (item of report.discrepancies; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+          }
+        }
+      </div>
     </section>
   }
 </div>

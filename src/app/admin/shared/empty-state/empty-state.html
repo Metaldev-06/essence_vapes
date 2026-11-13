@@ -1,0 +1,22 @@
+<div class="empty-state">
+  <svg
+    class="empty-state-icon"
+    width="34"
+    height="34"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="3" y="7" width="18" height="13" rx="2" />
+    <path d="M3 10h18M8 3v4M16 3v4" />
+  </svg>
+  <p class="empty-state-title">{{ title() }}</p>
+  @if (message()) {
+    <p class="empty-state-message">{{ message() }}</p>
+  }
+  <ng-content></ng-content>
+</div>

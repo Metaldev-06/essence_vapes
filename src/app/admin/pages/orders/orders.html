@@ -82,6 +82,27 @@
     </select>
     <input type="date" [value]="dateFrom()" (input)="onDateFromChange($event)" aria-label="Desde" />
     <input type="date" [value]="dateTo()" (input)="onDateToChange($event)" aria-label="Hasta" />
+    <input
+      type="number"
+      min="0"
+      placeholder="Importe mín."
+      [value]="minAmount()"
+      (input)="onMinAmountChange($event)"
+      aria-label="Importe mínimo"
+    />
+    <input
+      type="number"
+      min="0"
+      placeholder="Importe máx."
+      [value]="maxAmount()"
+      (input)="onMaxAmountChange($event)"
+      aria-label="Importe máximo"
+    />
+    <select (change)="onPaymentMethodTypeChange($event)" aria-label="Medio de pago">
+      <option value="todos" [selected]="paymentMethodType() === 'todos'">Cualquier medio de pago</option>
+      <option value="credit_card" [selected]="paymentMethodType() === 'credit_card'">Tarjeta de crédito</option>
+      <option value="debit_card" [selected]="paymentMethodType() === 'debit_card'">Tarjeta de débito</option>
+    </select>
     <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">Limpiar filtros</button>
   </div>
 

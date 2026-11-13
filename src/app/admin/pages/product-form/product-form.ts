@@ -25,6 +25,8 @@ import {
   type Sillage,
 } from '../../../ecommerce/data/product.model';
 import { MediaManager } from './components/media-manager/media-manager';
+import { ProductStats } from './components/product-stats/product-stats';
+import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
 import { VariantManager } from './components/variant-manager/variant-manager';
 import { ToggleSwitch } from '../../shared/toggle-switch/toggle-switch';
 
@@ -44,6 +46,8 @@ const SILLAGE_LABELS: Record<Sillage, string> = {
   enorme: 'Enorme',
 };
 
+type ProductFormTab = 'general' | 'pricing' | 'profile' | 'regulatory' | 'usage' | 'media';
+
 interface ProductFormModel {
   brand: string;
   name: string;
@@ -52,6 +56,7 @@ interface ProductFormModel {
   notesText: string;
   priceValue: number | null;
   oldPriceValue: number | null;
+  costValue: number | null;
   badge: string;
   accent: string;
   category: ProductCategory | '';
@@ -110,6 +115,7 @@ function emptyModel(): ProductFormModel {
     notesText: '',
     priceValue: null,
     oldPriceValue: null,
+    costValue: null,
     badge: '',
     accent: '',
     category: '',
@@ -239,6 +245,7 @@ function modelFromProduct(product: Product): ProductFormModel {
     notesText: joinList(product.notes),
     priceValue: product.priceValue,
     oldPriceValue: product.oldPriceValue ?? null,
+    costValue: product.costValue ?? null,
     badge: product.badge ?? '',
     accent: product.accent,
     category: product.category,
@@ -300,6 +307,7 @@ function buildPayload(model: ProductFormModel, styles: ReadonlySet<ProductStyle>
 
   if (model.variantLabel.trim()) payload.variantLabel = model.variantLabel.trim();
   if (model.oldPriceValue) payload.oldPriceValue = model.oldPriceValue;
+  if (model.costValue) payload.costValue = model.costValue;
   payload.badge = model.badge.trim() ? model.badge.trim() : null;
   if (model.year) payload.year = model.year;
   if (model.origin.trim()) payload.origin = model.origin.trim();
@@ -415,13 +423,14 @@ const productSchema = schema<ProductFormModel>((path) => {
   max(path.rating, 5, { message: 'Debe estar entre 0 y 5' });
 
   min(path.oldPriceValue, 1, { message: 'Debe ser mayor a 0' });
+  min(path.costValue, 1, { message: 'Debe ser mayor a 0' });
   min(path.ratingCount, 0, { message: 'No puede ser negativo' });
 });
 
 /** Create AND edit share this one form - `id` coming from the route is the only difference. */
 @Component({
   selector: 'app-admin-product-form',
-  imports: [FormField, RouterLink, MediaManager, VariantManager, ToggleSwitch],
+  imports: [FormField, RouterLink, MediaManager, VariantManager, ToggleSwitch, ProductStats, StockAdjustment],
   templateUrl: './product-form.html',
   styleUrl: './product-form.css',
 })
@@ -480,6 +489,18 @@ export default class ProductForm {
     'no_verificado',
     'autorizado',
     'rechazado',
+  ];
+
+  /** Pestañas del formulario (ver tarea, punto 6.1) - puramente visual, agrupa las MISMAS
+   *  secciones/campos que ya existían, sin mover ni renombrar ningún `[formField]`. */
+  protected readonly activeTab = signal<ProductFormTab>('general');
+  protected readonly tabs: readonly { id: ProductFormTab; label: string }[] = [
+    { id: 'general', label: 'Información general' },
+    { id: 'pricing', label: 'Precio e inventario' },
+    { id: 'profile', label: 'Perfil olfativo' },
+    { id: 'regulatory', label: 'Datos regulatorios' },
+    { id: 'usage', label: 'Uso y ocasiones' },
+    { id: 'media', label: 'Imágenes, variantes y estadísticas' },
   ];
 
   protected readonly productId = this.route.snapshot.paramMap.get('id');

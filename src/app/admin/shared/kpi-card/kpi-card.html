@@ -1,0 +1,43 @@
+<article class="kpi-card">
+  <div class="kpi-card-header">
+    <span class="kpi-card-label">{{ label() }}</span>
+    @if (tooltip()) {
+      <span class="kpi-card-info" [attr.title]="tooltip()" aria-hidden="true">?</span>
+      <span class="sr-only">{{ tooltip() }}</span>
+    }
+  </div>
+
+  @if (unavailable()) {
+    <p class="kpi-card-value kpi-card-value--unavailable">No disponible</p>
+  } @else {
+    <p class="kpi-card-value">{{ value() }}</p>
+
+    @if (comparisonText(); as text) {
+      <span class="kpi-card-trend" [class]="'kpi-card-trend--' + trend()">
+        @switch (trend()) {
+          @case ('up') {
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 19 19 5M9 5h10v10" />
+            </svg>
+          }
+          @case ('down') {
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 5 19 19M19 9v10H9" />
+            </svg>
+          }
+          @default {
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14" />
+            </svg>
+          }
+        }
+        {{ text }}
+        <span class="kpi-card-trend-label">{{ comparisonLabel() }}</span>
+      </span>
+    }
+  }
+
+  @if (reportLink()) {
+    <a [routerLink]="reportLink()" class="kpi-card-link">Ver reporte detallado</a>
+  }
+</article>

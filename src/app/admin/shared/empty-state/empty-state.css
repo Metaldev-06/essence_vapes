@@ -1,0 +1,27 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.empty-state-icon {
+  margin-bottom: 4px;
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.empty-state-message {
+  margin: 0;
+  font-size: 13px;
+  max-width: 32rem;
+}

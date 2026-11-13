@@ -6,12 +6,14 @@ import { MessagesAdminService } from '../../data/messages-admin.service';
 import { ConfirmDialog, type ConfirmDialogData } from '../../shared/confirm-dialog/confirm-dialog';
 
 const UNREAD_POLL_MS = 60_000;
+const COLLAPSE_STORAGE_KEY = 'essence-vapes-admin-sidebar-collapsed';
 
 @Component({
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive, ConfirmDialog],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
+  host: { '[class.collapsed]': 'collapsed()' },
 })
 export class Sidebar {
   protected readonly adminAuthService = inject(AdminAuthService);
@@ -22,6 +24,15 @@ export class Sidebar {
     const name = this.adminAuthService.user()?.fullName.trim() ?? '';
     return name ? name.charAt(0).toUpperCase() : '?';
   });
+
+  /** Solo afecta el layout de escritorio - en mobile el sidebar siempre es la franja horizontal
+   *  existente, angosta por diseño, así que "colapsar" no aplica ahí. */
+  protected readonly collapsed = signal(localStorage.getItem(COLLAPSE_STORAGE_KEY) === '1');
+
+  protected toggleCollapsed(): void {
+    this.collapsed.update((value) => !value);
+    localStorage.setItem(COLLAPSE_STORAGE_KEY, this.collapsed() ? '1' : '0');
+  }
 
   /** Pollea cada 60s en vez de abrir su propia conexión SSE - la página de Mensajes ya tiene la
    *  suya cuando está abierta; esto solo es para que el badge del sidebar no quede desactualizado

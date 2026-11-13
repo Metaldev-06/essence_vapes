@@ -39,14 +39,25 @@ export class VariantManager {
   protected readonly uploadingId = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
 
+  /** `costRaw` vacío = sin costo cargado (no se manda `costValue`); si viene con texto, debe ser
+   *  un número válido ≥ 0 - mismo criterio que `priceValue`/`stock` de acá abajo. */
+  private parseOptionalCost(costRaw: string): { ok: true; value?: number } | { ok: false } {
+    if (costRaw.trim() === '') return { ok: true, value: undefined };
+    const costValue = Number(costRaw);
+    if (!Number.isFinite(costValue) || costValue < 0) return { ok: false };
+    return { ok: true, value: costValue };
+  }
+
   protected async addVariant(
     labelRaw: string,
     priceRaw: string,
+    costRaw: string,
     stockRaw: string,
   ): Promise<void> {
     const label = labelRaw.trim();
     const priceValue = Number(priceRaw);
     const stock = stockRaw.trim() === '' ? 0 : Number(stockRaw);
+    const cost = this.parseOptionalCost(costRaw);
 
     if (!label) {
       this.error.set('La etiqueta de la variante es obligatoria');
@@ -54,6 +65,10 @@ export class VariantManager {
     }
     if (!Number.isFinite(priceValue) || priceValue < 0) {
       this.error.set('El precio de la variante debe ser un número válido');
+      return;
+    }
+    if (!cost.ok) {
+      this.error.set('El costo de la variante debe ser un número válido');
       return;
     }
     if (!Number.isFinite(stock) || stock < 0) {
@@ -67,6 +82,7 @@ export class VariantManager {
       const product = await this.productsAdminService.addVariant(this.productId(), {
         label,
         priceValue,
+        ...(cost.value !== undefined ? { costValue: cost.value } : {}),
         stock,
       });
       this.variantsChanged.emit(product);
@@ -82,11 +98,13 @@ export class VariantManager {
     variantId: string,
     labelRaw: string,
     priceRaw: string,
+    costRaw: string,
     stockRaw: string,
   ): Promise<void> {
     const label = labelRaw.trim();
     const priceValue = Number(priceRaw);
     const stock = Number(stockRaw);
+    const cost = this.parseOptionalCost(costRaw);
 
     if (!label) {
       this.error.set('La etiqueta de la variante es obligatoria');
@@ -94,6 +112,10 @@ export class VariantManager {
     }
     if (!Number.isFinite(priceValue) || priceValue < 0) {
       this.error.set('El precio de la variante debe ser un número válido');
+      return;
+    }
+    if (!cost.ok) {
+      this.error.set('El costo de la variante debe ser un número válido');
       return;
     }
     if (!Number.isFinite(stock) || stock < 0) {
@@ -107,6 +129,7 @@ export class VariantManager {
       const product = await this.productsAdminService.updateVariant(this.productId(), variantId, {
         label,
         priceValue,
+        ...(cost.value !== undefined ? { costValue: cost.value } : {}),
         stock,
       });
       this.variantsChanged.emit(product);

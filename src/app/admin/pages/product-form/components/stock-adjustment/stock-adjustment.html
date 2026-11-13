@@ -1,0 +1,47 @@
+<div class="stock-adjustment">
+  <div class="stock-adjustment-form">
+    <label class="stock-adjustment-field">
+      <span>Cantidad</span>
+      <input
+        type="number"
+        placeholder="Ej: 10 o -3"
+        [value]="quantityChange()"
+        (input)="onQuantityChange($event)"
+      />
+    </label>
+    <label class="stock-adjustment-field stock-adjustment-field-reason">
+      <span>Motivo</span>
+      <input
+        type="text"
+        placeholder="Ej: conteo físico, producto dañado..."
+        [value]="reason()"
+        (input)="onReasonChange($event)"
+      />
+    </label>
+    <button type="button" class="btn btn-sm btn-primary" [disabled]="saving()" (click)="submit()">
+      {{ saving() ? 'Guardando...' : 'Ajustar stock' }}
+    </button>
+  </div>
+  @if (error()) {
+    <p class="stock-adjustment-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (!loadingMovements() && movements().length > 0) {
+    <div class="stock-adjustment-history">
+      <h3 class="stock-adjustment-history-title">Historial de ajustes</h3>
+      <ul>
+        @for (movement of movements(); track movement.id) {
+          <li>
+            {{ movement.createdAt | date: 'dd/MM/yyyy HH:mm' }} ·
+            <span [class.positive]="movement.quantityChange > 0" [class.negative]="movement.quantityChange < 0">
+              {{ movement.quantityChange > 0 ? '+' : '' }}{{ movement.quantityChange }}
+            </span>
+            (quedó en {{ movement.stockAfter }}) · {{ movement.reason }} · {{ movement.adminEmail }}
+          </li>
+        }
+      </ul>
+    </div>
+  } @else if (!loadingMovements()) {
+    <p class="stock-adjustment-empty">Todavía no hay ajustes manuales registrados.</p>
+  }
+</div>

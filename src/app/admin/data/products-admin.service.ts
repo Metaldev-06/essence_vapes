@@ -12,6 +12,12 @@ const ADMIN_CONTEXT = new HttpContext().set(IS_ADMIN_REQUEST, true);
 export interface AdminProductsQuery {
   readonly term?: string;
   readonly category?: ProductCategory;
+  readonly brand?: string;
+  readonly minPrice?: number;
+  readonly maxPrice?: number;
+  readonly minStock?: number;
+  readonly maxStock?: number;
+  readonly isActive?: boolean;
   readonly limit?: number;
   readonly offset?: number;
   readonly sort?: string;
@@ -31,6 +37,18 @@ export interface AdminProductsPage {
   readonly pagination: AdminProductsPagination;
 }
 
+/** Ver `StockMovement` (backend) - ajuste manual de stock con motivo (punto 5.3). */
+export interface StockMovementRecord {
+  readonly id: string;
+  readonly productId: string;
+  readonly variantId: string;
+  readonly quantityChange: number;
+  readonly stockAfter: number;
+  readonly reason: string;
+  readonly adminEmail: string;
+  readonly createdAt: string;
+}
+
 /** All admin product operations, tagged so `adminAuthInterceptor` attaches the admin token. */
 @Injectable({ providedIn: 'root' })
 export class ProductsAdminService {
@@ -44,6 +62,12 @@ export class ProductsAdminService {
     };
     if (query.term) params['term'] = query.term;
     if (query.category) params['category'] = query.category;
+    if (query.brand) params['brand'] = query.brand;
+    if (query.minPrice != null) params['minPrice'] = query.minPrice;
+    if (query.maxPrice != null) params['maxPrice'] = query.maxPrice;
+    if (query.minStock != null) params['minStock'] = query.minStock;
+    if (query.maxStock != null) params['maxStock'] = query.maxStock;
+    if (query.isActive != null) params['isActive'] = String(query.isActive);
     if (query.sort) params['sort'] = query.sort;
     if (query.order) params['order'] = query.order;
 
@@ -55,9 +79,11 @@ export class ProductsAdminService {
     );
   }
 
+  /** Trae el producto CON el costo de adquisición incluido (ver tarea, punto 4.3) - distinto de
+   *  la ruta pública que usa el storefront, que nunca lo expone. */
   get(id: string): Promise<Product> {
     return firstValueFrom(
-      this.http.get<Product>(`${this.baseUrl}/${id}`, { context: ADMIN_CONTEXT }),
+      this.http.get<Product>(`${this.baseUrl}/${id}/admin`, { context: ADMIN_CONTEXT }),
     );
   }
 
@@ -89,6 +115,45 @@ export class ProductsAdminService {
   remove(id: string): Promise<void> {
     return firstValueFrom(
       this.http.delete<void>(`${this.baseUrl}/${id}`, { context: ADMIN_CONTEXT }),
+    );
+  }
+
+  /** Ajuste manual de stock con motivo (ver tarea, punto 5.3). */
+  adjustStock(
+    productId: string,
+    variantId: string,
+    quantityChange: number,
+    reason: string,
+  ): Promise<{ stockAfter: number }> {
+    return firstValueFrom(
+      this.http.post<{ stockAfter: number }>(
+        `${this.baseUrl}/${productId}/stock-movements`,
+        { variantId, quantityChange, reason },
+        { context: ADMIN_CONTEXT },
+      ),
+    );
+  }
+
+  getStockMovements(productId: string): Promise<StockMovementRecord[]> {
+    return firstValueFrom(
+      this.http.get<StockMovementRecord[]>(`${this.baseUrl}/${productId}/stock-movements`, {
+        context: ADMIN_CONTEXT,
+      }),
+    );
+  }
+
+  /** Acciones masivas (ver tarea, punto 5.2) - solo manda los campos que realmente se quieren
+   *  tocar. */
+  bulkUpdate(
+    ids: string[],
+    changes: { isActive?: boolean; featured?: boolean; category?: ProductCategory },
+  ): Promise<{ updated: number }> {
+    return firstValueFrom(
+      this.http.patch<{ updated: number }>(
+        `${this.baseUrl}/admin/bulk`,
+        { ids, ...changes },
+        { context: ADMIN_CONTEXT },
+      ),
     );
   }
 

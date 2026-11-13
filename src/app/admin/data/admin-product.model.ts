@@ -25,6 +25,9 @@ export interface AdminProductInput {
   notes: string[];
   priceValue: number;
   oldPriceValue?: number;
+  /** Costo de adquisición/fabricación (ver tarea, punto 4.3 "rentabilidad") - opcional, nunca se
+   *  infiere del precio de venta ni se expone públicamente. */
+  costValue?: number;
   badge?: string | null;
   accent: string;
   category: ProductCategory;
@@ -68,6 +71,7 @@ export interface AdminProductInput {
 export interface AdminVariantInput {
   label: string;
   priceValue: number;
+  costValue?: number;
   stock?: number;
   sortOrder?: number;
   featured?: boolean;

@@ -6,6 +6,11 @@
   flex-shrink: 0;
   width: 248px;
   height: 100vh;
+  transition: width 0.15s ease;
+}
+
+:host.collapsed {
+  width: 76px;
 }
 
 .sr-only {
@@ -28,6 +33,10 @@
 }
 
 .sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
   margin-bottom: 30px;
   padding: 0 8px;
 }
@@ -36,7 +45,36 @@
   display: flex;
   align-items: center;
   gap: 11px;
+  min-width: 0;
   text-decoration: none;
+}
+
+.sidebar-collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.sidebar-collapse-toggle:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-accent);
+}
+
+.sidebar-collapse-toggle:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
 }
 
 .sidebar-brand a:focus-visible {
@@ -80,8 +118,14 @@
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 14px;
   flex: 1;
+}
+
+.sidebar-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .sidebar-nav-heading {
@@ -239,6 +283,52 @@
   outline-offset: 2px;
 }
 
+/* Solo aplica en escritorio - en mobile el sidebar ya es la franja horizontal angosta de abajo,
+ * donde "colapsar" no tiene sentido (el toggle queda oculto ahí, ver media query de mobile). Los
+ * textos se ocultan con la misma técnica que `.sr-only` (no `display:none`) para no perder su
+ * nombre accesible - el `title` de cada link sigue mostrando un tooltip nativo al pasar el mouse. */
+@media (min-width: 861px) {
+  .sidebar.collapsed .sidebar-brand-text,
+  .sidebar.collapsed .sidebar-nav-heading,
+  .sidebar.collapsed .sidebar-nav-label,
+  .sidebar.collapsed .sidebar-nav-external-icon,
+  .sidebar.collapsed .sidebar-admin-info,
+  .sidebar.collapsed .sidebar-logout-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .sidebar.collapsed .sidebar-nav a {
+    justify-content: center;
+  }
+
+  .sidebar.collapsed .sidebar-nav-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 8px;
+    height: 8px;
+    padding: 0;
+  }
+
+  .sidebar.collapsed .sidebar-admin {
+    justify-content: center;
+  }
+
+  .sidebar.collapsed .sidebar-logout {
+    justify-content: center;
+    padding: 9px;
+  }
+
+  .sidebar.collapsed .sidebar-collapse-toggle {
+    transform: rotate(180deg);
+  }
+}
+
 /* Mobile: a compact top bar (brand + logout) with the nav as full-width tabs underneath. */
 @media (max-width: 860px) {
   :host {
@@ -294,8 +384,13 @@
 
   .sidebar-nav-heading,
   .sidebar-nav a.active::before,
-  .sidebar-nav-external-icon {
+  .sidebar-nav-external-icon,
+  .sidebar-collapse-toggle {
     display: none;
+  }
+
+  .sidebar-nav-group {
+    display: contents;
   }
 
   .sidebar-nav a {

@@ -38,7 +38,23 @@
   @if (isLoading()) {
     <p class="product-form-status" role="status">Cargando producto...</p>
   } @else {
+    <div class="product-form-tabs" role="tablist" aria-label="Secciones del formulario">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          class="product-form-tab"
+          [class.active]="activeTab() === tab.id"
+          [attr.aria-selected]="activeTab() === tab.id"
+          (click)="activeTab.set(tab.id)"
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
     <form class="product-form" novalidate (submit)="onSubmit($event)">
+      @if (activeTab() === 'general') {
       <div class="form-section">
         <h2 class="form-section-title">Publicación</h2>
         <div class="form-switches">
@@ -212,7 +228,9 @@
           </div>
         </div>
       </div>
+      }
 
+      @if (activeTab() === 'pricing') {
       <div class="form-section">
         <h2 class="form-section-title">Precio y stock</h2>
         <div class="form-grid form-grid-3">
@@ -236,6 +254,19 @@
               >Precio anterior <span class="form-optional">(opcional)</span></label
             >
             <input id="pf-old-price" type="number" [formField]="productForm.oldPriceValue" />
+          </div>
+
+          <div class="form-field">
+            <label for="pf-cost"
+              >Costo de adquisición <span class="form-optional">(opcional)</span></label
+            >
+            <input id="pf-cost" type="number" [formField]="productForm.costValue" />
+            @if (productForm.costValue().errors()[0]; as error) {
+              <span class="form-error">{{ error.message }}</span>
+            }
+            <span class="form-hint">
+              Solo se usa para calcular rentabilidad en Reportes - nunca se muestra en la tienda.
+            </span>
           </div>
 
           <div class="form-field">
@@ -276,7 +307,9 @@
         </div>
 
       </div>
+      }
 
+      @if (activeTab() === 'profile') {
       <div class="form-section">
         <h2 class="form-section-title">{{ styleSectionLabels().title }}</h2>
         <p class="form-section-hint">{{ styleSectionLabels().hint }}</p>
@@ -444,7 +477,9 @@
           </div>
         </div>
       </div>
+      }
 
+      @if (activeTab() === 'regulatory') {
       <div class="form-section">
         <h2 class="form-section-title">Datos regulatorios</h2>
         <p class="form-section-hint">
@@ -544,7 +579,9 @@
           </div>
         }
       </div>
+      }
 
+      @if (activeTab() === 'usage') {
       <div class="form-section">
         <h2 class="form-section-title">
           Uso por estación <span class="form-optional">(0-5, opcional)</span>
@@ -620,6 +657,7 @@
           </div>
         </div>
       </div>
+      }
 
       <div class="product-form-actions">
         <div class="product-form-feedback" role="status" aria-live="polite">
@@ -637,6 +675,7 @@
     </form>
 
     @if (isEditMode && loadedProduct(); as product) {
+      @if (activeTab() === 'media') {
       <div class="form-section">
         <h2 class="form-section-title">Imágenes y videos</h2>
         <p class="form-section-hint">
@@ -662,6 +701,24 @@
           (variantsChanged)="onProductChanged($event)"
         />
       </div>
+
+      <div class="form-section">
+        <h2 class="form-section-title">Estadísticas</h2>
+        <p class="form-section-hint">Ventas de este producto, respetando el período elegido.</p>
+        <app-product-stats [productId]="product.id" />
+      </div>
+      }
+
+      @if (activeTab() === 'pricing') {
+      <div class="form-section">
+        <h2 class="form-section-title">Inventario</h2>
+        <p class="form-section-hint">
+          Ajustá el stock a mano cuando no venga de una venta (ej: conteo físico, producto dañado)
+          - el motivo queda guardado en el historial.
+        </p>
+        <app-stock-adjustment [productId]="product.id" (adjusted)="onProductChanged($event)" />
+      </div>
+      }
     }
   }
 </div>

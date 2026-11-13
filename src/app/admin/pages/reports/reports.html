@@ -1,0 +1,253 @@
+<div class="reports">
+  <header class="reports-header">
+    <div>
+      <h1 class="reports-title">Reportes</h1>
+      <p class="reports-subtitle">Ventas, finanzas y rentabilidad - filtrá para explorar.</p>
+    </div>
+    <app-date-range-picker [(value)]="dateRange" />
+  </header>
+
+  <section class="reports-filters">
+    <select aria-label="Categoría" (change)="onCategoryChange($event)">
+      <option value="" [selected]="category() === ''">Todas las categorías</option>
+      @for (option of categoryOptions; track option) {
+        <option [value]="option" [selected]="category() === option">
+          {{ option === 'perfumes' ? 'Perfumes' : option === 'decants' ? 'Decants' : option === 'vapes' ? 'Vapes' : 'Esencias' }}
+        </option>
+      }
+    </select>
+
+    <input
+      type="text"
+      list="reports-brand-list"
+      placeholder="Marca..."
+      [value]="brand()"
+      (input)="onBrandInput($event)"
+    />
+    <datalist id="reports-brand-list">
+      @for (option of brandOptions(); track option) {
+        <option [value]="option"></option>
+      }
+    </datalist>
+
+    <select aria-label="Estado del pedido" (change)="onOrderStatusChange($event)">
+      <option value="" [selected]="orderStatus() === ''">Cualquier estado de pedido</option>
+      @for (option of orderStatusOptions; track option) {
+        <option [value]="option" [selected]="orderStatus() === option">{{ orderStatusLabel(option) }}</option>
+      }
+    </select>
+
+    <select aria-label="Estado del pago" (change)="onPaymentStatusChange($event)">
+      <option value="" [selected]="paymentStatus() === ''">Cualquier estado de pago</option>
+      @for (option of paymentStatusOptions; track option) {
+        <option [value]="option" [selected]="paymentStatus() === option">{{ paymentStatusLabel(option) }}</option>
+      }
+    </select>
+
+    <select aria-label="Modalidad de entrega" (change)="onDeliveryMethodChange($event)">
+      <option value="" [selected]="deliveryMethod() === ''">Cualquier entrega</option>
+      @for (option of deliveryMethodOptions; track option) {
+        <option [value]="option" [selected]="deliveryMethod() === option">{{ deliveryMethodLabel(option) }}</option>
+      }
+    </select>
+
+    <input type="text" placeholder="Comprador (nombre o email)..." [value]="buyer()" (input)="onBuyerInput($event)" />
+
+    @if (hasActiveFilters()) {
+      <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">Limpiar filtros</button>
+    }
+  </section>
+
+  @if (loading() && !summary()) {
+    <div class="kpi-grid" aria-busy="true">
+      <span class="sr-only" role="status">Cargando reporte...</span>
+      @for (tile of [1, 2, 3, 4, 5, 6, 7, 8]; track tile) {
+        <div class="kpi-skeleton skeleton-block" aria-hidden="true"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="reports-error" role="alert">
+      <span>{{ error() }}</span>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="retry()">Reintentar</button>
+    </div>
+  } @else if (summary(); as summaryValue) {
+    <section class="reports-section" aria-labelledby="sales-kpis-title">
+      <h2 id="sales-kpis-title" class="reports-section-title">Ventas</h2>
+      <div class="kpi-grid">
+        <app-kpi-card
+          label="Ventas confirmadas"
+          [value]="summaryValue.current.paidOrdersCount + ''"
+          [comparisonPercent]="comparisonFor('paidOrdersCount')"
+          tooltip="Pedidos con pago aprobado en el período (fecha de aprobación del pago), según los filtros aplicados."
+        />
+        <app-kpi-card
+          label="Importe bruto"
+          [value]="formatPrice(summaryValue.current.grossOrdersValue)"
+          [comparisonPercent]="comparisonFor('grossOrdersValue')"
+          tooltip="Suma de todos los pedidos creados en el período que cumplen los filtros, hayan terminado pagándose o no."
+        />
+        <app-kpi-card
+          label="Pagos aprobados"
+          [value]="formatPrice(summaryValue.current.approvedPaymentsValue)"
+          [comparisonPercent]="comparisonFor('approvedPaymentsValue')"
+          tooltip="Suma de pedidos cuyo pago fue aprobado en el período."
+        />
+        <app-kpi-card
+          label="Cantidad de pedidos"
+          [value]="summaryValue.current.ordersCount + ''"
+          [comparisonPercent]="comparisonFor('ordersCount')"
+        />
+        <app-kpi-card
+          label="Ticket promedio"
+          [value]="formatPrice(summaryValue.current.averageTicketValue)"
+          [comparisonPercent]="comparisonFor('averageTicketValue')"
+        />
+        <app-kpi-card
+          label="Unidades vendidas"
+          [value]="summaryValue.current.unitsSoldCount + ''"
+          [comparisonPercent]="comparisonFor('unitsSoldCount')"
+        />
+        <app-kpi-card
+          label="Pedidos cancelados"
+          [value]="summaryValue.current.cancelledOrdersCount + ''"
+          [comparisonPercent]="comparisonFor('cancelledOrdersCount')"
+        />
+        <app-kpi-card
+          label="Reembolsado"
+          [value]="formatPrice(summaryValue.current.refundedAmountValue)"
+          [comparisonPercent]="comparisonFor('refundedAmountValue')"
+          tooltip="Según fecha de creación del pedido - Mercado Pago no informa una fecha de reembolso propia."
+        />
+      </div>
+    </section>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h3 class="chart-card-title">Evolución de ventas</h3>
+          <div class="chart-card-controls">
+            <select aria-label="Métrica del gráfico" (change)="onMetricChange($event)">
+              <option value="approvedValue" [selected]="timeseriesMetric() === 'approvedValue'">Pagos aprobados</option>
+              <option value="grossValue" [selected]="timeseriesMetric() === 'grossValue'">Importe bruto</option>
+            </select>
+            <select aria-label="Agrupar por" (change)="onGranularityChange($event)">
+              <option value="day" [selected]="granularity() === 'day'">Por día</option>
+              <option value="week" [selected]="granularity() === 'week'">Por semana</option>
+              <option value="month" [selected]="granularity() === 'month'">Por mes</option>
+            </select>
+          </div>
+        </div>
+        <app-sales-evolution-chart [points]="timeseries()" [metric]="timeseriesMetric()" [granularity]="granularity()" />
+      </div>
+
+      <div class="chart-card">
+        <h3 class="chart-card-title">Ventas por categoría</h3>
+        <app-category-breakdown-chart [points]="byCategory()" />
+      </div>
+    </div>
+
+    <section class="reports-section" aria-labelledby="financial-title">
+      <h2 id="financial-title" class="reports-section-title">Financiero</h2>
+      <p class="reports-section-hint">
+        Mercado Pago no expone comisión, importe neto ni fecha de acreditación a través de la Orders
+        API - confirmado contra su documentación oficial. Esos datos solo están disponibles en sus
+        reportes de liberación de dinero, fuera de esta integración.
+      </p>
+      <div class="kpi-grid">
+        <app-kpi-card label="Comisión de Mercado Pago" [unavailable]="true" />
+        <app-kpi-card label="Importe neto acreditado" [unavailable]="true" />
+        <app-kpi-card label="Fecha de acreditación" [unavailable]="true" />
+        <app-kpi-card
+          label="Contracargos"
+          value="0"
+          tooltip="Ningún contracargo registrado en el período - esta app recién empieza a poder recibir este evento de Mercado Pago."
+        />
+      </div>
+    </section>
+
+    <section class="reports-section" aria-labelledby="top-products-title">
+      <div class="reports-section-header">
+        <h2 id="top-products-title" class="reports-section-title">Productos</h2>
+        <div class="chart-card-controls">
+          <select aria-label="Ordenar por" (change)="onSortByChange($event)">
+            <option value="revenue" [selected]="topProductsSortBy() === 'revenue'">Por ingresos</option>
+            <option value="units" [selected]="topProductsSortBy() === 'units'">Por unidades</option>
+          </select>
+          <select aria-label="Dirección" (change)="onDirectionChange($event)">
+            <option value="top" [selected]="topProductsDirection() === 'top'">Más vendidos</option>
+            <option value="bottom" [selected]="topProductsDirection() === 'bottom'">Menos vendidos</option>
+          </select>
+          <button type="button" class="btn btn-sm btn-ghost" [disabled]="topProducts().length === 0" (click)="exportCsv()">
+            CSV
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-ghost"
+            [disabled]="topProducts().length === 0 || exportingFormat() !== null"
+            (click)="exportExcel()"
+          >
+            {{ exportingFormat() === 'xlsx' ? 'Generando...' : 'Excel' }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-ghost"
+            [disabled]="topProducts().length === 0 || exportingFormat() !== null"
+            (click)="exportPdf()"
+          >
+            {{ exportingFormat() === 'pdf' ? 'Generando...' : 'PDF' }}
+          </button>
+        </div>
+      </div>
+
+      @if (topProducts().length === 0) {
+        <app-empty-state title="Sin ventas para estos filtros" />
+      } @else {
+        <div class="table-scroll">
+          <table class="reports-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Unidades</th>
+                <th>Ingresos</th>
+                <th>Participación</th>
+                <th>Margen</th>
+                <th>Stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of topProducts(); track product.productId + product.variantId) {
+                <tr>
+                  <td>
+                    <span class="product-thumb">
+                      @if (product.imageUrl) {
+                        <img [ngSrc]="cloudinaryUrl(product.imageUrl, 60)" alt="" width="36" height="36" />
+                      } @else {
+                        <span aria-hidden="true">{{ (product.brand ?? product.productName).charAt(0) }}</span>
+                      }
+                    </span>
+                  </td>
+                  <td>{{ product.productName }}{{ product.variantLabel ? ' - ' + product.variantLabel : '' }}</td>
+                  <td>{{ product.category ? categoryLabel(product.category) : '—' }}</td>
+                  <td>{{ product.unitsSold }}</td>
+                  <td>{{ formatPrice(product.revenueValue) }}</td>
+                  <td>{{ product.sharePercent.toFixed(1) }}%</td>
+                  <td>
+                    @if (product.marginValue !== null) {
+                      {{ formatPrice(product.marginValue) }}
+                      <span class="margin-percent">({{ product.marginPercent?.toFixed(0) }}%)</span>
+                    } @else {
+                      <span class="margin-unavailable">Sin costo cargado</span>
+                    }
+                  </td>
+                  <td>{{ product.currentStock ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

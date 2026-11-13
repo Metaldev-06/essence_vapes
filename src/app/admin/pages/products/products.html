@@ -7,6 +7,58 @@
         aparecen en la tienda.
       </p>
     </div>
+    <div class="admin-products-table-settings">
+      <button
+        type="button"
+        class="btn btn-sm btn-ghost"
+        [attr.aria-expanded]="tableSettingsOpen()"
+        (click)="tableSettingsOpen.set(!tableSettingsOpen())"
+      >
+        Vista de tabla
+      </button>
+      @if (tableSettingsOpen()) {
+        <button
+          type="button"
+          class="admin-products-table-settings-backdrop"
+          aria-label="Cerrar"
+          (click)="tableSettingsOpen.set(false)"
+        ></button>
+        <div class="admin-products-table-settings-panel" role="dialog" aria-label="Vista de tabla">
+          <span class="admin-products-table-settings-label">Columnas</span>
+          @for (column of allColumns; track column.id) {
+            <label class="admin-products-table-settings-item">
+              <input
+                type="checkbox"
+                [checked]="visibleColumns().has(column.id)"
+                (change)="onColumnToggleChange(column.id, $event)"
+              />
+              {{ column.label }}
+            </label>
+          }
+          <span class="admin-products-table-settings-label">Densidad</span>
+          <div class="admin-products-table-settings-item">
+            <label>
+              <input
+                type="radio"
+                name="density"
+                [checked]="density() === 'comfortable'"
+                (change)="setDensity('comfortable')"
+              />
+              Cómoda
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="density"
+                [checked]="density() === 'compact'"
+                (change)="setDensity('compact')"
+              />
+              Compacta
+            </label>
+          </div>
+        </div>
+      }
+    </div>
     <a [routerLink]="'/admin/productos/nuevo'" class="btn btn-primary">
       <svg
         width="16"
@@ -60,25 +112,120 @@
         </button>
       }
     </div>
+
+    <div class="admin-products-extra-filters">
+      <input type="text" placeholder="Marca..." [value]="brand()" (input)="onBrandInput($event)" aria-label="Marca" />
+      <input
+        type="number"
+        min="0"
+        placeholder="Precio mín."
+        [value]="minPrice()"
+        (input)="onMinPriceChange($event)"
+        aria-label="Precio mínimo"
+      />
+      <input
+        type="number"
+        min="0"
+        placeholder="Precio máx."
+        [value]="maxPrice()"
+        (input)="onMaxPriceChange($event)"
+        aria-label="Precio máximo"
+      />
+      <input
+        type="number"
+        min="0"
+        placeholder="Stock mín."
+        [value]="minStock()"
+        (input)="onMinStockChange($event)"
+        aria-label="Stock mínimo"
+      />
+      <input
+        type="number"
+        min="0"
+        placeholder="Stock máx."
+        [value]="maxStock()"
+        (input)="onMaxStockChange($event)"
+        aria-label="Stock máximo"
+      />
+      <select (change)="onIsActiveChange($event)" aria-label="Estado de publicación">
+        <option value="todos" [selected]="isActive() === 'todos'">Visibles y ocultos</option>
+        <option value="true" [selected]="isActive() === 'true'">Solo visibles</option>
+        <option value="false" [selected]="isActive() === 'false'">Solo ocultos</option>
+      </select>
+      @if (hasFilters()) {
+        <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">Limpiar filtros</button>
+      }
+    </div>
   </div>
 
   @if (error()) {
     <p class="admin-products-error" role="alert">{{ error() }}</p>
   }
 
+  @if (selectedCount() > 0) {
+    <div class="admin-products-bulk-bar" role="toolbar" aria-label="Acciones masivas">
+      <span class="admin-products-bulk-count">{{ selectedCount() }} seleccionados</span>
+      <button type="button" class="btn btn-sm btn-ghost" [disabled]="bulkBusy()" (click)="bulkPublish()">
+        Publicar
+      </button>
+      <button type="button" class="btn btn-sm btn-ghost" [disabled]="bulkBusy()" (click)="bulkHide()">
+        Ocultar
+      </button>
+      <button type="button" class="btn btn-sm btn-ghost" [disabled]="bulkBusy()" (click)="bulkFeature()">
+        Destacar
+      </button>
+      <button type="button" class="btn btn-sm btn-ghost" [disabled]="bulkBusy()" (click)="bulkUnfeature()">
+        Quitar destacado
+      </button>
+      <select [value]="bulkCategory()" (change)="onBulkCategoryChange($event)" aria-label="Cambiar categoría">
+        <option value="">Cambiar categoría...</option>
+        <option value="perfumes">Perfumes</option>
+        <option value="decants">Decants</option>
+        <option value="vapes">Vapes</option>
+        <option value="esencias">Esencias</option>
+      </select>
+      <button
+        type="button"
+        class="btn btn-sm btn-ghost"
+        [disabled]="!bulkCategory() || bulkBusy()"
+        (click)="applyBulkCategory()"
+      >
+        Aplicar
+      </button>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="exportSelectedCsv()">Exportar CSV</button>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="clearSelection()">Cancelar</button>
+    </div>
+  }
+
   <div class="admin-products-table-wrap" [attr.aria-busy]="isLoading()">
-    <table class="admin-products-table">
+    <table class="admin-products-table" [class.density-compact]="density() === 'compact'">
       <caption class="sr-only">
         Listado de productos
       </caption>
       <thead>
         <tr>
+          <th scope="col">
+            <input
+              type="checkbox"
+              [checked]="allSelected()"
+              (change)="onSelectAllChange($event)"
+              aria-label="Seleccionar todos"
+            />
+          </th>
           <th scope="col">Producto</th>
           <th scope="col">Categoría</th>
-          <th scope="col">Precio</th>
-          <th scope="col">Stock</th>
-          <th scope="col">Visible</th>
-          <th scope="col">Destacado</th>
+          @if (visibleColumns().has('price')) {
+            <th scope="col">Precio</th>
+          }
+          @if (visibleColumns().has('stock')) {
+            <th scope="col">Stock</th>
+          }
+          @if (visibleColumns().has('visible')) {
+            <th scope="col">Visible</th>
+          }
+          @if (visibleColumns().has('featured')) {
+            <th scope="col">Destacado</th>
+          }
           <th scope="col"><span class="sr-only">Acciones</span></th>
         </tr>
       </thead>
@@ -86,6 +233,7 @@
         @if (isLoading() && items().length === 0) {
           @for (row of skeletonRows; track row) {
             <tr class="skeleton-row" aria-hidden="true">
+              <td></td>
               <td>
                 <div class="product-cell">
                   <span class="skeleton-block skeleton-thumb"></span>
@@ -105,7 +253,7 @@
           }
         } @else if (items().length === 0) {
           <tr class="empty-row">
-            <td colspan="7">
+            <td colspan="8">
               <div class="admin-products-empty">
                 <p class="admin-products-empty-title">No encontramos productos</p>
                 @if (hasFilters()) {
@@ -125,6 +273,14 @@
         } @else {
           @for (product of items(); track product.id) {
             <tr [class.is-hidden]="!product.isActive">
+              <td>
+                <input
+                  type="checkbox"
+                  [checked]="selectedIds().has(product.id)"
+                  (change)="onRowSelectChange(product.id, $event)"
+                  [attr.aria-label]="'Seleccionar ' + product.name"
+                />
+              </td>
               <td class="cell-product">
                 <div class="product-cell">
                   <span class="product-thumb">
@@ -152,35 +308,43 @@
               <td class="cell-category" data-label="Categoría">
                 <span class="category-pill">{{ categoryLabels[product.category] }}</span>
               </td>
-              <td class="cell-price" data-label="Precio">{{ product.price }}</td>
-              <td class="cell-stock" data-label="Stock">
-                @if (product.stock === 0) {
-                  <span class="stock-indicator stock-out">Sin stock</span>
-                } @else if (product.stock <= lowStockThreshold) {
-                  <span class="stock-indicator stock-low">{{ product.stock }} · bajo</span>
-                } @else {
-                  <span class="stock-indicator">{{ product.stock }}</span>
-                }
-              </td>
-              <td class="cell-visible" data-label="Visible">
-                <app-toggle-switch
-                  [checked]="product.isActive"
-                  (checkedChange)="setVisibility(product, $event)"
-                  [busy]="togglingIds().has(product.id)"
-                  [ariaLabel]="'Visible en la tienda: ' + product.name"
-                />
-                <span class="visibility-text" aria-hidden="true">
-                  {{ product.isActive ? 'Visible' : 'Oculto' }}
-                </span>
-              </td>
-              <td class="cell-featured" data-label="Destacado">
-                <app-toggle-switch
-                  [checked]="!!product.featured"
-                  (checkedChange)="setFeatured(product, $event)"
-                  [busy]="togglingFeaturedIds().has(product.id)"
-                  [ariaLabel]="'Destacado: ' + product.name"
-                />
-              </td>
+              @if (visibleColumns().has('price')) {
+                <td class="cell-price" data-label="Precio">{{ product.price }}</td>
+              }
+              @if (visibleColumns().has('stock')) {
+                <td class="cell-stock" data-label="Stock">
+                  @if (product.stock === 0) {
+                    <span class="stock-indicator stock-out">Sin stock</span>
+                  } @else if (product.stock <= lowStockThreshold) {
+                    <span class="stock-indicator stock-low">{{ product.stock }} · bajo</span>
+                  } @else {
+                    <span class="stock-indicator">{{ product.stock }}</span>
+                  }
+                </td>
+              }
+              @if (visibleColumns().has('visible')) {
+                <td class="cell-visible" data-label="Visible">
+                  <app-toggle-switch
+                    [checked]="product.isActive"
+                    (checkedChange)="setVisibility(product, $event)"
+                    [busy]="togglingIds().has(product.id)"
+                    [ariaLabel]="'Visible en la tienda: ' + product.name"
+                  />
+                  <span class="visibility-text" aria-hidden="true">
+                    {{ product.isActive ? 'Visible' : 'Oculto' }}
+                  </span>
+                </td>
+              }
+              @if (visibleColumns().has('featured')) {
+                <td class="cell-featured" data-label="Destacado">
+                  <app-toggle-switch
+                    [checked]="!!product.featured"
+                    (checkedChange)="setFeatured(product, $event)"
+                    [busy]="togglingFeaturedIds().has(product.id)"
+                    [ariaLabel]="'Destacado: ' + product.name"
+                  />
+                </td>
+              }
               <td class="cell-actions">
                 <div class="row-actions">
                   <a

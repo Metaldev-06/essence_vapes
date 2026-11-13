@@ -1,0 +1,103 @@
+.product-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.product-stats-period {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.product-stats-loading {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.product-stats-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+
+.product-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.product-stats-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.product-stats-metric-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.product-stats-metric-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.product-stats-variants-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.product-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.product-stats-table th {
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.product-stats-table td {
+  padding: 8px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.product-stats-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 640px) {
+  .product-stats-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

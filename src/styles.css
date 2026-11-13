@@ -186,3 +186,26 @@ body {
   border: 1px solid var(--color-border-subtle);
   border-radius: 20px;
 }
+
+/* ── Admin skeleton loaders ───────────────────────────
+   Shared across every admin list/dashboard - each page composes its own shapes (thumb, line,
+   pill, switch...) from this one `.skeleton-block` primitive instead of redefining the pulse
+   animation per page. */
+.skeleton-block {
+  display: block;
+  border-radius: 6px;
+  background: var(--color-surface-elevated);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation: none;
+  }
+}

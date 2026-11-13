@@ -2,7 +2,7 @@
   <header class="dashboard-header">
     <div>
       <h1 class="dashboard-title">Hola{{ firstName() ? ', ' + firstName() : '' }} 👋</h1>
-      <p class="dashboard-subtitle">Así está tu catálogo hoy.</p>
+      <p class="dashboard-subtitle">Así está tu negocio.</p>
     </div>
     <div class="dashboard-actions">
       <a href="/" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">
@@ -26,9 +26,243 @@
     </div>
   </header>
 
+  <section class="dashboard-section" aria-labelledby="sales-title">
+    <div class="dashboard-section-header">
+      <div>
+        <h2 id="sales-title" class="dashboard-section-title">Ventas</h2>
+        <p class="dashboard-section-hint">{{ dateRange().label }}</p>
+      </div>
+      <app-date-range-picker [(value)]="dateRange" />
+    </div>
+
+    @if (salesLoading() && !salesSummary()) {
+      <div class="kpi-grid" aria-busy="true">
+        <span class="sr-only" role="status">Cargando métricas de ventas...</span>
+        @for (tile of [1, 2, 3, 4, 5, 6, 7, 8]; track tile) {
+          <div class="kpi-skeleton skeleton-block" aria-hidden="true"></div>
+        }
+      </div>
+    } @else if (salesError()) {
+      <div class="dashboard-error" role="alert">
+        <span>{{ salesError() }}</span>
+        <button type="button" class="btn btn-sm btn-ghost" (click)="retrySales()">Reintentar</button>
+      </div>
+    } @else if (salesSummary(); as summary) {
+      <div class="kpi-grid">
+        <app-kpi-card
+          label="Ventas confirmadas"
+          [value]="summary.current.paidOrdersCount + ''"
+          [comparisonPercent]="comparisonFor(s => s.paidOrdersCount)"
+          tooltip="Pedidos con pago aprobado por Mercado Pago en el período (según la fecha de aprobación del pago)."
+        />
+        <app-kpi-card
+          label="Importe bruto de pedidos"
+          [value]="formatPrice(summary.current.grossOrdersValue)"
+          [comparisonPercent]="comparisonFor(s => s.grossOrdersValue)"
+          tooltip="Suma de todos los pedidos creados en el período, hayan terminado pagándose o no."
+        />
+        <app-kpi-card
+          label="Importe de pagos aprobados"
+          [value]="formatPrice(summary.current.approvedPaymentsValue)"
+          [comparisonPercent]="comparisonFor(s => s.approvedPaymentsValue)"
+          tooltip="Suma de los pedidos cuyo pago fue aprobado por Mercado Pago en el período."
+        />
+        <app-kpi-card
+          label="Importe neto acreditado"
+          [unavailable]="true"
+          tooltip="Mercado Pago no expone este dato en la Orders API - hay que consultarlo en sus reportes de liberación de dinero, fuera de esta integración."
+        />
+        <app-kpi-card
+          label="Cantidad de pedidos"
+          [value]="summary.current.ordersCount + ''"
+          [comparisonPercent]="comparisonFor(s => s.ordersCount)"
+          tooltip="Pedidos creados en el período, cualquiera sea su estado."
+        />
+        <app-kpi-card
+          label="Pedidos pagados"
+          [value]="summary.current.paidOrdersCount + ''"
+          [comparisonPercent]="comparisonFor(s => s.paidOrdersCount)"
+          tooltip="De los pedidos creados en el período, cuántos tienen el pago aprobado."
+        />
+        <app-kpi-card
+          label="Pedidos pendientes"
+          [value]="summary.current.pendingOrdersCount + ''"
+          [comparisonPercent]="comparisonFor(s => s.pendingOrdersCount)"
+          tooltip="Todavía esperando pago o en revisión por Mercado Pago."
+        />
+        <app-kpi-card
+          label="Pedidos cancelados"
+          [value]="summary.current.cancelledOrdersCount + ''"
+          [comparisonPercent]="comparisonFor(s => s.cancelledOrdersCount)"
+          tooltip="Cancelados o vencidos sin llegar a pagarse."
+        />
+        <app-kpi-card
+          label="Ticket promedio"
+          [value]="formatPrice(summary.current.averageTicketValue)"
+          [comparisonPercent]="comparisonFor(s => s.averageTicketValue)"
+          tooltip="Importe de pagos aprobados dividido la cantidad de pedidos pagados."
+        />
+        <app-kpi-card
+          label="Unidades vendidas"
+          [value]="summary.current.unitsSoldCount + ''"
+          [comparisonPercent]="comparisonFor(s => s.unitsSoldCount)"
+          tooltip="Suma de las cantidades de las líneas de pedidos pagados en el período."
+        />
+        <app-kpi-card
+          label="Importe reembolsado"
+          [value]="formatPrice(summary.current.refundedAmountValue)"
+          [comparisonPercent]="comparisonFor(s => s.refundedAmountValue)"
+          tooltip="Pedidos reembolsados, según su fecha de creación - Mercado Pago no informa una fecha de reembolso propia."
+          reportLink="/admin/transacciones"
+        />
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3 class="chart-card-title">Evolución de ventas</h3>
+            <div class="chart-card-controls">
+              <select aria-label="Métrica del gráfico" (change)="onMetricChange($event)">
+                <option value="approvedValue" [selected]="timeseriesMetric() === 'approvedValue'">
+                  Pagos aprobados
+                </option>
+                <option value="grossValue" [selected]="timeseriesMetric() === 'grossValue'">
+                  Importe bruto
+                </option>
+              </select>
+              <select aria-label="Agrupar por" (change)="onGranularityChange($event)">
+                <option value="day" [selected]="granularity() === 'day'">Por día</option>
+                <option value="week" [selected]="granularity() === 'week'">Por semana</option>
+                <option value="month" [selected]="granularity() === 'month'">Por mes</option>
+              </select>
+            </div>
+          </div>
+          <app-sales-evolution-chart
+            [points]="timeseries()"
+            [metric]="timeseriesMetric()"
+            [granularity]="granularity()"
+          />
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-card-title">Ventas por categoría</h3>
+          <app-category-breakdown-chart [points]="byCategory()" />
+        </div>
+      </div>
+
+      <div class="dashboard-section-header">
+        <h3 class="chart-card-title">Productos más vendidos</h3>
+        <select aria-label="Ordenar por" (change)="onSortByChange($event)">
+          <option value="revenue" [selected]="topProductsSortBy() === 'revenue'">Por ingresos</option>
+          <option value="units" [selected]="topProductsSortBy() === 'units'">Por unidades</option>
+        </select>
+      </div>
+
+      @if (topProducts().length === 0) {
+        <app-empty-state title="Sin ventas en este período" />
+      } @else {
+        <div class="table-scroll">
+          <table class="top-products-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Unidades</th>
+                <th>Ingresos</th>
+                <th>Participación</th>
+                <th>Stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of topProducts(); track product.productId + product.variantId) {
+                <tr>
+                  <td>
+                    <span class="attention-thumb">
+                      @if (product.imageUrl) {
+                        <img [ngSrc]="cloudinaryUrl(product.imageUrl, 60)" alt="" width="40" height="40" />
+                      } @else {
+                        <span aria-hidden="true">{{ (product.brand ?? product.productName).charAt(0) }}</span>
+                      }
+                    </span>
+                  </td>
+                  <td>
+                    {{ product.productName }}{{ product.variantLabel ? ' - ' + product.variantLabel : '' }}
+                  </td>
+                  <td>{{ product.category ? categoryLabel(product.category) : '—' }}</td>
+                  <td>{{ product.unitsSold }}</td>
+                  <td>{{ formatPrice(product.revenueValue) }}</td>
+                  <td>{{ product.sharePercent.toFixed(1) }}%</td>
+                  <td>{{ product.currentStock ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </section>
+
+  @if (!isLoading() && operationalStats(); as ops) {
+    <section class="dashboard-section" aria-labelledby="alerts-title">
+      <div class="dashboard-section-header">
+        <div>
+          <h2 id="alerts-title" class="dashboard-section-title">Actividad operativa</h2>
+          <p class="dashboard-section-hint">Estado actual, no depende del período elegido arriba.</p>
+        </div>
+      </div>
+
+      @if (
+        ops.pendingPreparationCount === 0 &&
+        ops.pendingShipmentCount === 0 &&
+        ops.readyForPickupCount === 0 &&
+        ops.rejectedPaymentsCount === 0 &&
+        outOfStockCount() === 0
+      ) {
+        <div class="dashboard-empty">
+          <span class="dashboard-empty-icon" aria-hidden="true">✓</span>
+          Sin pendientes - todo al día.
+        </div>
+      } @else {
+        <div class="alert-row">
+          @if (ops.pendingPreparationCount > 0) {
+            <a class="alert-pill" [routerLink]="'/admin/ventas'">
+              <span class="alert-pill-value">{{ ops.pendingPreparationCount }}</span>
+              pedido{{ ops.pendingPreparationCount === 1 ? '' : 's' }} para preparar
+            </a>
+          }
+          @if (ops.pendingShipmentCount > 0) {
+            <a class="alert-pill" [routerLink]="'/admin/ventas'">
+              <span class="alert-pill-value">{{ ops.pendingShipmentCount }}</span>
+              listo{{ ops.pendingShipmentCount === 1 ? '' : 's' }} para enviar
+            </a>
+          }
+          @if (ops.readyForPickupCount > 0) {
+            <a class="alert-pill" [routerLink]="'/admin/ventas'">
+              <span class="alert-pill-value">{{ ops.readyForPickupCount }}</span>
+              listo{{ ops.readyForPickupCount === 1 ? '' : 's' }} para retirar
+            </a>
+          }
+          @if (ops.rejectedPaymentsCount > 0) {
+            <a class="alert-pill alert-pill-danger" [routerLink]="'/admin/transacciones'">
+              <span class="alert-pill-value">{{ ops.rejectedPaymentsCount }}</span>
+              pago{{ ops.rejectedPaymentsCount === 1 ? '' : 's' }} rechazado{{ ops.rejectedPaymentsCount === 1 ? '' : 's' }}
+            </a>
+          }
+          @if (outOfStockCount() > 0) {
+            <a class="alert-pill alert-pill-danger" [routerLink]="'/admin/productos'">
+              <span class="alert-pill-value">{{ outOfStockCount() }}</span>
+              producto{{ outOfStockCount() === 1 ? '' : 's' }} sin stock
+            </a>
+          }
+        </div>
+      }
+    </section>
+  }
+
   @if (isLoading()) {
     <div class="stat-row" aria-busy="true">
-      <span class="sr-only" role="status">Cargando estadísticas...</span>
+      <span class="sr-only" role="status">Cargando estadísticas de catálogo...</span>
       @for (tile of skeletonTiles; track tile) {
         <div class="stat-tile stat-tile-skeleton" aria-hidden="true">
           <span class="skeleton-block skeleton-icon"></span>

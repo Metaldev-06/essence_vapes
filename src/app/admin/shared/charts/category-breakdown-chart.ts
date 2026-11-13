@@ -47,6 +47,19 @@ export class CategoryBreakdownChart {
     };
   });
 
+  /** Alternativa textual del gráfico (ver tarea, punto 7 - validación de accesibilidad) - un
+   *  `<canvas>` no transmite nada a un lector de pantalla por sí solo. */
+  protected readonly ariaLabel = computed(() => {
+    const rows = this.points();
+    if (rows.length === 0) return 'Ventas por categoría: sin datos en el período.';
+    const total = rows.reduce((sum, row) => sum + row.revenueValue, 0);
+    const parts = rows.map((row) => {
+      const share = total > 0 ? Math.round((row.revenueValue / total) * 100) : 0;
+      return `${categoryLabel(row.category)} ${share}%`;
+    });
+    return `Gráfico de dona: participación de ingresos por categoría - ${parts.join(', ')}.`;
+  });
+
   protected readonly chartOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,

@@ -2,6 +2,13 @@
   <app-empty-state title="Sin ventas en este período" />
 } @else {
   <div class="chart-container">
-    <canvas baseChart [data]="chartData()" [options]="chartOptions" type="line"></canvas>
+    <canvas
+      baseChart
+      [data]="chartData()"
+      [options]="chartOptions"
+      type="line"
+      role="img"
+      [attr.aria-label]="ariaLabel()"
+    ></canvas>
   </div>
 }

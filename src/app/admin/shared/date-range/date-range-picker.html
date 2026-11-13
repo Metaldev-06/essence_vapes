@@ -40,11 +40,17 @@
     <button
       type="button"
       class="date-range-backdrop"
-      aria-label="Cerrar selector de período"
+      aria-hidden="true"
+      tabindex="-1"
       (click)="close()"
     ></button>
 
-    <div class="date-range-panel" role="dialog" aria-label="Elegir período">
+    <div
+      class="date-range-panel"
+      role="dialog"
+      aria-label="Elegir período"
+      (keydown.escape)="close()"
+    >
       <ul class="date-range-presets">
         @for (preset of presets; track preset) {
           <li>

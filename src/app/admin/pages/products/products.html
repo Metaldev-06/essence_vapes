@@ -20,10 +20,16 @@
         <button
           type="button"
           class="admin-products-table-settings-backdrop"
-          aria-label="Cerrar"
+          aria-hidden="true"
+          tabindex="-1"
           (click)="tableSettingsOpen.set(false)"
         ></button>
-        <div class="admin-products-table-settings-panel" role="dialog" aria-label="Vista de tabla">
+        <div
+          class="admin-products-table-settings-panel"
+          role="dialog"
+          aria-label="Vista de tabla"
+          (keydown.escape)="tableSettingsOpen.set(false)"
+        >
           <span class="admin-products-table-settings-label">Columnas</span>
           @for (column of allColumns; track column.id) {
             <label class="admin-products-table-settings-item">
@@ -273,7 +279,7 @@
         } @else {
           @for (product of items(); track product.id) {
             <tr [class.is-hidden]="!product.isActive">
-              <td>
+              <td class="cell-select">
                 <input
                   type="checkbox"
                   [checked]="selectedIds().has(product.id)"

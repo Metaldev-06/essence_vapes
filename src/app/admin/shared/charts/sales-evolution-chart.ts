@@ -76,6 +76,29 @@ export class SalesEvolutionChart {
     },
   };
 
+  /** Alternativa textual del gráfico (ver tarea, punto 7 - validación de accesibilidad): un
+   *  `<canvas>` no transmite nada a un lector de pantalla por sí solo, así que se resume la
+   *  misma data que ya se ve en pantalla. */
+  protected readonly ariaLabel = computed(() => {
+    const points = this.points();
+    const metric = this.metric();
+    const metricLabel = metric === 'grossValue' ? 'importe bruto' : 'pagos aprobados';
+    if (points.length === 0) return `Evolución de ${metricLabel}: sin datos en el período.`;
+    const total = points.reduce((sum, point) => sum + point[metric], 0);
+    const first = points[0][metric];
+    const last = points[points.length - 1][metric];
+    const trend = last > first ? 'en alza' : last < first ? 'a la baja' : 'estable';
+    return (
+      `Gráfico de evolución de ${metricLabel} por ${this.granularityLabel(this.granularity())}, ` +
+      `${points.length} puntos, total ${formatPrice(total)}, tendencia ${trend} ` +
+      `(de ${formatPrice(first)} a ${formatPrice(last)}).`
+    );
+  });
+
+  private granularityLabel(granularity: SalesTimeseriesGranularity): string {
+    return granularity === 'day' ? 'día' : granularity === 'week' ? 'semana' : 'mes';
+  }
+
   private formatBucketLabel(bucketStartUtc: string, granularity: SalesTimeseriesGranularity): string {
     const date = new Date(bucketStartUtc);
     if (granularity === 'month') {

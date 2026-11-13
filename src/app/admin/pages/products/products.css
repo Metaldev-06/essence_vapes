@@ -613,7 +613,7 @@ tr:not(.is-hidden) .visibility-text {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-areas:
-      'product product product'
+      'select product product'
       'category price stock'
       'visible featured actions';
     align-items: center;
@@ -646,6 +646,13 @@ tr:not(.is-hidden) .visibility-text {
 
   .admin-products-table td.cell-visible::before {
     display: none;
+  }
+
+  .cell-select {
+    grid-area: select;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 2px;
   }
 
   .cell-product {

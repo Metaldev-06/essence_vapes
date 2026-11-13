@@ -62,7 +62,7 @@
           @if (editingId()) {
             <button type="button" class="btn btn-sm btn-ghost" (click)="cancelEdit()">Cancelar</button>
           }
-          <button type="submit" class="btn btn-sm btn-primary" [disabled]="saving()">
+          <button type="submit" class="btn btn-sm btn-primary" [disabled]="saving() || !canSaveCannedResponse()">
             {{ editingId() ? 'Guardar cambios' : 'Crear respuesta rápida' }}
           </button>
         </div>

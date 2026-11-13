@@ -36,7 +36,7 @@
           <form class="arrepentimiento-form" novalidate (submit)="onSubmit($event)">
             <div class="form-row form-row--split">
               <div class="form-field">
-                <label for="ar-name">Nombre completo</label>
+                <label for="ar-name">Nombre completo <span class="required-mark" aria-hidden="true">*</span></label>
                 <input
                   id="ar-name"
                   type="text"
@@ -50,7 +50,7 @@
               </div>
 
               <div class="form-field">
-                <label for="ar-email">Email</label>
+                <label for="ar-email">Email <span class="required-mark" aria-hidden="true">*</span></label>
                 <input
                   id="ar-email"
                   type="email"
@@ -79,7 +79,7 @@
             </div>
 
             <div class="form-field">
-              <label for="ar-product">Qué producto querés devolver</label>
+              <label for="ar-product">Qué producto querés devolver <span class="required-mark" aria-hidden="true">*</span></label>
               <textarea
                 id="ar-product"
                 rows="3"
@@ -109,7 +109,7 @@
               <p class="arrepentimiento-error" role="alert">{{ error() }}</p>
             }
 
-            <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+            <button type="submit" class="btn btn-primary" [disabled]="submitting() || !withdrawalForm().valid()">
               {{ submitting() ? 'Enviando...' : 'Enviar solicitud de arrepentimiento' }}
             </button>
           </form>
@@ -132,7 +132,7 @@
         <form class="arrepentimiento-form" novalidate (submit)="onLookup($event)">
           <div class="form-row form-row--split">
             <div class="form-field">
-              <label for="ar-lookup-code">Código de gestión</label>
+              <label for="ar-lookup-code">Código de gestión <span class="required-mark" aria-hidden="true">*</span></label>
               <input
                 id="ar-lookup-code"
                 type="text"
@@ -146,7 +146,7 @@
             </div>
 
             <div class="form-field">
-              <label for="ar-lookup-email">Email con el que hiciste la solicitud</label>
+              <label for="ar-lookup-email">Email con el que hiciste la solicitud <span class="required-mark" aria-hidden="true">*</span></label>
               <input
                 id="ar-lookup-email"
                 type="email"
@@ -163,7 +163,7 @@
             <p class="arrepentimiento-error" role="alert">{{ lookupError() }}</p>
           }
 
-          <button type="submit" class="btn btn-primary" [disabled]="lookingUp()">
+          <button type="submit" class="btn btn-primary" [disabled]="lookingUp() || !lookupForm().valid()">
             {{ lookingUp() ? 'Buscando...' : 'Consultar estado' }}
           </button>
 

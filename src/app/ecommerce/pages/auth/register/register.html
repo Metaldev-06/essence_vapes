@@ -6,7 +6,7 @@
 
       <form class="auth-form" novalidate (submit)="onSubmit($event)">
         <div class="form-field">
-          <label for="register-name">Nombre completo</label>
+          <label for="register-name">Nombre completo <span class="required-mark" aria-hidden="true">*</span></label>
           <input
             id="register-name"
             type="text"
@@ -20,7 +20,7 @@
         </div>
 
         <div class="form-field">
-          <label for="register-email">Email</label>
+          <label for="register-email">Email <span class="required-mark" aria-hidden="true">*</span></label>
           <input
             id="register-email"
             type="email"
@@ -34,7 +34,7 @@
         </div>
 
         <div class="form-field">
-          <label for="register-password">Contraseña</label>
+          <label for="register-password">Contraseña <span class="required-mark" aria-hidden="true">*</span></label>
           <div class="password-field">
             <input
               id="register-password"
@@ -71,7 +71,7 @@
         </div>
 
         <div class="form-field">
-          <label for="register-confirm">Repetí la contraseña</label>
+          <label for="register-confirm">Repetí la contraseña <span class="required-mark" aria-hidden="true">*</span></label>
           <div class="password-field">
             <input
               id="register-confirm"
@@ -117,7 +117,7 @@
           <p class="auth-form-error" role="alert">{{ error() }}</p>
         }
 
-        <button type="submit" class="btn btn-primary auth-submit" [disabled]="submitting()">
+        <button type="submit" class="btn btn-primary auth-submit" [disabled]="submitting() || !registerForm().valid()">
           {{ submitting() ? 'Creando cuenta...' : 'Crear cuenta' }}
         </button>
       </form>

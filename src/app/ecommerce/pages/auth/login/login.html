@@ -6,7 +6,7 @@
 
       <form class="auth-form" novalidate (submit)="onSubmit($event)">
         <div class="form-field">
-          <label for="login-email">Email</label>
+          <label for="login-email">Email <span class="required-mark" aria-hidden="true">*</span></label>
           <input
             id="login-email"
             type="email"
@@ -20,7 +20,7 @@
         </div>
 
         <div class="form-field">
-          <label for="login-password">Contraseña</label>
+          <label for="login-password">Contraseña <span class="required-mark" aria-hidden="true">*</span></label>
           <div class="password-field">
             <input
               id="login-password"
@@ -61,7 +61,7 @@
           <p class="auth-form-error" role="alert">{{ error() }}</p>
         }
 
-        <button type="submit" class="btn btn-primary auth-submit" [disabled]="submitting()">
+        <button type="submit" class="btn btn-primary auth-submit" [disabled]="submitting() || !loginForm().valid()">
           {{ submitting() ? 'Ingresando...' : 'Iniciar sesión' }}
         </button>
       </form>

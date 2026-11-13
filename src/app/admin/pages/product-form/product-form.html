@@ -75,7 +75,7 @@
         <h2 class="form-section-title">Información básica</h2>
         <div class="form-grid form-grid-2">
           <div class="form-field">
-            <label for="pf-brand">Marca</label>
+            <label for="pf-brand">Marca <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="pf-brand"
               type="text"
@@ -88,7 +88,7 @@
           </div>
 
           <div class="form-field">
-            <label for="pf-name">Nombre</label>
+            <label for="pf-name">Nombre <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="pf-name"
               type="text"
@@ -165,7 +165,7 @@
         </div>
 
         <div class="form-field">
-          <label for="pf-subtitle">Subtítulo</label>
+          <label for="pf-subtitle">Subtítulo <span class="required-mark" aria-hidden="true">*</span></label>
           <input
             id="pf-subtitle"
             type="text"
@@ -180,7 +180,7 @@
 
         <div class="form-grid form-grid-2">
           <div class="form-field">
-            <label for="pf-category">Categoría</label>
+            <label for="pf-category">Categoría <span class="required-mark" aria-hidden="true">*</span></label>
             <select
               id="pf-category"
               [formField]="productForm.category"
@@ -198,7 +198,7 @@
 
           <div class="form-field">
             <label for="pf-accent-hex" class="label-with-swatch">
-              Color de acento
+              Color de acento <span class="required-mark" aria-hidden="true">*</span>
               @if (productForm.accent().value(); as accent) {
                 <span class="accent-swatch" [style.background]="accent"></span>
               }
@@ -235,7 +235,7 @@
         <h2 class="form-section-title">Precio y stock</h2>
         <div class="form-grid form-grid-3">
           <div class="form-field">
-            <label for="pf-price">Precio <span class="form-optional">($)</span></label>
+            <label for="pf-price">Precio <span class="form-optional">($)</span> <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="pf-price"
               type="number"
@@ -333,7 +333,8 @@
         <h2 class="form-section-title">Notas y acordes</h2>
         <div class="form-field">
           <label for="pf-notes"
-            >Notas <span class="form-optional">(separadas por coma)</span></label
+            >Notas <span class="form-optional">(separadas por coma)</span>
+            <span class="required-mark" aria-hidden="true">*</span></label
           >
           <input
             id="pf-notes"
@@ -668,7 +669,7 @@
           }
         </div>
         <a [routerLink]="'/admin/productos'" class="btn btn-sm btn-ghost">Cancelar</a>
-        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving() || !productForm().valid()">
           {{ isSaving() ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear producto' }}
         </button>
       </div>

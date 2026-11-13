@@ -78,7 +78,7 @@
 
       <form class="account-form address-form" novalidate (submit)="submitForm($event)">
         <div class="form-field">
-          <label for="address-label">Nombre de la dirección</label>
+          <label for="address-label">Nombre de la dirección <span class="required-mark" aria-hidden="true">*</span></label>
           <input
             id="address-label"
             type="text"
@@ -93,7 +93,7 @@
 
         <div class="form-row">
           <div class="form-field">
-            <label for="address-recipient">Quién recibe</label>
+            <label for="address-recipient">Quién recibe <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="address-recipient"
               type="text"
@@ -105,7 +105,7 @@
             }
           </div>
           <div class="form-field">
-            <label for="address-phone">Teléfono de contacto</label>
+            <label for="address-phone">Teléfono de contacto <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="address-phone"
               type="tel"
@@ -120,7 +120,7 @@
 
         <div class="form-row">
           <div class="form-field address-street">
-            <label for="address-street">Calle</label>
+            <label for="address-street">Calle <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="address-street"
               type="text"
@@ -132,7 +132,7 @@
             }
           </div>
           <div class="form-field">
-            <label for="address-number">Número</label>
+            <label for="address-number">Número <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="address-number"
               type="text"
@@ -151,7 +151,7 @@
 
         <div class="form-row">
           <div class="form-field">
-            <label for="address-city">Ciudad/localidad</label>
+            <label for="address-city">Ciudad/localidad <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="address-city"
               type="text"
@@ -163,7 +163,7 @@
             }
           </div>
           <div class="form-field">
-            <label for="address-province">Provincia</label>
+            <label for="address-province">Provincia <span class="required-mark" aria-hidden="true">*</span></label>
             <select
               id="address-province"
               [formField]="addressForm.province"
@@ -179,7 +179,7 @@
             }
           </div>
           <div class="form-field">
-            <label for="address-postal">Código postal</label>
+            <label for="address-postal">Código postal <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="address-postal"
               type="text"
@@ -217,7 +217,7 @@
         }
 
         <div class="account-form-actions">
-          <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+          <button type="submit" class="btn btn-primary" [disabled]="submitting() || !addressForm().valid()">
             {{ submitting() ? 'Guardando...' : 'Guardar dirección' }}
           </button>
           <button type="button" class="btn btn-ghost" (click)="closeForm()">Cancelar</button>

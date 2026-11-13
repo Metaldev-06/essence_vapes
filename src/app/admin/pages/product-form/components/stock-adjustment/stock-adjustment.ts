@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 
 import { extractErrorMessage } from '../../../../data/extract-error-message';
 import {
@@ -25,6 +25,11 @@ export class StockAdjustment {
   protected readonly reason = signal('');
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
+
+  protected readonly canSubmit = computed(() => {
+    const qty = Number(this.quantityChange());
+    return Number.isFinite(qty) && qty !== 0 && this.reason().trim() !== '';
+  });
 
   protected readonly movements = signal<readonly StockMovementRecord[]>([]);
   protected readonly loadingMovements = signal(true);

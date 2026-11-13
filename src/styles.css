@@ -56,6 +56,14 @@ body {
   color: var(--color-text-primary);
 }
 
+/* Marca "campo obligatorio" en el label de un form field - un solo lugar para que todos los
+   formularios del sitio (admin y storefront) se vean iguales, en vez de redefinirlo por
+   componente. */
+.required-mark {
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+
 /* ── Shared layout primitives ─────────────────────────
    Every home section is built from these so the whole page
    stays in the same rhythm/typography/color system. */

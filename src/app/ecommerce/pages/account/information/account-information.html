@@ -7,7 +7,7 @@
   <section class="account-card card">
     <form class="account-form" novalidate (submit)="saveProfile($event)">
       <div class="form-field">
-        <label for="account-name">Nombre</label>
+        <label for="account-name">Nombre <span class="required-mark" aria-hidden="true">*</span></label>
         <input
           id="account-name"
           type="text"
@@ -72,7 +72,7 @@
         <p class="account-error" role="alert">{{ profileError() }}</p>
       }
 
-      <button type="submit" class="btn btn-primary account-submit" [disabled]="savingProfile()">
+      <button type="submit" class="btn btn-primary account-submit" [disabled]="savingProfile() || !profileForm().valid()">
         {{ savingProfile() ? 'Guardando...' : 'Guardar cambios' }}
       </button>
     </form>

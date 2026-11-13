@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { extractErrorMessage } from '../../data/extract-error-message';
@@ -44,6 +44,9 @@ export default class MessagesSettings {
   protected readonly formModel = signal<CannedResponseFormModel>(emptyModel());
   protected readonly editingId = signal<string | null>(null);
   protected readonly saving = signal(false);
+  protected readonly canSaveCannedResponse = computed(
+    () => this.formModel().title.trim() !== '' && this.formModel().body.trim() !== '',
+  );
 
   protected readonly signatureDrafts = signal<Record<InboxAddress, string>>({
     contacto: '',

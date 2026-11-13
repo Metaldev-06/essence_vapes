@@ -83,7 +83,9 @@
       <h2 class="account-card-title">Datos para el retiro</h2>
 
       <div class="form-field">
-        <label for="checkout-pickup-name">Nombre y apellido de quien retira</label>
+        <label for="checkout-pickup-name">
+          Nombre y apellido de quien retira <span class="required-mark" aria-hidden="true">*</span>
+        </label>
         <input
           id="checkout-pickup-name"
           type="text"
@@ -93,7 +95,9 @@
       </div>
 
       <div class="form-field">
-        <label for="checkout-pickup-phone">Teléfono de contacto</label>
+        <label for="checkout-pickup-phone">
+          Teléfono de contacto <span class="required-mark" aria-hidden="true">*</span>
+        </label>
         <input
           id="checkout-pickup-phone"
           type="tel"
@@ -147,7 +151,7 @@
 
     <form class="account-form" novalidate (submit)="submitNewAddress($event)">
       <div class="form-field">
-        <label for="checkout-address-label">Nombre de la dirección</label>
+        <label for="checkout-address-label">Nombre de la dirección <span class="required-mark" aria-hidden="true">*</span></label>
         <input
           id="checkout-address-label"
           type="text"
@@ -162,22 +166,22 @@
 
       <div class="form-row">
         <div class="form-field">
-          <label for="checkout-address-recipient">Quién recibe</label>
+          <label for="checkout-address-recipient">Quién recibe <span class="required-mark" aria-hidden="true">*</span></label>
           <input id="checkout-address-recipient" type="text" [formField]="addressForm.recipientName" />
         </div>
         <div class="form-field">
-          <label for="checkout-address-phone">Teléfono de contacto</label>
+          <label for="checkout-address-phone">Teléfono de contacto <span class="required-mark" aria-hidden="true">*</span></label>
           <input id="checkout-address-phone" type="tel" [formField]="addressForm.phone" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-field checkout-address-street">
-          <label for="checkout-address-street">Calle</label>
+          <label for="checkout-address-street">Calle <span class="required-mark" aria-hidden="true">*</span></label>
           <input id="checkout-address-street" type="text" [formField]="addressForm.street" />
         </div>
         <div class="form-field">
-          <label for="checkout-address-number">Número</label>
+          <label for="checkout-address-number">Número <span class="required-mark" aria-hidden="true">*</span></label>
           <input id="checkout-address-number" type="text" [formField]="addressForm.streetNumber" />
         </div>
         <div class="form-field">
@@ -188,11 +192,11 @@
 
       <div class="form-row">
         <div class="form-field">
-          <label for="checkout-address-city">Ciudad/localidad</label>
+          <label for="checkout-address-city">Ciudad/localidad <span class="required-mark" aria-hidden="true">*</span></label>
           <input id="checkout-address-city" type="text" [formField]="addressForm.city" />
         </div>
         <div class="form-field">
-          <label for="checkout-address-province">Provincia</label>
+          <label for="checkout-address-province">Provincia <span class="required-mark" aria-hidden="true">*</span></label>
           <select id="checkout-address-province" [formField]="addressForm.province">
             <option value="" disabled selected>Elegí una provincia</option>
             @for (province of provinces; track province) {
@@ -201,7 +205,7 @@
           </select>
         </div>
         <div class="form-field">
-          <label for="checkout-address-postal">Código postal</label>
+          <label for="checkout-address-postal">Código postal <span class="required-mark" aria-hidden="true">*</span></label>
           <input id="checkout-address-postal" type="text" [formField]="addressForm.postalCode" />
         </div>
       </div>
@@ -234,7 +238,7 @@
       }
 
       <div class="account-form-actions">
-        <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+        <button type="submit" class="btn btn-primary" [disabled]="submitting() || !addressForm().valid()">
           {{ submitting() ? 'Guardando...' : 'Guardar y continuar' }}
         </button>
         <button type="button" class="btn btn-ghost" (click)="showNewAddressForm.set(false)">

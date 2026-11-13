@@ -1,7 +1,7 @@
 <div class="stock-adjustment">
   <div class="stock-adjustment-form">
     <label class="stock-adjustment-field">
-      <span>Cantidad</span>
+      <span>Cantidad <span class="required-mark" aria-hidden="true">*</span></span>
       <input
         type="number"
         placeholder="Ej: 10 o -3"
@@ -10,7 +10,7 @@
       />
     </label>
     <label class="stock-adjustment-field stock-adjustment-field-reason">
-      <span>Motivo</span>
+      <span>Motivo <span class="required-mark" aria-hidden="true">*</span></span>
       <input
         type="text"
         placeholder="Ej: conteo físico, producto dañado..."
@@ -18,7 +18,7 @@
         (input)="onReasonChange($event)"
       />
     </label>
-    <button type="button" class="btn btn-sm btn-primary" [disabled]="saving()" (click)="submit()">
+    <button type="button" class="btn btn-sm btn-primary" [disabled]="saving() || !canSubmit()" (click)="submit()">
       {{ saving() ? 'Guardando...' : 'Ajustar stock' }}
     </button>
   </div>

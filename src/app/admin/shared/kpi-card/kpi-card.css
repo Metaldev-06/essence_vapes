@@ -31,6 +31,7 @@
 }
 
 .kpi-card-info {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -42,6 +43,40 @@
   color: var(--color-text-muted);
   border: 1px solid var(--color-border-subtle);
   cursor: help;
+}
+
+/* Tooltip CSS-only via `[data-tooltip]` en vez de `[title]` nativo - mismo patrón que los
+ * botones de favorito/comparar/carrito en `product-card` (control de estilo, sin el delay del
+ * navegador). */
+.kpi-card-info::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  z-index: 5;
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
+  color: var(--color-text-primary);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.kpi-card-info:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
 }
 
 .kpi-card-value {

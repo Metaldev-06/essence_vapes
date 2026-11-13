@@ -2,7 +2,7 @@
   <div class="kpi-card-header">
     <span class="kpi-card-label">{{ label() }}</span>
     @if (tooltip()) {
-      <span class="kpi-card-info" [attr.title]="tooltip()" aria-hidden="true">?</span>
+      <span class="kpi-card-info" [attr.data-tooltip]="tooltip()" aria-hidden="true">?</span>
       <span class="sr-only">{{ tooltip() }}</span>
     }
   </div>

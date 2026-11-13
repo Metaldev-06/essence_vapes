@@ -2,7 +2,7 @@
   <form class="contact-form" novalidate (submit)="onSubmit($event)">
     <div class="form-row form-row--split">
       <div class="form-field">
-        <label for="cf-name">Nombre</label>
+        <label for="cf-name">Nombre <span class="required-mark" aria-hidden="true">*</span></label>
         <input
           id="cf-name"
           type="text"
@@ -16,7 +16,7 @@
       </div>
 
       <div class="form-field">
-        <label for="cf-email">Email</label>
+        <label for="cf-email">Email <span class="required-mark" aria-hidden="true">*</span></label>
         <input
           id="cf-email"
           type="email"
@@ -47,7 +47,7 @@
     </div>
 
     <div class="form-field">
-      <label for="cf-message">Mensaje</label>
+      <label for="cf-message">Mensaje <span class="required-mark" aria-hidden="true">*</span></label>
       <textarea
         id="cf-message"
         rows="5"
@@ -64,7 +64,7 @@
       <p class="contact-form-error" role="alert">{{ error() }}</p>
     }
 
-    <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+    <button type="submit" class="btn btn-primary" [disabled]="submitting() || !contactForm().valid()">
       {{ submitting() ? 'Enviando...' : 'Enviar mensaje' }}
     </button>
   </form>

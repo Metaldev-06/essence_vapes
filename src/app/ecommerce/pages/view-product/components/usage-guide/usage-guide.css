@@ -13,17 +13,18 @@
 }
 
 .usage-row--two {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .usage-row--three {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .usage-card-panel {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-width: 0;
   padding: 24px;
   border-radius: 20px;
   background: var(--color-surface-elevated);
@@ -81,47 +82,10 @@
   border: 1px solid color-mix(in srgb, var(--color-accent) 24%, transparent);
 }
 
-.mini-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.usage-card-panel app-horizontal-bar-chart {
   margin-top: 4px;
   padding-top: 14px;
   border-top: 1px solid var(--color-border-subtle);
-}
-
-.mini-bar-row {
-  display: grid;
-  grid-template-columns: 50px 1fr 30px;
-  align-items: center;
-  gap: 10px;
-}
-
-.mini-bar-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.mini-bar-track {
-  height: 5px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  overflow: hidden;
-}
-
-.mini-bar-fill {
-  display: block;
-  height: 100%;
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
-}
-
-.mini-bar-value {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  text-align: right;
 }
 
 .occasion-grid {
@@ -213,58 +177,6 @@
   font-weight: 700;
 }
 
-.season-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.season-row {
-  display: grid;
-  grid-template-columns: 22px 70px 1fr 28px;
-  align-items: center;
-  gap: 10px;
-}
-
-.season-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-accent);
-}
-
-.season-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.season-label {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.season-track {
-  height: 5px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  overflow: hidden;
-}
-
-.season-fill {
-  display: block;
-  height: 100%;
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
-}
-
-.season-value {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  text-align: right;
-}
-
 .performance-track {
   display: flex;
   gap: 4px;
@@ -302,7 +214,7 @@
 @media (max-width: 860px) {
   .usage-row--two,
   .usage-row--three {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .usage-guide-section .container + .container {
@@ -313,9 +225,5 @@
 @media (max-width: 480px) {
   .occasion-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .season-row {
-    grid-template-columns: 20px 56px 1fr 26px;
   }
 }

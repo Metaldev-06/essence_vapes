@@ -11,70 +11,36 @@
 
     @if (radar(); as radarData) {
       <div class="taste-profile-radar-row">
-        <svg class="taste-radar" viewBox="0 0 260 260" role="img" aria-label="Radar de acordes favoritos">
-          @for (ring of radarData.rings; track $index) {
-            <polygon [attr.points]="ring" class="taste-radar-ring" />
-          }
-          @for (axis of radarData.axes; track $index) {
-            <line x1="130" y1="130" [attr.x2]="axis.x2" [attr.y2]="axis.y2" class="taste-radar-axis" />
-          }
-          <polygon [attr.points]="radarData.polygonPoints" class="taste-radar-shape" />
-          @for (label of radarData.labels; track label.text) {
-            <text [attr.x]="label.x" [attr.y]="label.y" [attr.text-anchor]="label.anchor" class="taste-radar-label">
-              {{ label.text }}
-            </text>
-          }
-        </svg>
+        <app-radar-chart
+          [labels]="radarData.labels"
+          [series]="radarData.series"
+          [legend]="false"
+          ariaLabel="Radar de acordes favoritos"
+        />
 
         @if (accordStats().length > 0) {
           <div class="taste-profile-section taste-profile-section--compact">
             <span class="taste-profile-section-label">Tus acordes favoritos</span>
-            <div
-              class="taste-bars"
-              role="img"
-              [attr.aria-label]="'Acordes más frecuentes en tus favoritos'"
-            >
-              @for (stat of accordStats(); track stat.label) {
-                <div
-                  class="taste-bar-row"
-                  [attr.title]="
-                    stat.label + ': ' + stat.count + ' de ' + products().length + ' favoritos'
-                  "
-                >
-                  <span class="taste-bar-label">{{ stat.label }}</span>
-                  <div class="taste-bar-track">
-                    <div class="taste-bar-fill" [style.width.%]="stat.pct"></div>
-                  </div>
-                  <span class="taste-bar-value">{{ stat.pct }}%</span>
-                </div>
-              }
-            </div>
+            <app-horizontal-bar-chart
+              [categories]="accordBarChart().categories"
+              [series]="accordBarChart().series"
+              [points]="accordBarChart().points"
+              [legend]="false"
+              ariaLabel="Acordes más frecuentes en tus favoritos"
+            />
           </div>
         }
       </div>
     } @else if (accordStats().length > 0) {
       <div class="taste-profile-section">
         <span class="taste-profile-section-label">Tus acordes favoritos</span>
-        <div
-          class="taste-bars"
-          role="img"
-          [attr.aria-label]="'Acordes más frecuentes en tus favoritos'"
-        >
-          @for (stat of accordStats(); track stat.label) {
-            <div
-              class="taste-bar-row"
-              [attr.title]="
-                stat.label + ': ' + stat.count + ' de ' + products().length + ' favoritos'
-              "
-            >
-              <span class="taste-bar-label">{{ stat.label }}</span>
-              <div class="taste-bar-track">
-                <div class="taste-bar-fill" [style.width.%]="stat.pct"></div>
-              </div>
-              <span class="taste-bar-value">{{ stat.count }}</span>
-            </div>
-          }
-        </div>
+        <app-horizontal-bar-chart
+          [categories]="accordBarChart().categories"
+          [series]="accordBarChart().series"
+          [points]="accordBarChart().points"
+          [legend]="false"
+          ariaLabel="Acordes más frecuentes en tus favoritos"
+        />
       </div>
     }
 

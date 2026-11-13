@@ -1,0 +1,12 @@
+.radar-chart-container {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 260px;
+}
+
+/* Ver el mismo comentario en `horizontal-bar-chart.css` - sin esto, el ancho intrínseco del
+ * `<canvas>` puede forzar el desborde de la página en mobile en vez de achicarse. */
+.radar-chart-container canvas {
+  max-width: 100%;
+}

@@ -1,0 +1,11 @@
+<div class="horizontal-bar-chart-container" [style.height.px]="height()">
+  <canvas
+    baseChart
+    [data]="chartData()"
+    [options]="chartOptions()"
+    [type]="chartType"
+    [plugins]="plugins"
+    role="img"
+    [attr.aria-label]="ariaLabel()"
+  ></canvas>
+</div>

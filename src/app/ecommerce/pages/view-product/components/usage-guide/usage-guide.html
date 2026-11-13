@@ -16,17 +16,13 @@
             }
 
             @if (dayBars().length > 0) {
-              <div class="mini-bars">
-                @for (bar of dayBars(); track bar.label) {
-                  <div class="mini-bar-row">
-                    <span class="mini-bar-label">{{ bar.label }}</span>
-                    <div class="mini-bar-track">
-                      <span class="mini-bar-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
-                    </div>
-                    <span class="mini-bar-value">{{ bar.value }}/5</span>
-                  </div>
-                }
-              </div>
+              <app-horizontal-bar-chart
+                [categories]="dayBarChart().categories"
+                [series]="dayBarChart().series"
+                [points]="dayBarChart().points"
+                [legend]="false"
+                ariaLabel="Uso recomendado de día y de noche"
+              />
             }
           </div>
         }
@@ -106,45 +102,13 @@
         @if (seasonBars().length > 0) {
           <div class="usage-card-panel">
             <h3 class="usage-stat-title">Mejores estaciones</h3>
-            <div class="season-list">
-              @for (bar of seasonBars(); track bar.label) {
-                <div class="season-row">
-                  <span class="season-icon" aria-hidden="true">
-                    @switch (bar.icon) {
-                      @case ('primavera') {
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M12 21V10" />
-                          <path d="M12 10c0-3.5 2.2-6 5.5-6.5C17.2 6.8 15 9.5 12 10Z" />
-                          <path d="M12 13c0-3-2-5-5.5-5.5C6.8 10.8 9 13.5 12 13Z" />
-                        </svg>
-                      }
-                      @case ('verano') {
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="12" cy="12" r="4" />
-                          <path d="M12 3v2M12 19v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M3 12h2M19 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5" />
-                        </svg>
-                      }
-                      @case ('otono') {
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M12 3c4.5 2 7 5.5 7 10a5 5 0 0 1-9.5 2.2C8 12.5 10 7 12 3Z" />
-                          <path d="M12 21c0-5 1-8 3-11" />
-                        </svg>
-                      }
-                      @case ('invierno') {
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11" />
-                        </svg>
-                      }
-                    }
-                  </span>
-                  <span class="season-label">{{ bar.label }}</span>
-                  <div class="season-track">
-                    <span class="season-fill" [style.width.%]="(bar.value / maxRating) * 100"></span>
-                  </div>
-                  <span class="season-value">{{ bar.value }}/5</span>
-                </div>
-              }
-            </div>
+            <app-horizontal-bar-chart
+              [categories]="seasonBarChart().categories"
+              [series]="seasonBarChart().series"
+              [points]="seasonBarChart().points"
+              [legend]="false"
+              ariaLabel="Mejores estaciones para usar esta fragancia"
+            />
           </div>
         }
 

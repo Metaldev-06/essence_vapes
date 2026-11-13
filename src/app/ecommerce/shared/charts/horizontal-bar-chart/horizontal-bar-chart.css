@@ -1,0 +1,13 @@
+.horizontal-bar-chart-container {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Un `<canvas>` tiene ancho intrínseco (el atributo `width` que Chart.js le asigna antes de su
+ * primer resize) que actúa como un "min-content" no-achicable - sin esto, dentro de una grilla o
+ * flex con track `1fr` (en vez de `minmax(0, 1fr)`), el gráfico fuerza la página a desbordar en
+ * vez de achicarse en mobile (mismo gotcha documentado para imágenes en el resto del sitio). */
+.horizontal-bar-chart-container canvas {
+  max-width: 100%;
+}

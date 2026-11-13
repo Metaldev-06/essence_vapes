@@ -1,11 +1,36 @@
 import { Component, computed, input } from '@angular/core';
 import type { Longevity, Product, Sillage } from '../../../../data/product.model';
+import {
+  HorizontalBarChart,
+  type BarChartPoint,
+  type BarChartSeries,
+} from '../../../../shared/charts/horizontal-bar-chart/horizontal-bar-chart';
 
 interface RatingBar {
   readonly label: string;
   readonly value: number;
   readonly icon?: 'primavera' | 'verano' | 'otono' | 'invierno';
 }
+
+/** Literal hex de `--color-accent` (`--color-aurora-cyan` en `styles.css`) - un canvas no puede
+ *  resolver una custom property como lo hace el CSS. */
+const ACCENT_HEX = '#06b6d4';
+
+const SEASON_EMOJI: Record<'primavera' | 'verano' | 'otono' | 'invierno', string> = {
+  primavera: '🌸',
+  verano: '☀️',
+  otono: '🍂',
+  invierno: '❄️',
+};
+
+const toBarChart = (
+  bars: readonly RatingBar[],
+  maxRating: number,
+): { categories: readonly string[]; series: readonly BarChartSeries[]; points: readonly (readonly BarChartPoint[])[] } => ({
+  categories: bars.map((bar) => (bar.icon ? `${SEASON_EMOJI[bar.icon]} ${bar.label}` : bar.label)),
+  series: [{ label: 'Rating', color: ACCENT_HEX }],
+  points: [bars.map((bar) => ({ value: (bar.value / maxRating) * 100, displayLabel: `${bar.value}/${maxRating}` }))],
+});
 
 interface OccasionTile {
   readonly label: string;
@@ -28,7 +53,7 @@ const LONGEVITY_STEPS: readonly Longevity[] = ['2-4h', '4-6h', '6-8h', '8-12h', 
 
 @Component({
   selector: 'app-usage-guide',
-  imports: [],
+  imports: [HorizontalBarChart],
   templateUrl: './usage-guide.html',
   styleUrl: './usage-guide.css',
 })
@@ -67,6 +92,9 @@ export class UsageGuide {
       { label: 'Noche', value: day.noche },
     ];
   });
+
+  protected readonly seasonBarChart = computed(() => toBarChart(this.seasonBars(), MAX_RATING));
+  protected readonly dayBarChart = computed(() => toBarChart(this.dayBars(), MAX_RATING));
 
   protected readonly occasionTiles = computed<readonly OccasionTile[]>(() => {
     const occasions = this.product().occasions;

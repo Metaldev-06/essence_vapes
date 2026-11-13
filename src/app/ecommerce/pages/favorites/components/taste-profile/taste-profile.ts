@@ -1,6 +1,12 @@
 import { Component, computed, input } from '@angular/core';
 import { SCENT_STYLE_OPTIONS } from '../../../../data/scent-styles';
 import type { Product, ProductStyle, ScentStyle } from '../../../../data/product.model';
+import {
+  HorizontalBarChart,
+  type BarChartPoint,
+  type BarChartSeries,
+} from '../../../../shared/charts/horizontal-bar-chart/horizontal-bar-chart';
+import { RadarChart, type RadarSeries } from '../../../../shared/charts/radar-chart/radar-chart';
 
 interface AccordStat {
   readonly label: string;
@@ -17,22 +23,9 @@ interface StyleStat {
 
 const MAX_ACCORDS_SHOWN = 6;
 const MIN_ACCORDS_FOR_RADAR = 3;
-
-interface RadarGeometry {
-  readonly polygonPoints: string;
-  readonly rings: readonly string[];
-  readonly axes: readonly { readonly x2: number; readonly y2: number }[];
-  readonly labels: readonly {
-    readonly x: number;
-    readonly y: number;
-    readonly anchor: 'start' | 'middle' | 'end';
-    readonly text: string;
-  }[];
-}
-
-const RADAR_CENTER = 130;
-const RADAR_RADIUS = 82;
-const RADAR_LABEL_RADIUS = 114;
+/** Literal hex de `--color-accent` (`--color-aurora-cyan` en `styles.css`) - un canvas no puede
+ *  resolver una custom property como lo hace el CSS. */
+const ACCENT_HEX = '#06b6d4';
 
 /**
  * A read-only summary of taste, derived entirely from the products a user already favorited -
@@ -42,7 +35,7 @@ const RADAR_LABEL_RADIUS = 114;
  */
 @Component({
   selector: 'app-taste-profile',
-  imports: [],
+  imports: [RadarChart, HorizontalBarChart],
   templateUrl: './taste-profile.html',
   styleUrl: './taste-profile.css',
 })
@@ -73,44 +66,26 @@ export class TasteProfile {
    * profile vs. the bars' exact per-accord standing). `null` below `MIN_ACCORDS_FOR_RADAR`: a
    * 2-axis "radar" is just a line, not a meaningful shape.
    */
-  protected readonly radar = computed<RadarGeometry | null>(() => {
+  protected readonly radar = computed<{ labels: readonly string[]; series: readonly RadarSeries[] } | null>(() => {
     const stats = this.accordStats();
     if (stats.length < MIN_ACCORDS_FOR_RADAR) return null;
-
-    const axisCount = stats.length;
-    const angleFor = (index: number) => (Math.PI * 2 * index) / axisCount - Math.PI / 2;
-    const pointAt = (index: number, radius: number) => {
-      const angle = angleFor(index);
-      return { x: RADAR_CENTER + radius * Math.cos(angle), y: RADAR_CENTER + radius * Math.sin(angle) };
+    return {
+      labels: stats.map((stat) => stat.label),
+      series: [{ label: 'Tus favoritos', color: ACCENT_HEX, data: stats.map((stat) => stat.pct) }],
     };
+  });
 
-    const polygonPoints = stats
-      .map((stat, i) => {
-        const point = pointAt(i, RADAR_RADIUS * (stat.pct / 100));
-        return `${point.x},${point.y}`;
-      })
-      .join(' ');
-
-    const rings = [0.33, 0.66, 1].map((factor) =>
-      stats
-        .map((_, i) => {
-          const point = pointAt(i, RADAR_RADIUS * factor);
-          return `${point.x},${point.y}`;
-        })
-        .join(' '),
-    );
-
-    const axes = stats.map((_, i) => pointAt(i, RADAR_RADIUS)).map(({ x, y }) => ({ x2: x, y2: y }));
-
-    const labels = stats.map((stat, i) => {
-      const angle = angleFor(i);
-      const cos = Math.cos(angle);
-      const point = pointAt(i, RADAR_LABEL_RADIUS);
-      const anchor: 'start' | 'middle' | 'end' = cos > 0.3 ? 'start' : cos < -0.3 ? 'end' : 'middle';
-      return { x: point.x, y: point.y, anchor, text: stat.label };
-    });
-
-    return { polygonPoints, rings, axes, labels };
+  protected readonly accordBarChart = computed<{
+    categories: readonly string[];
+    series: readonly BarChartSeries[];
+    points: readonly (readonly BarChartPoint[])[];
+  }>(() => {
+    const stats = this.accordStats();
+    return {
+      categories: stats.map((stat) => stat.label),
+      series: [{ label: 'Favoritos', color: ACCENT_HEX }],
+      points: [stats.map((stat) => ({ value: stat.pct, displayLabel: `${stat.count}` }))],
+    };
   });
 
   protected readonly styleStats = computed<readonly StyleStat[]>(() => {

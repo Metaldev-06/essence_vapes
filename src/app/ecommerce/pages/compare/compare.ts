@@ -5,10 +5,14 @@ import { CompareService } from '../../../core/compare/compare.service';
 import { cloudinaryUrl } from '../../data/cloudinary-url.helper';
 import { SCENT_STYLE_OPTIONS } from '../../data/scent-styles';
 import { CompareDotRows } from './components/compare-dot-rows/compare-dot-rows';
-import { CompareMetricRows } from './components/compare-metric-rows/compare-metric-rows';
-import { CompareRadarChart } from './components/compare-radar-chart/compare-radar-chart';
 import { CompareStarRating } from './components/compare-star-rating/compare-star-rating';
-import { SERIES_COLORS, type DotRow, type MetricRow, type RadarGeometry } from './compare.types';
+import { SERIES_COLORS, SERIES_COLORS_HEX, type DotRow, type MetricRow } from './compare.types';
+import {
+  HorizontalBarChart,
+  type BarChartPoint,
+  type BarChartSeries,
+} from '../../shared/charts/horizontal-bar-chart/horizontal-bar-chart';
+import { RadarChart, type RadarSeries } from '../../shared/charts/radar-chart/radar-chart';
 import {
   CATEGORY_SINGULAR_LABELS,
   CONCENTRATION_LABELS,
@@ -52,9 +56,6 @@ interface Differentiator {
 
 const MOBILE_BREAKPOINT_QUERY = '(max-width: 640px)';
 
-const RADAR_CENTER = 130;
-const RADAR_RADIUS = 66;
-const RADAR_LABEL_RADIUS = 96;
 const MAX_RADAR_AXES = 6;
 
 @Component({
@@ -63,9 +64,9 @@ const MAX_RADAR_AXES = 6;
     RouterLink,
     NgOptimizedImage,
     CompareDotRows,
-    CompareMetricRows,
-    CompareRadarChart,
     CompareStarRating,
+    RadarChart,
+    HorizontalBarChart,
   ],
   templateUrl: './compare.html',
   styleUrl: './compare.css',
@@ -286,8 +287,10 @@ export default class Compare {
     };
   }
 
-  /** Multi-series radar over the accords shared/most common across the compared products. */
-  protected readonly radar = computed<RadarGeometry | null>(() => {
+  /** Multi-series radar over the accords shared/most common across the compared products - cada
+   *  eje vale 100 si el producto tiene ese acorde, 12 si no (nunca 0 literal, para que el polígono
+   *  siga siendo visible en vez de colapsar al centro). */
+  protected readonly radar = computed<{ labels: readonly string[]; series: readonly RadarSeries[] } | null>(() => {
     const products = this.products();
     if (products.length < 2) return null;
 
@@ -303,38 +306,44 @@ export default class Compare {
       .map(([label]) => label);
     if (axes.length < 3) return null;
 
-    const axisCount = axes.length;
-    const angleFor = (index: number) => (Math.PI * 2 * index) / axisCount - Math.PI / 2;
-    const pointAt = (index: number, radius: number) => {
-      const angle = angleFor(index);
-      return { x: RADAR_CENTER + radius * Math.cos(angle), y: RADAR_CENTER + radius * Math.sin(angle) };
-    };
-
-    const rings = [0.33, 0.66, 1].map((factor) =>
-      axes.map((_, i) => { const p = pointAt(i, RADAR_RADIUS * factor); return `${p.x},${p.y}`; }).join(' '),
-    );
-    const axisLines = axes.map((_, i) => pointAt(i, RADAR_RADIUS)).map(({ x, y }) => ({ x2: x, y2: y }));
-    const labels = axes.map((text, i) => {
-      const angle = angleFor(i);
-      const cos = Math.cos(angle);
-      const point = pointAt(i, RADAR_LABEL_RADIUS);
-      const anchor = cos > 0.3 ? 'start' : cos < -0.3 ? 'end' : 'middle';
-      return { x: point.x, y: point.y, anchor, text };
-    });
-
     const series = products.map((product, productIndex) => {
       const owned = new Set(product.accords ?? []);
-      const points = axes
-        .map((axis, i) => {
-          const point = pointAt(i, owned.has(axis) ? RADAR_RADIUS : RADAR_RADIUS * 0.12);
-          return `${point.x},${point.y}`;
-        })
-        .join(' ');
-      return { color: SERIES_COLORS[productIndex % SERIES_COLORS.length], points };
+      return {
+        label: product.name,
+        color: SERIES_COLORS_HEX[productIndex % SERIES_COLORS_HEX.length],
+        data: axes.map((axis) => (owned.has(axis) ? 100 : 12)),
+      };
     });
 
-    return { rings, axisLines, labels, series };
+    return { labels: axes, series };
   });
+
+  /** Adapta `MetricRow[]` (la data de "rendimiento"/"cuándo usarla", ya calculada arriba) al
+   *  formato genérico que espera `app-horizontal-bar-chart`. */
+  private toBarChart(rows: readonly MetricRow[]): {
+    categories: readonly string[];
+    series: readonly BarChartSeries[];
+    points: readonly (readonly BarChartPoint[])[];
+  } {
+    const products = this.products();
+    return {
+      categories: rows.map((row) => `${row.icon} ${row.label}`),
+      series: products.map((product, i) => ({
+        label: product.name,
+        color: SERIES_COLORS_HEX[i % SERIES_COLORS_HEX.length],
+      })),
+      points: products.map((_, i) =>
+        rows.map((row) => ({
+          value: row.bars[i].pct,
+          displayLabel: row.bars[i].displayLabel,
+          isBest: row.bars[i].isBest,
+        })),
+      ),
+    };
+  }
+
+  protected readonly performanceChart = computed(() => this.toBarChart(this.performanceRows()));
+  protected readonly usageChart = computed(() => this.toBarChart(this.usageRows()));
 
   /**
    * "Diferencias clave" / "¿Cuál elegir?" - only meaningful for exactly 2 products. Every entry

@@ -342,6 +342,9 @@ export class AuthService {
     this.tokenSignal.set(session.token);
     this.userSignal.set(session.user);
     this.storeToken(session.token);
+    // Sesión nueva = sin aviso pendiente. Sin esto, el "Tu sesión venció" de la sesión anterior
+    // seguía en pantalla después de volver a iniciar sesión.
+    this.sessionStateSignal.set('ok');
     this.scheduleExpiryWatch(session.token);
     return { success: true };
   }

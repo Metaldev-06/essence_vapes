@@ -31,6 +31,9 @@ export class SessionExpiryModal {
   }
 
   protected goToLogin(): void {
+    // La sesión ya terminó: esto solo baja el aviso (deja `sessionState` en 'ok') antes de ir al
+    // login, para que no reaparezca si se vuelve al panel.
+    this.adminAuthService.logout();
     void this.router.navigateByUrl('/admin/login');
   }
 }

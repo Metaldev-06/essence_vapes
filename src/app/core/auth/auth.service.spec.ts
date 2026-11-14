@@ -13,6 +13,36 @@ describe('AuthService', () => {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
   });
 
+  it('volver a iniciar sesión después de que venció baja el aviso "Tu sesión venció"', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(AuthService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    service.handleSessionExpired();
+    expect(service.sessionState()).toBe('expired');
+
+    const pending = service.login({ email: 'cliente@test.com', password: 'secreta123' });
+    httpMock.expectOne(`${API_BASE_URL}/auth/login`).flush({
+      token: 'new-token',
+      user: {
+        id: 'u1',
+        email: 'cliente@test.com',
+        fullName: 'Cliente Test',
+        role: 'regular',
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    });
+
+    await expect(pending).resolves.toEqual({ success: true });
+    expect(service.sessionState()).toBe('ok');
+    expect(service.isAuthenticated()).toBe(true);
+    httpMock.verify();
+  });
+
   it('restores a stored session on startup without wiping a valid token', async () => {
     localStorage.setItem(TOKEN_STORAGE_KEY, 'stored-token');
 

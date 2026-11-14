@@ -31,6 +31,10 @@ export class SessionExpiryModal {
   }
 
   protected goToLogin(): void {
+    // La sesión ya terminó: esto solo baja el aviso (deja `sessionState` en 'ok'). Acá es
+    // imprescindible: `/auth/login` vive dentro del mismo shell que monta este cartel, así que
+    // sin esto el aviso quedaba tapando el propio formulario de login.
+    this.authService.logout();
     void this.router.navigateByUrl('/auth/login');
   }
 }

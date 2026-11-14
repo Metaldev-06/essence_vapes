@@ -75,6 +75,23 @@ export const adminRoutes: Routes = [
         data: { breadcrumbs: [{ label: 'Botón de arrepentimiento' }] },
       },
       {
+        path: 'notificaciones',
+        loadComponent: () => import('./pages/notifications/notifications'),
+        title: 'Notificaciones | Admin Essence Vapes',
+        data: { breadcrumbs: [{ label: 'Notificaciones' }] },
+      },
+      {
+        path: 'notificaciones/configuracion',
+        loadComponent: () => import('./pages/notification-settings/notification-settings'),
+        title: 'Configuración de notificaciones | Admin Essence Vapes',
+        data: {
+          breadcrumbs: [
+            { label: 'Notificaciones', link: '/admin/notificaciones' },
+            { label: 'Configuración' },
+          ],
+        },
+      },
+      {
         path: 'mensajes',
         loadComponent: () => import('./pages/messages/messages'),
         title: 'Mensajes | Admin Essence Vapes',

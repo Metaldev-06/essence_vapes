@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AdminAuthService } from '../../data/admin-auth.service';
 import { MessagesAdminService } from '../../data/messages-admin.service';
+import { NotificationsStore } from '../../data/notifications.store';
 import { ConfirmDialog, type ConfirmDialogData } from '../../shared/confirm-dialog/confirm-dialog';
 
 const UNREAD_POLL_MS = 60_000;
@@ -18,6 +19,8 @@ const COLLAPSE_STORAGE_KEY = 'essence-vapes-admin-sidebar-collapsed';
 export class Sidebar {
   protected readonly adminAuthService = inject(AdminAuthService);
   private readonly messagesAdminService = inject(MessagesAdminService);
+  /** Mismo contador que la campana de la barra superior - una sola fuente (el store). */
+  protected readonly notificationsStore = inject(NotificationsStore);
   private readonly router = inject(Router);
 
   protected readonly adminInitial = computed(() => {

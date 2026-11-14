@@ -1,0 +1,232 @@
+<div class="notifications">
+  <header class="notifications-header">
+    <div>
+      <h1 class="notifications-title">Notificaciones</h1>
+      <p class="notifications-subtitle">
+        @if (store.unreadCount() === 0) {
+          Estás al día: no hay nada sin leer.
+        } @else {
+          {{ store.unreadCount() }} sin leer.
+        }
+      </p>
+    </div>
+    <div class="notifications-header-actions">
+      @if (store.hasUnread()) {
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="busy()" (click)="markAllRead()">
+          Marcar todas como leídas
+        </button>
+      }
+      <a routerLink="/admin/notificaciones/configuracion" class="btn btn-sm btn-ghost">Configuración</a>
+    </div>
+  </header>
+
+  <div class="notifications-tabs" role="group" aria-label="Filtrar por estado">
+    @for (tab of statusTabs; track tab.id) {
+      <button
+        type="button"
+        class="notifications-tab"
+        [class.active]="status() === tab.id"
+        [attr.aria-pressed]="status() === tab.id"
+        (click)="setStatus(tab.id)"
+      >
+        {{ tab.label }}
+        @if (tab.id === 'unread' && store.hasUnread()) {
+          <span class="notifications-tab-count">{{ store.unreadCount() }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <div class="notifications-filters">
+    <input
+      type="search"
+      class="notifications-search"
+      placeholder="Buscar en título o detalle..."
+      aria-label="Buscar notificaciones"
+      [value]="search()"
+      (input)="onSearchInput($event)"
+    />
+    <select aria-label="Categoría" (change)="onCategoryChange($event)">
+      <option value="" [selected]="category() === ''">Todas las categorías</option>
+      @for (option of categories; track option) {
+        <option [value]="option" [selected]="category() === option">{{ categoryLabels[option] }}</option>
+      }
+    </select>
+    <select aria-label="Prioridad" (change)="onPriorityChange($event)">
+      <option value="" [selected]="priority() === ''">Todas las prioridades</option>
+      @for (option of priorities; track option) {
+        <option [value]="option" [selected]="priority() === option">{{ priorityLabels[option] }}</option>
+      }
+    </select>
+    <label class="notifications-date">
+      <span>Desde</span>
+      <input type="date" [value]="dateFrom()" [max]="dateTo()" (input)="onDateFromChange($event)" />
+    </label>
+    <label class="notifications-date">
+      <span>Hasta</span>
+      <input type="date" [value]="dateTo()" [min]="dateFrom()" (input)="onDateToChange($event)" />
+    </label>
+    @if (hasFilters()) {
+      <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">Limpiar filtros</button>
+    }
+  </div>
+
+  @if (error(); as message) {
+    <div class="notifications-error" role="alert">
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="load()">Reintentar</button>
+    </div>
+  }
+
+  <section class="notifications-card" [attr.aria-busy]="isLoading()">
+    @if (items().length > 0) {
+      <div class="notifications-toolbar">
+        <label class="notifications-select-all">
+          <input type="checkbox" [checked]="allSelected()" (change)="onSelectAllChange($event)" />
+          <span>
+            @if (selectedCount() > 0) {
+              {{ selectedCount() }} {{ selectedCount() === 1 ? 'seleccionada' : 'seleccionadas' }}
+            } @else {
+              Seleccionar todas
+            }
+          </span>
+        </label>
+
+        @if (selectedCount() > 0) {
+          <div class="notifications-bulk" role="group" aria-label="Acciones sobre la selección">
+            @if (status() !== 'archived') {
+              <button type="button" class="notifications-action" [disabled]="busy()" (click)="bulk('read')">
+                Marcar leídas
+              </button>
+              <button type="button" class="notifications-action" [disabled]="busy()" (click)="bulk('unread')">
+                Marcar no leídas
+              </button>
+              <button type="button" class="notifications-action" [disabled]="busy()" (click)="bulk('archive')">
+                Archivar
+              </button>
+            } @else {
+              <button type="button" class="notifications-action" [disabled]="busy()" (click)="bulk('unarchive')">
+                Restaurar
+              </button>
+            }
+            <button type="button" class="notifications-action danger" [disabled]="busy()" (click)="askDelete()">
+              Eliminar
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!hasLoadedOnce()) {
+      <ul class="notifications-list" aria-label="Cargando notificaciones">
+        @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
+          <li class="notification-row skeleton-row" aria-hidden="true">
+            <span class="skeleton-block skeleton-icon"></span>
+            <span class="skeleton-lines">
+              <span class="skeleton-block skeleton-line"></span>
+              <span class="skeleton-block skeleton-line short"></span>
+            </span>
+          </li>
+        }
+      </ul>
+    } @else if (items().length === 0 && !error()) {
+      <app-empty-state
+        [title]="emptyTitle()"
+        [message]="emptyMessage()"
+      >
+        @if (hasFilters()) {
+          <button type="button" class="btn btn-sm btn-ghost" (click)="clearFilters()">Limpiar filtros</button>
+        }
+      </app-empty-state>
+    } @else {
+      <ul class="notifications-list" [class.is-refreshing]="isLoading()">
+        @for (row of rows(); track row.notification.id) {
+          <li
+            class="notification-row"
+            [class.unread]="!row.notification.read"
+            [class]="'priority-' + row.notification.priority"
+          >
+            <input
+              type="checkbox"
+              class="notification-check"
+              [checked]="selectedIds().has(row.notification.id)"
+              [attr.aria-label]="'Seleccionar: ' + row.notification.title"
+              (change)="onRowSelectChange(row.notification.id, $event)"
+            />
+
+            <app-notification-icon [category]="row.notification.category" [priority]="row.notification.priority" />
+
+            <div class="notification-main">
+              <p class="notification-title">
+                @if (!row.notification.read) {
+                  <span class="notification-dot" aria-hidden="true"></span>
+                  <span class="sr-only">Sin leer.</span>
+                }
+                {{ row.notification.title }}
+              </p>
+              <p class="notification-body">{{ row.notification.body }}</p>
+              <p class="notification-meta">
+                <span class="notification-chip">{{ categoryLabels[row.notification.category] }}</span>
+                @if (row.notification.priority === 'critical' || row.notification.priority === 'high') {
+                  <span class="notification-chip priority">
+                    Prioridad {{ priorityLabels[row.notification.priority].toLowerCase() }}
+                  </span>
+                }
+                <time [attr.datetime]="row.notification.createdAt" [attr.title]="row.fullDate">
+                  {{ row.relativeTime }}
+                </time>
+              </p>
+            </div>
+
+            <div class="notification-actions">
+              @if (row.notification.resourceUrl) {
+                <button type="button" class="notifications-action primary" (click)="open(row.notification)">
+                  Abrir
+                </button>
+              }
+              @if (!row.notification.archived) {
+                <button
+                  type="button"
+                  class="notifications-action"
+                  [disabled]="busy()"
+                  (click)="toggleRead(row.notification)"
+                >
+                  {{ row.notification.read ? 'Marcar no leída' : 'Marcar leída' }}
+                </button>
+              }
+              <button
+                type="button"
+                class="notifications-action"
+                [disabled]="busy()"
+                (click)="toggleArchived(row.notification)"
+              >
+                {{ row.notification.archived ? 'Restaurar' : 'Archivar' }}
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (pageCount() > 1) {
+    <nav class="notifications-pagination" aria-label="Paginación">
+      <span>Página {{ page() }} de {{ pageCount() }} · {{ total() }} en total</span>
+      <div class="notifications-pagination-buttons">
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasPrev()" (click)="prevPage()">
+          ← Anterior
+        </button>
+        <button type="button" class="btn btn-sm btn-ghost" [disabled]="!hasNext()" (click)="nextPage()">
+          Siguiente →
+        </button>
+      </div>
+    </nav>
+  }
+</div>
+
+<app-confirm-dialog
+  [data]="deleteDialogOpen() ? deleteDialogData() : null"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>
+<app-toast [toast]="toast()" (dismissed)="dismissToast()" />

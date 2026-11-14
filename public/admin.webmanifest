@@ -1,0 +1,20 @@
+{
+  "name": "Essence Vapes · Panel de administración",
+  "short_name": "EV Admin",
+  "description": "Panel interno de Essence Vapes: pedidos, stock y notificaciones.",
+  "id": "/admin/",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#100e0b",
+  "theme_color": "#100e0b",
+  "lang": "es-AR",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

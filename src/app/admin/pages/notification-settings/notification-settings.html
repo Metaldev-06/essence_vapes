@@ -1,0 +1,412 @@
+<div class="nsettings">
+  <header>
+    <a routerLink="/admin/notificaciones" class="back-link">← Volver a Notificaciones</a>
+    <h1 class="nsettings-title">Configuración de notificaciones</h1>
+    <p class="nsettings-subtitle">
+      Elegí qué te avisamos y por dónde. Tus preferencias son solo tuyas: no cambian las de otros administradores.
+    </p>
+  </header>
+
+  @if (loading()) {
+    <p class="nsettings-state" role="status">Cargando…</p>
+  } @else if (loadError(); as message) {
+    <div class="nsettings-state nsettings-error" role="alert">
+      <p>{{ message }}</p>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="load()">Reintentar</button>
+    </div>
+  } @else {
+    <!-- ── Push en este dispositivo ───────────────────── -->
+    <section class="nsettings-section" aria-labelledby="push-heading">
+      <div class="nsettings-section-head">
+        <div>
+          <h2 id="push-heading">Notificaciones push</h2>
+          <p class="nsettings-hint">
+            Te avisan aunque el panel esté cerrado. Se activan por dispositivo: hacelo en cada computadora o teléfono
+            donde quieras recibirlas.
+          </p>
+        </div>
+        <span class="nsettings-scope">Solo vos</span>
+      </div>
+
+      @if (!serverChannels().push) {
+        <p class="nsettings-notice">
+          El servidor todavía no tiene configuradas las claves de Web Push, así que este canal está apagado. El panel
+          y los correos funcionan igual.
+        </p>
+      } @else if (push.support === 'unsupported') {
+        <p class="nsettings-notice">Este navegador no admite notificaciones push.</p>
+      } @else {
+        <div class="push-status">
+          <div>
+            @if (thisDevice(); as device) {
+              <p class="push-status-title on">Activadas en este dispositivo</p>
+              <p class="nsettings-hint">{{ device.deviceLabel }}</p>
+            } @else if (push.permission() === 'denied') {
+              <p class="push-status-title">Bloqueadas por el navegador</p>
+              <p class="nsettings-hint">
+                Para habilitarlas, abrí el candado de la barra de direcciones y permití las notificaciones de este
+                sitio.
+              </p>
+            } @else if (push.support === 'needs-install') {
+              <p class="push-status-title">Falta instalar el panel</p>
+              <p class="nsettings-hint">
+                En iPhone y iPad las notificaciones solo funcionan con el panel instalado: tocá Compartir, después
+                "Agregar a inicio", y abrilo desde ese ícono.
+              </p>
+            } @else {
+              <p class="push-status-title">Desactivadas en este dispositivo</p>
+              <p class="nsettings-hint">Al activarlas, el navegador te va a pedir permiso.</p>
+            }
+          </div>
+          <div class="push-status-actions">
+            @if (thisDevice()) {
+              <button type="button" class="btn btn-sm btn-ghost" [disabled]="pushBusy()" (click)="sendTestPush()">
+                Enviar prueba
+              </button>
+              <button type="button" class="btn btn-sm btn-ghost" [disabled]="pushBusy()" (click)="disablePush()">
+                Desactivar
+              </button>
+            } @else if (push.support === 'supported' && push.permission() !== 'denied') {
+              <button type="button" class="btn btn-sm btn-primary" [disabled]="pushBusy()" (click)="enablePush()">
+                {{ pushBusy() ? 'Activando…' : 'Activar en este dispositivo' }}
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (pushMessage(); as message) {
+          <p class="nsettings-notice warning" role="alert">{{ message }}</p>
+        }
+
+        @if (devices().length > 0) {
+          <h3 class="nsettings-subheading">Dispositivos registrados</h3>
+          <ul class="device-list">
+            @for (device of devices(); track device.id) {
+              <li class="device-row">
+                <div>
+                  <p class="device-name">
+                    {{ device.deviceLabel }}
+                    @if (device.id === thisDevice()?.id) {
+                      <span class="device-current">Este dispositivo</span>
+                    }
+                  </p>
+                  <p class="nsettings-hint">
+                    Registrado el {{ device.createdAt | date: 'dd/MM/yyyy' }}
+                    @if (device.lastUsedAt) {
+                      · último aviso el {{ device.lastUsedAt | date: 'dd/MM/yyyy HH:mm' }}
+                    }
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-ghost danger"
+                  [disabled]="pushBusy()"
+                  [attr.aria-label]="'Eliminar dispositivo ' + device.deviceLabel"
+                  (click)="removeDevice(device)"
+                >
+                  Eliminar
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </section>
+
+    <!-- ── Eventos y canales ──────────────────────────── -->
+    <section class="nsettings-section" aria-labelledby="events-heading">
+      <div class="nsettings-section-head">
+        <div>
+          <h2 id="events-heading">Qué te avisamos y por dónde</h2>
+          <p class="nsettings-hint">
+            Los avisos críticos siempre quedan en el panel: podés apagarles push y correo, pero no ocultarlos.
+          </p>
+        </div>
+        <span class="nsettings-scope">Solo vos</span>
+      </div>
+
+      @if (!serverChannels().email) {
+        <p class="nsettings-notice">El envío de correos no está configurado en el servidor: la columna Correo no tiene efecto por ahora.</p>
+      }
+
+      @for (group of eventGroups(); track group.category) {
+        <div class="event-group">
+          <h3 class="nsettings-subheading">{{ group.label }}</h3>
+          <div class="event-table" role="table" [attr.aria-label]="'Alertas de ' + group.label">
+            <div class="event-row event-head" role="row">
+              <span role="columnheader">Evento</span>
+              <span role="columnheader">Activo</span>
+              <span role="columnheader">Panel</span>
+              <span role="columnheader">Push</span>
+              <span role="columnheader">Correo</span>
+            </div>
+            @for (event of group.events; track event.type) {
+              <div class="event-row" role="row" [class.is-off]="!event.enabled">
+                <div class="event-info" role="cell">
+                  <p class="event-label">
+                    {{ event.label }}
+                    @if (event.critical) {
+                      <span class="event-critical">Crítico</span>
+                    }
+                  </p>
+                  <p class="nsettings-hint">{{ event.description }}</p>
+                </div>
+                <span role="cell" data-label="Activo">
+                  <app-toggle-switch
+                    [checked]="event.enabled"
+                    [ariaLabel]="'Activar alertas de: ' + event.label"
+                    (checkedChange)="setChannel(event.type, 'enabled', $event)"
+                  />
+                </span>
+                <span role="cell" data-label="Panel">
+                  <app-toggle-switch
+                    [checked]="event.critical || (event.enabled && event.inApp)"
+                    [disabled]="event.critical || !event.enabled"
+                    [ariaLabel]="event.label + ': mostrar en el panel'"
+                    (checkedChange)="setChannel(event.type, 'inApp', $event)"
+                  />
+                </span>
+                <span role="cell" data-label="Push">
+                  <app-toggle-switch
+                    [checked]="event.enabled && event.push"
+                    [disabled]="!event.enabled"
+                    [ariaLabel]="event.label + ': enviar push'"
+                    (checkedChange)="setChannel(event.type, 'push', $event)"
+                  />
+                </span>
+                <span role="cell" data-label="Correo">
+                  <app-toggle-switch
+                    [checked]="event.enabled && event.email"
+                    [disabled]="!event.enabled"
+                    [ariaLabel]="event.label + ': enviar correo'"
+                    (checkedChange)="setChannel(event.type, 'email', $event)"
+                  />
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (personal(); as settings) {
+        <div class="personal-grid">
+          <fieldset class="personal-card">
+            <legend>Horario de silencio</legend>
+            <p class="nsettings-hint">
+              En este horario no te mandamos push ni correos de avisos no críticos. Igual quedan en el panel.
+            </p>
+            <app-toggle-switch
+              label="Silenciar avisos no críticos"
+              [checked]="settings.quietHoursEnabled"
+              (checkedChange)="patchPersonal({ quietHoursEnabled: $event })"
+            />
+            <div class="personal-inline">
+              <label>
+                <span>Desde</span>
+                <input
+                  type="time"
+                  [value]="quietStart()"
+                  [disabled]="!settings.quietHoursEnabled"
+                  (change)="onQuietTimeChange('quietHoursStart', $event)"
+                />
+              </label>
+              <label>
+                <span>Hasta</span>
+                <input
+                  type="time"
+                  [value]="quietEnd()"
+                  [disabled]="!settings.quietHoursEnabled"
+                  (change)="onQuietTimeChange('quietHoursEnd', $event)"
+                />
+              </label>
+            </div>
+            <p class="nsettings-hint">Hora de Argentina.</p>
+          </fieldset>
+
+          <fieldset class="personal-card">
+            <legend>Resumen por correo</legend>
+            <p class="nsettings-hint">Ventas, pedidos pendientes, stock y alertas importantes en un solo correo.</p>
+            <div class="personal-inline">
+              <label>
+                <span>Frecuencia</span>
+                <select (change)="onDigestFrequencyChange($event)">
+                  @for (option of digestOptions; track option.id) {
+                    <option [value]="option.id" [selected]="settings.digestFrequency === option.id">
+                      {{ option.label }}
+                    </option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Hora de envío</span>
+                <select [disabled]="settings.digestFrequency === 'off'" (change)="onDigestHourChange($event)">
+                  @for (hour of hours; track hour) {
+                    <option [value]="hour" [selected]="settings.digestHour === hour">
+                      {{ hour < 10 ? '0' + hour : hour }}:00
+                    </option>
+                  }
+                </select>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      }
+
+      <div class="nsettings-save">
+        @if (preferencesDirty()) {
+          <span class="nsettings-dirty" role="status">Tenés cambios sin guardar</span>
+        }
+        <button
+          type="button"
+          class="btn btn-sm btn-primary"
+          [disabled]="!preferencesDirty() || savingPreferences()"
+          (click)="savePreferences()"
+        >
+          {{ savingPreferences() ? 'Guardando…' : 'Guardar mis preferencias' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Reglas del negocio ─────────────────────────── -->
+    @if (global(); as rules) {
+      <section class="nsettings-section" aria-labelledby="rules-heading">
+        <div class="nsettings-section-head">
+          <div>
+            <h2 id="rules-heading">Reglas del negocio</h2>
+            <p class="nsettings-hint">Definen cuándo se dispara cada alerta. Valen para todos los administradores.</p>
+          </div>
+          <span class="nsettings-scope shared">Todos los admins</span>
+        </div>
+
+        <div class="rules-grid">
+          @for (field of globalFields; track field.key) {
+            <label class="rule-field">
+              <span class="rule-label">{{ field.label }}</span>
+              <span class="rule-input">
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  [min]="field.min"
+                  [max]="field.max"
+                  [value]="rules[field.key]"
+                  (change)="onGlobalInput(field, $event)"
+                />
+                <span>{{ field.unit }}</span>
+              </span>
+              <span class="nsettings-hint">{{ field.hint }}</span>
+            </label>
+          }
+        </div>
+
+        <div class="nsettings-save">
+          @if (globalDirty()) {
+            <span class="nsettings-dirty" role="status">Tenés cambios sin guardar</span>
+          }
+          <button
+            type="button"
+            class="btn btn-sm btn-primary"
+            [disabled]="!globalDirty() || savingGlobal()"
+            (click)="saveGlobal()"
+          >
+            {{ savingGlobal() ? 'Guardando…' : 'Guardar reglas' }}
+          </button>
+        </div>
+
+        <h3 class="nsettings-subheading">Umbral propio por producto</h3>
+        <p class="nsettings-hint">
+          Para productos que rotan distinto al resto. Si un producto no figura acá, usa el umbral global.
+        </p>
+
+        <div class="threshold-form">
+          <div class="threshold-search">
+            <label class="sr-only" for="threshold-product">Buscar producto</label>
+            <input
+              id="threshold-product"
+              type="search"
+              placeholder="Buscar producto por nombre o marca…"
+              autocomplete="off"
+              [value]="productSearch()"
+              (input)="onProductSearchInput($event)"
+            />
+            @if (productResults().length > 0) {
+              <ul class="threshold-results">
+                @for (product of productResults(); track product.id) {
+                  <li>
+                    <button type="button" (click)="pickProduct(product)">
+                      <span>{{ product.brand }} {{ product.name }}</span>
+                      <span class="nsettings-hint">Stock: {{ product.stock }}</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else if (searchingProducts()) {
+              <p class="nsettings-hint" role="status">Buscando…</p>
+            }
+          </div>
+
+          @if (selectedProduct(); as product) {
+            @if (product.variants.length > 1) {
+              <label class="threshold-field">
+                <span>Presentación</span>
+                <select (change)="onVariantChange($event)">
+                  @for (variant of product.variants; track variant.id) {
+                    <option [value]="variant.id" [selected]="selectedVariantId() === variant.id">
+                      {{ variant.label || 'Base' }} · stock {{ variant.stock }}
+                    </option>
+                  }
+                </select>
+              </label>
+            }
+            <label class="threshold-field">
+              <span>Avisar con</span>
+              <span class="rule-input">
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  max="1000"
+                  [value]="newThreshold()"
+                  (change)="onNewThresholdInput($event)"
+                />
+                <span>unidades o menos</span>
+              </span>
+            </label>
+            <button type="button" class="btn btn-sm btn-primary" [disabled]="savingThreshold()" (click)="addThreshold()">
+              {{ savingThreshold() ? 'Guardando…' : 'Guardar umbral' }}
+            </button>
+          }
+        </div>
+
+        @if (thresholds().length > 0) {
+          <ul class="threshold-list">
+            @for (threshold of thresholds(); track threshold.productId + ':' + threshold.variantId) {
+              <li class="threshold-row">
+                <div>
+                  <p class="device-name">{{ threshold.label }}</p>
+                  <p class="nsettings-hint">
+                    Avisa con {{ threshold.threshold }} o menos · stock actual: {{ threshold.stock }}
+                    @if (threshold.state === 'out') {
+                      <span class="stock-state out">Sin stock</span>
+                    } @else if (threshold.state === 'low') {
+                      <span class="stock-state low">Stock bajo</span>
+                    }
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-ghost danger"
+                  [attr.aria-label]="'Quitar umbral propio de ' + threshold.label"
+                  (click)="removeThreshold(threshold)"
+                >
+                  Quitar
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+</div>
+
+<app-toast [toast]="toast()" (dismissed)="dismissToast()" />

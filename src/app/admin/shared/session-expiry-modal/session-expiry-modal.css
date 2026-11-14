@@ -1,0 +1,62 @@
+.session-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 65%);
+  animation: session-modal-backdrop-in 0.15s ease-out;
+}
+
+.session-modal {
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  border-radius: 18px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 80%);
+  animation: session-modal-in 0.18s ease-out;
+}
+
+.session-modal-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.session-modal-message {
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+.session-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+@keyframes session-modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes session-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-modal-backdrop,
+  .session-modal {
+    animation: none;
+  }
+}

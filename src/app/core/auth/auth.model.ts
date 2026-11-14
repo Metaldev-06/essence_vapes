@@ -50,3 +50,8 @@ export interface AuthResult {
   readonly success: boolean;
   readonly message?: string;
 }
+
+/** `ok` = nada que mostrar. `expiring-soon` = faltan pocos minutos para que el JWT venza -
+ *  se ofrece renovar sin volver a loguearse. `expired` = ya venció (o un request devolvió 401) -
+ *  la sesión ya se cerró del lado del cliente y hay que re-loguearse. */
+export type SessionState = 'ok' | 'expiring-soon' | 'expired';

@@ -1,0 +1,45 @@
+@if (state() === 'expiring-soon') {
+  <div class="session-modal-backdrop" role="presentation">
+    <div
+      class="session-modal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="session-modal-title"
+      aria-describedby="session-modal-message"
+      tabindex="-1"
+    >
+      <h2 id="session-modal-title" class="session-modal-title">Tu sesión está por vencer</h2>
+      <p id="session-modal-message" class="session-modal-message">
+        Por seguridad, las sesiones del panel duran un tiempo limitado. ¿Querés seguir conectado o
+        preferís cerrar sesión?
+      </p>
+      <div class="session-modal-actions">
+        <button type="button" class="btn btn-sm btn-ghost" (click)="logout()">Cerrar sesión</button>
+        <button type="button" class="btn btn-sm btn-primary" [disabled]="renewing()" (click)="renew()">
+          {{ renewing() ? 'Renovando...' : 'Seguir conectado' }}
+        </button>
+      </div>
+    </div>
+  </div>
+} @else if (state() === 'expired') {
+  <div class="session-modal-backdrop" role="presentation">
+    <div
+      class="session-modal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="session-expired-title"
+      aria-describedby="session-expired-message"
+      tabindex="-1"
+    >
+      <h2 id="session-expired-title" class="session-modal-title">Tu sesión venció</h2>
+      <p id="session-expired-message" class="session-modal-message">
+        Iniciá sesión de nuevo para seguir usando el panel.
+      </p>
+      <div class="session-modal-actions">
+        <button type="button" class="btn btn-sm btn-primary" (click)="goToLogin()">
+          Ir a iniciar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+}

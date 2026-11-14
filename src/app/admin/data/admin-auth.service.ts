@@ -4,15 +4,20 @@ import { firstValueFrom } from 'rxjs';
 
 import { API_BASE_URL } from '../../core/config/api.config';
 import { IS_ADMIN_REQUEST } from '../../core/auth/admin-request.context';
+import { decodeJwtExpiryMs } from '../../core/auth/jwt-expiry.helper';
 import type {
   AuthResult,
   AuthSession,
   AuthUser,
   LoginCredentials,
+  SessionState,
 } from '../../core/auth/auth.model';
 
 const TOKEN_STORAGE_KEY = 'essence-vapes-admin-token';
 const ADMIN_CONTEXT = new HttpContext().set(IS_ADMIN_REQUEST, true);
+/** Mismo margen que la sesión de la tienda (`core/auth/auth.service.ts`) - ver tarea del
+ *  usuario, 2026-11-13. */
+const SESSION_WARNING_LEAD_MS = 5 * 60_000;
 
 /**
  * The admin panel's own session - separate storage key and separate interceptor from the
@@ -31,11 +36,18 @@ export class AdminAuthService {
   private readonly tokenSignal = signal<string | null>(this.readStoredToken());
   private readonly userSignal = signal<AuthUser | null>(null);
   private readonly restoringSignal = signal(this.tokenSignal() !== null);
+  private readonly sessionStateSignal = signal<SessionState>('ok');
+  private readonly renewingSignal = signal(false);
+  private warningTimer: ReturnType<typeof setTimeout> | undefined;
+  private expiryTimer: ReturnType<typeof setTimeout> | undefined;
 
   readonly token = this.tokenSignal.asReadonly();
   readonly user = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.userSignal() !== null);
   readonly isRestoring = this.restoringSignal.asReadonly();
+  /** Maneja el aviso "tu sesión está por vencer"/"tu sesión venció" - ver `SessionExpiryModal`. */
+  readonly sessionState = this.sessionStateSignal.asReadonly();
+  readonly renewing = this.renewingSignal.asReadonly();
 
   constructor() {
     if (this.tokenSignal()) {
@@ -59,10 +71,68 @@ export class AdminAuthService {
     }
   }
 
+  /** Cierre explícito, elegido por la persona - a diferencia de `handleSessionExpired`, no deja
+   *  nada para mostrar. */
   logout(): void {
+    this.clearExpiryTimers();
     this.tokenSignal.set(null);
     this.userSignal.set(null);
+    this.sessionStateSignal.set('ok');
     this.clearStoredToken();
+  }
+
+  /** Sesión terminada SIN que la persona lo haya pedido (venció, o un request devolvió 401) -
+   *  deja `sessionState` en `'expired'` para que `SessionExpiryModal` lo muestre y redirija a
+   *  login, en vez de desaparecer en silencio. Idempotente. */
+  handleSessionExpired(): void {
+    this.clearExpiryTimers();
+    this.tokenSignal.set(null);
+    this.userSignal.set(null);
+    this.sessionStateSignal.set('expired');
+    this.clearStoredToken();
+  }
+
+  /** Pide un JWT nuevo sin pedir credenciales de nuevo - ver tarea del usuario, 2026-11-13.
+   *  `GET /auth/check-status` ya firma y devuelve una sesión fresca para el usuario autenticado. */
+  async renewSession(): Promise<boolean> {
+    this.renewingSignal.set(true);
+    try {
+      const session = await firstValueFrom(
+        this.http.get<AuthSession>(`${this.baseUrl}/check-status`, { context: ADMIN_CONTEXT }),
+      );
+      this.tokenSignal.set(session.token);
+      this.userSignal.set(session.user);
+      this.storeToken(session.token);
+      this.sessionStateSignal.set('ok');
+      this.scheduleExpiryWatch(session.token);
+      return true;
+    } catch {
+      this.handleSessionExpired();
+      return false;
+    } finally {
+      this.renewingSignal.set(false);
+    }
+  }
+
+  private scheduleExpiryWatch(token: string): void {
+    this.clearExpiryTimers();
+    const expiryMs = decodeJwtExpiryMs(token);
+    if (expiryMs === null) return;
+
+    const msUntilExpiry = expiryMs - Date.now();
+    if (msUntilExpiry <= 0) {
+      this.handleSessionExpired();
+      return;
+    }
+
+    const msUntilWarning = Math.max(0, msUntilExpiry - SESSION_WARNING_LEAD_MS);
+    this.warningTimer = setTimeout(() => this.sessionStateSignal.set('expiring-soon'), msUntilWarning);
+    this.expiryTimer = setTimeout(() => this.handleSessionExpired(), msUntilExpiry);
+  }
+
+  private clearExpiryTimers(): void {
+    clearTimeout(this.warningTimer);
+    clearTimeout(this.expiryTimer);
   }
 
   private admitAdminSession(session: AuthSession): AuthResult {
@@ -73,6 +143,7 @@ export class AdminAuthService {
     this.tokenSignal.set(session.token);
     this.userSignal.set(session.user);
     this.storeToken(session.token);
+    this.scheduleExpiryWatch(session.token);
     return { success: true };
   }
 
@@ -85,9 +156,12 @@ export class AdminAuthService {
         this.logout();
       } else {
         this.userSignal.set(user);
+        this.scheduleExpiryWatch(this.tokenSignal()!);
       }
     } catch {
-      this.logout();
+      // Un 401 ya pasó por el interceptor (que dejó `sessionState` en 'expired') - no pisarlo
+      // acá con un `logout()` silencioso.
+      if (this.sessionStateSignal() !== 'expired') this.logout();
     } finally {
       this.restoringSignal.set(false);
     }

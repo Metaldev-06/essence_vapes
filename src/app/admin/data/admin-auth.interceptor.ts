@@ -23,7 +23,7 @@ export const adminAuthInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: unknown) => {
       if (token && error instanceof HttpErrorResponse && error.status === 401) {
-        adminAuthService.logout();
+        adminAuthService.handleSessionExpired();
       }
       return throwError(() => error);
     }),

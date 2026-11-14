@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { API_BASE_URL } from '../config/api.config';
+import { decodeJwtExpiryMs } from './jwt-expiry.helper';
 import type {
   AuthResult,
   AuthSession,
@@ -11,8 +12,14 @@ import type {
   LoginCredentials,
   RegisterData,
   SecurityStatus,
+  SessionState,
   UpdateProfileData,
 } from './auth.model';
+
+/** Cuánto antes del vencimiento se avisa (ver tarea del usuario, 2026-11-13) - el JWT dura 2hs
+ *  (`JWT_EXPIRES_IN` en el backend), 5 minutos de margen alcanzan para que el usuario reaccione
+ *  sin ser un aviso tan temprano que se sienta molesto. */
+const SESSION_WARNING_LEAD_MS = 5 * 60_000;
 
 export type EmailVerificationConfirmResult =
   | { success: true; outcome: EmailVerificationOutcome }
@@ -41,6 +48,10 @@ export class AuthService {
   private readonly tokenSignal = signal<string | null>(this.readStoredToken());
   private readonly userSignal = signal<AuthUser | null>(null);
   private readonly restoringSignal = signal(this.tokenSignal() !== null);
+  private readonly sessionStateSignal = signal<SessionState>('ok');
+  private readonly renewingSignal = signal(false);
+  private warningTimer: ReturnType<typeof setTimeout> | undefined;
+  private expiryTimer: ReturnType<typeof setTimeout> | undefined;
 
   /** Current JWT. Read by the auth interceptor; templates should use `user`/`isAuthenticated`. */
   readonly token = this.tokenSignal.asReadonly();
@@ -48,6 +59,9 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.userSignal() !== null);
   /** True while a stored session is being validated against the API on startup. */
   readonly isRestoring = this.restoringSignal.asReadonly();
+  /** Maneja el aviso "tu sesión está por vencer"/"tu sesión venció" - ver `SessionExpiryModal`. */
+  readonly sessionState = this.sessionStateSignal.asReadonly();
+  readonly renewing = this.renewingSignal.asReadonly();
 
   constructor() {
     if (this.tokenSignal()) {
@@ -83,10 +97,71 @@ export class AuthService {
     }
   }
 
+  /** Cierre explícito, elegido por la persona (botón "Cerrar sesión", cambio de contraseña,
+   *  etc.) - a diferencia de `handleSessionExpired`, no deja nada para mostrar. */
   logout(): void {
+    this.clearExpiryTimers();
     this.tokenSignal.set(null);
     this.userSignal.set(null);
+    this.sessionStateSignal.set('ok');
     this.clearStoredToken();
+  }
+
+  /** Sesión terminada SIN que la persona lo haya pedido (venció, o un request devolvió 401 -
+   *  ver el interceptor) - deja `sessionState` en `'expired'` para que `SessionExpiryModal` lo
+   *  muestre y redirija a login, en vez de desaparecer en silencio. Idempotente. */
+  handleSessionExpired(): void {
+    this.clearExpiryTimers();
+    this.tokenSignal.set(null);
+    this.userSignal.set(null);
+    this.sessionStateSignal.set('expired');
+    this.clearStoredToken();
+  }
+
+  /** Pide un JWT nuevo sin pedir credenciales de nuevo - ver tarea del usuario, 2026-11-13.
+   *  `GET /auth/check-status` ya firma y devuelve una sesión fresca para el usuario autenticado
+   *  (reutilizado tal cual, no hizo falta un endpoint de refresh nuevo). */
+  async renewSession(): Promise<boolean> {
+    this.renewingSignal.set(true);
+    try {
+      const session = await firstValueFrom(
+        this.http.get<AuthSession>(`${this.baseUrl}/check-status`),
+      );
+      this.tokenSignal.set(session.token);
+      this.userSignal.set(session.user);
+      this.storeToken(session.token);
+      this.sessionStateSignal.set('ok');
+      this.scheduleExpiryWatch(session.token);
+      return true;
+    } catch {
+      this.handleSessionExpired();
+      return false;
+    } finally {
+      this.renewingSignal.set(false);
+    }
+  }
+
+  /** Programa el aviso previo y el cierre automático al vencer, en base al `exp` del propio
+   *  JWT - nunca espera a que un request falle para enterarse. */
+  private scheduleExpiryWatch(token: string): void {
+    this.clearExpiryTimers();
+    const expiryMs = decodeJwtExpiryMs(token);
+    if (expiryMs === null) return;
+
+    const msUntilExpiry = expiryMs - Date.now();
+    if (msUntilExpiry <= 0) {
+      this.handleSessionExpired();
+      return;
+    }
+
+    const msUntilWarning = Math.max(0, msUntilExpiry - SESSION_WARNING_LEAD_MS);
+    this.warningTimer = setTimeout(() => this.sessionStateSignal.set('expiring-soon'), msUntilWarning);
+    this.expiryTimer = setTimeout(() => this.handleSessionExpired(), msUntilExpiry);
+  }
+
+  private clearExpiryTimers(): void {
+    clearTimeout(this.warningTimer);
+    clearTimeout(this.expiryTimer);
   }
 
   // -------------------------------------------------------------------------------------
@@ -267,6 +342,7 @@ export class AuthService {
     this.tokenSignal.set(session.token);
     this.userSignal.set(session.user);
     this.storeToken(session.token);
+    this.scheduleExpiryWatch(session.token);
     return { success: true };
   }
 
@@ -278,9 +354,12 @@ export class AuthService {
         this.logout();
       } else {
         this.userSignal.set(user);
+        this.scheduleExpiryWatch(this.tokenSignal()!);
       }
     } catch {
-      this.logout();
+      // Un 401 ya pasó por el interceptor (que dejó `sessionState` en 'expired') - no pisarlo
+      // acá con un `logout()` silencioso. Cualquier otra falla (red caída, etc.) sí limpia todo.
+      if (this.sessionStateSignal() !== 'expired') this.logout();
     } finally {
       this.restoringSignal.set(false);
     }

@@ -50,6 +50,10 @@ export class Sidebar {
   }
 
   private async refreshUnreadCount(): Promise<void> {
+    // Sin sesión (venció, o el aviso de `SessionExpiryModal` todavía no se cerró) no tiene
+    // sentido seguir pidiendo esto - evita el loop de 401 repetidos que reportó el usuario
+    // (2026-11-13) mientras el admin se queda en la pantalla sin reaccionar al aviso.
+    if (!this.adminAuthService.isAuthenticated()) return;
     try {
       const summary = await this.messagesAdminService.listInboxes();
       this.unreadMessagesCount.set(summary.reduce((sum, i) => sum + i.unread, 0));

@@ -28,6 +28,7 @@ import { MediaManager } from './components/media-manager/media-manager';
 import { ProductStats } from './components/product-stats/product-stats';
 import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
 import { VariantManager } from './components/variant-manager/variant-manager';
+import { MoneyInput } from '../../shared/money-input/money-input';
 import { ToggleSwitch } from '../../shared/toggle-switch/toggle-switch';
 
 const SAVED_MESSAGE_DURATION_MS = 4000;
@@ -430,7 +431,16 @@ const productSchema = schema<ProductFormModel>((path) => {
 /** Create AND edit share this one form - `id` coming from the route is the only difference. */
 @Component({
   selector: 'app-admin-product-form',
-  imports: [FormField, RouterLink, MediaManager, VariantManager, ToggleSwitch, ProductStats, StockAdjustment],
+  imports: [
+    FormField,
+    RouterLink,
+    MediaManager,
+    VariantManager,
+    ToggleSwitch,
+    ProductStats,
+    StockAdjustment,
+    MoneyInput,
+  ],
   templateUrl: './product-form.html',
   styleUrl: './product-form.css',
 })

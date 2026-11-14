@@ -6,6 +6,7 @@ import {
   type Product,
   type VariantSummary,
 } from '../../../../../ecommerce/data/product.model';
+import { MoneyInput } from '../../../../shared/money-input/money-input';
 import { ToggleSwitch } from '../../../../shared/toggle-switch/toggle-switch';
 
 // Mirrors MAX_IMAGES_PER_PRODUCT (backend reuses the same constant for variant images too).
@@ -14,7 +15,7 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-variant-manager',
-  imports: [ToggleSwitch],
+  imports: [ToggleSwitch, MoneyInput],
   templateUrl: './variant-manager.html',
   styleUrl: './variant-manager.css',
 })
@@ -39,36 +40,22 @@ export class VariantManager {
   protected readonly uploadingId = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
 
-  /** `costRaw` vacío = sin costo cargado (no se manda `costValue`); si viene con texto, debe ser
-   *  un número válido ≥ 0 - mismo criterio que `priceValue`/`stock` de acá abajo. */
-  private parseOptionalCost(costRaw: string): { ok: true; value?: number } | { ok: false } {
-    if (costRaw.trim() === '') return { ok: true, value: undefined };
-    const costValue = Number(costRaw);
-    if (!Number.isFinite(costValue) || costValue < 0) return { ok: false };
-    return { ok: true, value: costValue };
-  }
+  // Precio y costo llegan ya como pesos enteros desde `MoneyInput` (`null` = campo vacío): no
+  // hay texto que validar. Precio vacío se guarda como $0, igual que antes; costo vacío no se
+  // manda (no pisa el costo cargado).
 
   protected async addVariant(
     labelRaw: string,
-    priceRaw: string,
-    costRaw: string,
+    price: number | null,
+    cost: number | null,
     stockRaw: string,
   ): Promise<void> {
     const label = labelRaw.trim();
-    const priceValue = Number(priceRaw);
+    const priceValue = price ?? 0;
     const stock = stockRaw.trim() === '' ? 0 : Number(stockRaw);
-    const cost = this.parseOptionalCost(costRaw);
 
     if (!label) {
       this.error.set('La etiqueta de la variante es obligatoria');
-      return;
-    }
-    if (!Number.isFinite(priceValue) || priceValue < 0) {
-      this.error.set('El precio de la variante debe ser un número válido');
-      return;
-    }
-    if (!cost.ok) {
-      this.error.set('El costo de la variante debe ser un número válido');
       return;
     }
     if (!Number.isFinite(stock) || stock < 0) {
@@ -82,7 +69,7 @@ export class VariantManager {
       const product = await this.productsAdminService.addVariant(this.productId(), {
         label,
         priceValue,
-        ...(cost.value !== undefined ? { costValue: cost.value } : {}),
+        ...(cost !== null ? { costValue: cost } : {}),
         stock,
       });
       this.variantsChanged.emit(product);
@@ -97,25 +84,16 @@ export class VariantManager {
   protected async saveVariant(
     variantId: string,
     labelRaw: string,
-    priceRaw: string,
-    costRaw: string,
+    price: number | null,
+    cost: number | null,
     stockRaw: string,
   ): Promise<void> {
     const label = labelRaw.trim();
-    const priceValue = Number(priceRaw);
+    const priceValue = price ?? 0;
     const stock = Number(stockRaw);
-    const cost = this.parseOptionalCost(costRaw);
 
     if (!label) {
       this.error.set('La etiqueta de la variante es obligatoria');
-      return;
-    }
-    if (!Number.isFinite(priceValue) || priceValue < 0) {
-      this.error.set('El precio de la variante debe ser un número válido');
-      return;
-    }
-    if (!cost.ok) {
-      this.error.set('El costo de la variante debe ser un número válido');
       return;
     }
     if (!Number.isFinite(stock) || stock < 0) {
@@ -129,7 +107,7 @@ export class VariantManager {
       const product = await this.productsAdminService.updateVariant(this.productId(), variantId, {
         label,
         priceValue,
-        ...(cost.value !== undefined ? { costValue: cost.value } : {}),
+        ...(cost !== null ? { costValue: cost } : {}),
         stock,
       });
       this.variantsChanged.emit(product);

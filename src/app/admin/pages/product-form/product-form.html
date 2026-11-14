@@ -238,7 +238,9 @@
             <label for="pf-price">Precio <span class="form-optional">($)</span> <span class="required-mark" aria-hidden="true">*</span></label>
             <input
               id="pf-price"
-              type="number"
+              type="text"
+              placeholder="$0"
+              appMoneyInput
               [formField]="productForm.priceValue"
               [class.invalid]="
                 productForm.priceValue().touched() && productForm.priceValue().invalid()
@@ -253,14 +255,26 @@
             <label for="pf-old-price"
               >Precio anterior <span class="form-optional">(opcional)</span></label
             >
-            <input id="pf-old-price" type="number" [formField]="productForm.oldPriceValue" />
+            <input
+              id="pf-old-price"
+              type="text"
+              placeholder="$0"
+              appMoneyInput
+              [formField]="productForm.oldPriceValue"
+            />
           </div>
 
           <div class="form-field">
             <label for="pf-cost"
               >Costo de adquisición <span class="form-optional">(opcional)</span></label
             >
-            <input id="pf-cost" type="number" [formField]="productForm.costValue" />
+            <input
+              id="pf-cost"
+              type="text"
+              placeholder="$0"
+              appMoneyInput
+              [formField]="productForm.costValue"
+            />
             @if (productForm.costValue().errors()[0]; as error) {
               <span class="form-error">{{ error.message }}</span>
             }

@@ -16,11 +16,23 @@
             </label>
             <label class="variant-field">
               <span>Precio</span>
-              <input type="number" min="0" #priceInput [value]="variant.priceValue" />
+              <input
+                type="text"
+                placeholder="$0"
+                appMoneyInput
+                #priceInput="appMoneyInput"
+                [value]="variant.priceValue"
+              />
             </label>
             <label class="variant-field">
               <span>Costo (opcional)</span>
-              <input type="number" min="0" #costInput [value]="variant.costValue ?? ''" />
+              <input
+                type="text"
+                placeholder="$0"
+                appMoneyInput
+                #costInput="appMoneyInput"
+                [value]="variant.costValue ?? null"
+              />
             </label>
             <label class="variant-field">
               <span>Stock</span>
@@ -39,7 +51,7 @@
                 class="btn btn-sm btn-primary"
                 [disabled]="savingId() === variant.id"
                 (click)="
-                  saveVariant(variant.id, labelInput.value, priceInput.value, costInput.value, stockInput.value)
+                  saveVariant(variant.id, labelInput.value, priceInput.value(), costInput.value(), stockInput.value)
                 "
               >
                 {{ savingId() === variant.id ? 'Guardando...' : 'Guardar' }}
@@ -98,11 +110,11 @@
       </label>
       <label class="variant-field">
         <span>Precio</span>
-        <input type="number" min="0" #newPrice />
+        <input type="text" placeholder="$0" appMoneyInput #newPrice="appMoneyInput" />
       </label>
       <label class="variant-field">
         <span>Costo (opcional)</span>
-        <input type="number" min="0" #newCost />
+        <input type="text" placeholder="$0" appMoneyInput #newCost="appMoneyInput" />
       </label>
       <label class="variant-field">
         <span>Stock</span>
@@ -113,7 +125,7 @@
           type="button"
           class="btn btn-sm btn-primary"
           [disabled]="savingNew()"
-          (click)="addVariant(newLabel.value, newPrice.value, newCost.value, newStock.value)"
+          (click)="addVariant(newLabel.value, newPrice.value(), newCost.value(), newStock.value)"
         >
           {{ savingNew() ? 'Agregando...' : 'Agregar' }}
         </button>

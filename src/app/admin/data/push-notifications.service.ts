@@ -37,6 +37,50 @@ export async function endpointFingerprint(endpoint: string): Promise<string> {
     .slice(0, 16);
 }
 
+/**
+ * `true` si la suscripción existente fue hecha con esta misma clave VAPID. Si las claves del
+ * servidor cambiaron, la suscripción vieja ya no sirve: el servicio de push rechaza todo lo que
+ * el servidor le firme con la clave nueva.
+ */
+export function hasSameApplicationServerKey(subscription: PushSubscription, key: Uint8Array): boolean {
+  // Navegadores viejos no informan la clave: no hay forma de saberlo, se conserva.
+  if (!subscription.options) return true;
+  const current = subscription.options.applicationServerKey;
+  if (!current) return false;
+  const bytes = new Uint8Array(current);
+  return bytes.length === key.length && bytes.every((byte, index) => byte === key[index]);
+}
+
+/**
+ * Traduce el error que tira el navegador al registrar el service worker o al suscribirse a algo
+ * que el administrador pueda resolver. Sin esto, cualquier falla terminaba en un "error
+ * inesperado" sin pista de la causa.
+ */
+export function describePushError(error: unknown, isBrave = false): string {
+  const name =
+    typeof error === 'object' && error !== null && typeof (error as { name?: unknown }).name === 'string'
+      ? (error as { name: string }).name
+      : '';
+
+  switch (name) {
+    case 'AbortError':
+      // Lo que devuelve el navegador cuando su propio servicio de push no responde o está apagado.
+      return isBrave
+        ? 'Brave trae apagado el servicio de push. Activá "Usar los servicios de Google para la mensajería push" en brave://settings/privacy, reiniciá el navegador y probá de nuevo.'
+        : 'El servicio de notificaciones del navegador no aceptó la suscripción. Revisá que una VPN, un firewall o un bloqueador no estén cortando la conexión del navegador y probá de nuevo, o usá otro navegador.';
+    case 'NotAllowedError':
+      return 'El navegador o el sistema operativo no permiten notificaciones para este sitio. Revisá el permiso desde el candado de la barra de direcciones y que las notificaciones del navegador estén habilitadas en la configuración del sistema.';
+    case 'SecurityError':
+      return 'El navegador no dejó instalar el componente de notificaciones del panel. Recargá la página y probá de nuevo.';
+    default:
+      return `El navegador no pudo activar las notificaciones push${name ? ` (${name})` : ''}. Probá de nuevo o usá otro navegador.`;
+  }
+}
+
+function isBraveBrowser(): boolean {
+  return typeof navigator !== 'undefined' && 'brave' in navigator;
+}
+
 export function detectPushSupport(): PushSupport {
   if (typeof window === 'undefined') return 'unsupported';
   const hasApis = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
@@ -96,11 +140,9 @@ export class PushNotificationsService {
       return { ok: false, reason: 'Este navegador no admite notificaciones push.' };
     }
 
-    const { enabled, publicKey } = await this.api.getPushPublicKey();
-    if (!enabled || !publicKey) {
-      return { ok: false, reason: 'Las notificaciones push todavía no están configuradas en el servidor.' };
-    }
-
+    // El permiso se pide ANTES de cualquier otra espera: Safari (iPhone/iPad) solo muestra el
+    // diálogo si la llamada sale directo del toque, y una consulta de red previa puede hacer que
+    // lo ignore. La pantalla solo ofrece el botón si el servidor tiene push configurado.
     const permission = await Notification.requestPermission();
     this.permissionSignal.set(permission);
     if (permission === 'denied') {
@@ -114,24 +156,42 @@ export class PushNotificationsService {
       return { ok: false, reason: 'No se otorgó el permiso para mostrar notificaciones.' };
     }
 
-    const registration = await navigator.serviceWorker.register(SERVICE_WORKER_URL, {
-      scope: SERVICE_WORKER_SCOPE,
-    });
-    await navigator.serviceWorker.ready.catch(() => undefined);
+    const { enabled, publicKey } = await this.api.getPushPublicKey();
+    if (!enabled || !publicKey) {
+      return { ok: false, reason: 'Las notificaciones push todavía no están configuradas en el servidor.' };
+    }
 
-    const applicationServerKey = urlBase64ToUint8Array(publicKey);
-    let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        // Exigido por los navegadores: todo push debe mostrar una notificación visible.
-        userVisibleOnly: true,
-        applicationServerKey,
-      });
+    let subscription: PushSubscription;
+    try {
+      subscription = await this.subscribeThisBrowser(urlBase64ToUint8Array(publicKey));
+    } catch (error) {
+      // Queda en la consola con el detalle completo del navegador, para poder diagnosticarlo.
+      console.error('[push] No se pudo suscribir este navegador:', error);
+      return { ok: false, reason: describePushError(error, isBraveBrowser()) };
     }
 
     await this.api.registerPushDevice(subscription.toJSON());
     this.fingerprintSignal.set(await endpointFingerprint(subscription.endpoint));
     return { ok: true };
+  }
+
+  private async subscribeThisBrowser(applicationServerKey: Uint8Array<ArrayBuffer>): Promise<PushSubscription> {
+    const registration = await navigator.serviceWorker.register(SERVICE_WORKER_URL, {
+      scope: SERVICE_WORKER_SCOPE,
+    });
+    // Suscribirse exige un worker ya activo.
+    await navigator.serviceWorker.ready;
+
+    const existing = await registration.pushManager.getSubscription();
+    if (existing && hasSameApplicationServerKey(existing, applicationServerKey)) return existing;
+    // Hecha con otra clave VAPID: el servidor ya no puede mandarle nada. Se reemplaza.
+    await existing?.unsubscribe();
+
+    return registration.pushManager.subscribe({
+      // Exigido por los navegadores: todo push debe mostrar una notificación visible.
+      userVisibleOnly: true,
+      applicationServerKey,
+    });
   }
 
   /** Da de baja ESTE navegador: en el servidor y en el propio navegador. */

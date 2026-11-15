@@ -1,5 +1,12 @@
+/* El host llena su celda de la grilla, y la card llena el host: así todas las cards de una fila
+   miden lo mismo aunque una tenga más texto. */
+:host {
+  display: block;
+}
+
 .product-card {
   position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
   border-radius: 20px;
@@ -255,6 +262,8 @@
 }
 
 .product-card-body {
+  /* Ocupa el alto que sobre, para que el pie (precio + carrito) quede siempre abajo. */
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -323,13 +332,18 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
+  /* Siempre reserva los 2 renglones: un nombre corto no achica la card, y los chips y el precio
+     quedan a la misma altura en todas. */
+  min-height: calc(2em * 1.25);
 }
 
 .product-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
+  /* Empujado al fondo de la card; el padding mantiene la separación de antes. */
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .product-price {
@@ -452,6 +466,7 @@
 .product-card--list .product-card-name {
   -webkit-line-clamp: 1;
   line-clamp: 1;
+  min-height: 0;
 }
 
 .product-card--list .product-card-meta {
@@ -462,6 +477,7 @@
 .product-card--list .product-card-footer {
   flex-shrink: 0;
   margin-top: 0;
+  padding-top: 0;
 }
 
 @media (max-width: 560px) {

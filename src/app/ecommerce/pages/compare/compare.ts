@@ -6,7 +6,15 @@ import { cloudinaryUrl } from '../../data/cloudinary-url.helper';
 import { SCENT_STYLE_OPTIONS } from '../../data/scent-styles';
 import { CompareDotRows } from './components/compare-dot-rows/compare-dot-rows';
 import { CompareStarRating } from './components/compare-star-rating/compare-star-rating';
-import { SERIES_COLORS, SERIES_COLORS_HEX, type DotRow, type MetricRow } from './compare.types';
+import {
+  SERIES_COLORS,
+  SERIES_COLORS_HEX,
+  USAGE_AXIS_ICONS,
+  type DotRow,
+  type MetricRow,
+  type UsageAxis,
+} from './compare.types';
+import { factsGridColumns } from './compare-facts-grid';
 import {
   HorizontalBarChart,
   type BarChartPoint,
@@ -234,7 +242,7 @@ export default class Compare {
     const products = this.products();
     const rows: MetricRow[] = [];
 
-    const seasonAxes: readonly [string, (p: Product) => number | undefined][] = [
+    const seasonAxes: readonly [UsageAxis, (p: Product) => number | undefined][] = [
       ['Primavera', (p) => p.seasonUsage?.primavera],
       ['Verano', (p) => p.seasonUsage?.verano],
       ['Otoño', (p) => p.seasonUsage?.otono],
@@ -242,21 +250,21 @@ export default class Compare {
     ];
     for (const [label, getValue] of seasonAxes) {
       if (products.some((p) => getValue(p) !== undefined)) {
-        rows.push(this.buildValueRow('❄️', label, products.map((p) => getValue(p) ?? 0)));
+        rows.push(this.buildValueRow(USAGE_AXIS_ICONS[label], label, products.map((p) => getValue(p) ?? 0)));
       }
     }
 
-    const dayAxes: readonly [string, (p: Product) => number | undefined][] = [
+    const dayAxes: readonly [UsageAxis, (p: Product) => number | undefined][] = [
       ['Día', (p) => p.dayUsage?.dia],
       ['Noche', (p) => p.dayUsage?.noche],
     ];
     for (const [label, getValue] of dayAxes) {
       if (products.some((p) => getValue(p) !== undefined)) {
-        rows.push(this.buildValueRow('🌙', label, products.map((p) => getValue(p) ?? 0)));
+        rows.push(this.buildValueRow(USAGE_AXIS_ICONS[label], label, products.map((p) => getValue(p) ?? 0)));
       }
     }
 
-    const occasionAxes: readonly [string, (p: Product) => number | undefined][] = [
+    const occasionAxes: readonly [UsageAxis, (p: Product) => number | undefined][] = [
       ['Trabajo', (p) => p.occasions?.trabajo],
       ['Romántico', (p) => p.occasions?.romantico],
       ['Social', (p) => p.occasions?.social],
@@ -266,7 +274,7 @@ export default class Compare {
     ];
     for (const [label, getValue] of occasionAxes) {
       if (products.some((p) => getValue(p) !== undefined)) {
-        rows.push(this.buildValueRow('📅', label, products.map((p) => getValue(p) ?? 0)));
+        rows.push(this.buildValueRow(USAGE_AXIS_ICONS[label], label, products.map((p) => getValue(p) ?? 0)));
       }
     }
 
@@ -435,11 +443,9 @@ export default class Compare {
    *  table needs more width than a fixed 50/50 split allows, so it stacks instead. */
   protected readonly resumenStacked = computed(() => this.products().length > 2);
 
-  protected readonly gridTemplateColumns = computed(() => {
-    const n = Math.max(this.products().length, 1);
-    // Mobile: columnas flexibles sin piso mínimo (`minmax(0, 1fr)`) - con `minmax(220px, 1fr)`
-    // la tabla pedía 640px+ de ancho mínimo (200 + 220×2) y se desbordaba en cualquier celular.
-    if (this.isMobile()) return `72px repeat(${n}, minmax(0, 1fr))`;
-    return `200px repeat(${n}, minmax(220px, 1fr))`;
-  });
+  /** Ver `factsGridColumns`: las columnas nunca piden un ancho mínimo fijo, así la tabla entra
+   *  en su tarjeta tanto en celular como al lado del radar en escritorio. */
+  protected readonly gridTemplateColumns = computed(() =>
+    factsGridColumns(this.products().length, this.isMobile()),
+  );
 }

@@ -12,6 +12,29 @@ export const SERIES_COLORS = [
  *  the DOM does, so chart datasets need the real color value instead of `SERIES_COLORS` above. */
 export const SERIES_COLORS_HEX = ['#8b5cf6', '#06b6d4', '#10b981', '#34d399'] as const;
 
+/**
+ * Un ícono propio por cada eje de "Cuándo usarla" (antes era uno por grupo: ❄️ para las cuatro
+ * estaciones, 🌙 para día y noche, 📅 para todas las ocasiones). Son los mismos que ya muestran
+ * los filtros de favoritos (`favorite-filters.ts`) - ahí también conviven Verano y Día, por eso
+ * Verano es 🏖️ y Día ☀️, para no repetir el sol en el mismo gráfico.
+ */
+export const USAGE_AXIS_ICONS = {
+  Primavera: '🌸',
+  Verano: '🏖️',
+  Otoño: '🍂',
+  Invierno: '❄️',
+  Día: '☀️',
+  Noche: '🌙',
+  Trabajo: '💼',
+  Romántico: '💕',
+  Social: '🎉',
+  Casual: '👕',
+  Formal: '🎩',
+  Deporte: '🏃',
+} as const;
+
+export type UsageAxis = keyof typeof USAGE_AXIS_ICONS;
+
 export interface DotRow {
   readonly name: string;
   readonly chips: readonly string[];

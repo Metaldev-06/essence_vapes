@@ -554,11 +554,17 @@
   font-size: 13px;
   color: var(--color-text-primary);
   background: var(--color-surface);
+  /* El texto parte de línea dentro de su celda; nunca se sale de ella. */
+  overflow-wrap: anywhere;
 }
 
 .compare-fact-header {
   gap: 8px;
   color: var(--series-color);
+}
+
+.compare-fact-header span {
+  min-width: 0;
 }
 
 .compare-fact-photo {

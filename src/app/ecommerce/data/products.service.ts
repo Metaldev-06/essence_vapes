@@ -1,5 +1,7 @@
 import { Injectable, Signal, inject } from '@angular/core';
 import { HttpClient, httpResource } from '@angular/common/http';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { type Observable, catchError, shareReplay } from 'rxjs';
 
 import { API_BASE_URL } from '../../core/config/api.config';
 import type { Gender, Product, ProductCategory, ProductStyle } from './product.model';
@@ -39,6 +41,10 @@ const EMPTY_PAGE: ProductsPage = {
 };
 
 export const PRODUCTS_PAGE_SIZE = 12;
+
+/** Cuánto sirve una ficha precargada al pasar el mouse: cubre de sobra el tiempo hasta el clic.
+ *  Pasado eso se vuelve a pedir. */
+export const PRODUCT_PREFETCH_TTL_MS = 30_000;
 
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
@@ -110,35 +116,55 @@ export class ProductsService {
     );
   }
 
+  /**
+   * La ficha de un producto. Si la card del catálogo ya lo precargó (`prefetchProduct`), usa ESA
+   * respuesta en vez de pedirlo de nuevo. `rxResource` cancela el pedido anterior si cambia el
+   * producto (ej. navegar a uno relacionado).
+   */
   byId(id: Signal<string>) {
-    return httpResource<Product>(() => (id() ? `${this.baseUrl}/${id()}` : undefined));
+    return rxResource({
+      params: () => id() || undefined,
+      stream: ({ params }) => this.takePrefetched(params) ?? this.fetchProduct(params),
+    });
   }
 
-  private catalogPrefetched = false;
-  private readonly prefetchedProductIds = new Set<string>();
+  /** Precargas hechas al pasar el mouse por una card, a la espera del clic. */
+  private readonly prefetchedProducts = new Map<string, { at: number; response: Observable<Product> }>();
 
   /**
-   * Fire-and-forget: warms the browser's HTTP cache for the catalog's default first page plus
-   * its filter option lists, so hovering/focusing the "Productos" nav link resolves before the
-   * click even lands (see `Header`). Fires at most once per session - repeated hovers would just
-   * re-request the exact same URLs for no benefit. Not wired through `httpResource`/`list()` on
-   * purpose: those bind to a component's reactive lifecycle, which the header isn't part of.
+   * Hover/focus sobre una card: pide el producto ya, y la ficha usa esta misma respuesta.
+   *
+   * Antes hacía un `http.get` suelto y descartaba el resultado, contando con la caché del
+   * navegador - pero la API no manda `Cache-Control` (solo `ETag`), así que al entrar a la ficha
+   * el navegador volvía a consultar al servidor (304) y la precarga no ahorraba nada: era un
+   * pedido de más.
    */
-  prefetchCatalog(): void {
-    if (this.catalogPrefetched) return;
-    this.catalogPrefetched = true;
-    this.http
-      .get(this.baseUrl, { params: { limit: PRODUCTS_PAGE_SIZE, offset: 0 } })
-      .subscribe({ error: () => {} });
-    this.http.get(`${this.baseUrl}/capacities`).subscribe({ error: () => {} });
-    this.http.get(`${this.baseUrl}/brands`).subscribe({ error: () => {} });
+  prefetchProduct(id: string): void {
+    const now = Date.now();
+    for (const [key, entry] of this.prefetchedProducts) {
+      if (now - entry.at >= PRODUCT_PREFETCH_TTL_MS) this.prefetchedProducts.delete(key);
+    }
+    if (this.prefetchedProducts.has(id)) return;
+
+    const response = this.fetchProduct(id).pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    // Arranca el pedido ya; si falla, no queda guardado y la ficha lo pide de nuevo.
+    response.subscribe({ error: () => this.prefetchedProducts.delete(id) });
+    this.prefetchedProducts.set(id, { at: now, response });
   }
 
-  /** Same idea as `prefetchCatalog()`, per product - see `ProductCard`'s hover/focus handlers. */
-  prefetchProduct(id: string): void {
-    if (this.prefetchedProductIds.has(id)) return;
-    this.prefetchedProductIds.add(id);
-    this.http.get(`${this.baseUrl}/${id}`).subscribe({ error: () => {} });
+  /**
+   * De un solo uso y con vencimiento: la próxima visita a la ficha trae datos frescos (el stock y
+   * el precio pueden cambiar). Si la precarga falló, se pide de nuevo en vez de mostrar el error.
+   */
+  private takePrefetched(id: string): Observable<Product> | undefined {
+    const entry = this.prefetchedProducts.get(id);
+    this.prefetchedProducts.delete(id);
+    if (!entry || Date.now() - entry.at >= PRODUCT_PREFETCH_TTL_MS) return undefined;
+    return entry.response.pipe(catchError(() => this.fetchProduct(id)));
+  }
+
+  private fetchProduct(id: string): Observable<Product> {
+    return this.http.get<Product>(`${this.baseUrl}/${id}`);
   }
 
   private toParams(query: ProductsQuery): Record<string, string | number> {

@@ -52,19 +52,19 @@
         <app-kpi-card
           label="Ventas confirmadas"
           [value]="summary.current.paidOrdersCount + ''"
-          [comparisonPercent]="comparisonFor(s => s.paidOrdersCount)"
+          [comparisonPercent]="comparisonFor('paidOrdersCount')"
           tooltip="Pedidos con pago aprobado por Mercado Pago en el período (según la fecha de aprobación del pago)."
         />
         <app-kpi-card
           label="Importe bruto de pedidos"
           [value]="formatPrice(summary.current.grossOrdersValue)"
-          [comparisonPercent]="comparisonFor(s => s.grossOrdersValue)"
+          [comparisonPercent]="comparisonFor('grossOrdersValue')"
           tooltip="Suma de todos los pedidos creados en el período, hayan terminado pagándose o no."
         />
         <app-kpi-card
           label="Importe de pagos aprobados"
           [value]="formatPrice(summary.current.approvedPaymentsValue)"
-          [comparisonPercent]="comparisonFor(s => s.approvedPaymentsValue)"
+          [comparisonPercent]="comparisonFor('approvedPaymentsValue')"
           tooltip="Suma de los pedidos cuyo pago fue aprobado por Mercado Pago en el período."
         />
         <app-kpi-card
@@ -75,43 +75,43 @@
         <app-kpi-card
           label="Cantidad de pedidos"
           [value]="summary.current.ordersCount + ''"
-          [comparisonPercent]="comparisonFor(s => s.ordersCount)"
+          [comparisonPercent]="comparisonFor('ordersCount')"
           tooltip="Pedidos creados en el período, cualquiera sea su estado."
         />
         <app-kpi-card
           label="Pedidos pagados"
           [value]="summary.current.paidOrdersCount + ''"
-          [comparisonPercent]="comparisonFor(s => s.paidOrdersCount)"
+          [comparisonPercent]="comparisonFor('paidOrdersCount')"
           tooltip="De los pedidos creados en el período, cuántos tienen el pago aprobado."
         />
         <app-kpi-card
           label="Pedidos pendientes"
           [value]="summary.current.pendingOrdersCount + ''"
-          [comparisonPercent]="comparisonFor(s => s.pendingOrdersCount)"
+          [comparisonPercent]="comparisonFor('pendingOrdersCount')"
           tooltip="Todavía esperando pago o en revisión por Mercado Pago."
         />
         <app-kpi-card
           label="Pedidos cancelados"
           [value]="summary.current.cancelledOrdersCount + ''"
-          [comparisonPercent]="comparisonFor(s => s.cancelledOrdersCount)"
+          [comparisonPercent]="comparisonFor('cancelledOrdersCount')"
           tooltip="Cancelados o vencidos sin llegar a pagarse."
         />
         <app-kpi-card
           label="Ticket promedio"
           [value]="formatPrice(summary.current.averageTicketValue)"
-          [comparisonPercent]="comparisonFor(s => s.averageTicketValue)"
+          [comparisonPercent]="comparisonFor('averageTicketValue')"
           tooltip="Importe de pagos aprobados dividido la cantidad de pedidos pagados."
         />
         <app-kpi-card
           label="Unidades vendidas"
           [value]="summary.current.unitsSoldCount + ''"
-          [comparisonPercent]="comparisonFor(s => s.unitsSoldCount)"
+          [comparisonPercent]="comparisonFor('unitsSoldCount')"
           tooltip="Suma de las cantidades de las líneas de pedidos pagados en el período."
         />
         <app-kpi-card
           label="Importe reembolsado"
           [value]="formatPrice(summary.current.refundedAmountValue)"
-          [comparisonPercent]="comparisonFor(s => s.refundedAmountValue)"
+          [comparisonPercent]="comparisonFor('refundedAmountValue')"
           tooltip="Pedidos reembolsados, según su fecha de creación - Mercado Pago no informa una fecha de reembolso propia."
           reportLink="/admin/transacciones"
         />

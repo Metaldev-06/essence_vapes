@@ -128,6 +128,16 @@ export class ProductsService {
     });
   }
 
+  /**
+   * "También te puede gustar" de la ficha: el backend ya devuelve solo lo que se muestra (sin el
+   * producto actual, uno por perfume, ordenados por parecido) - ver `findRelated` en el backend.
+   */
+  related(id: Signal<string>) {
+    return httpResource<Product[]>(() => (id() ? `${this.baseUrl}/${id()}/related` : undefined), {
+      defaultValue: [],
+    });
+  }
+
   /** Precargas hechas al pasar el mouse por una card, a la espera del clic. */
   private readonly prefetchedProducts = new Map<string, { at: number; response: Observable<Product> }>();
 

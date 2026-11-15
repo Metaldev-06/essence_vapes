@@ -1,6 +1,11 @@
+/* Tantas columnas como entren con al menos 210px por card (con el ancho máximo del sitio da 4).
+   Antes eran 4 fijas: con la barra lateral al lado, entre ~1110px y 900px de pantalla cada card
+   quedaba en 125-180px y el chip de categoría se pisaba con comparar/favorito, o la grilla se
+   desbordaba. 210px es lo que necesita la card: chip + los dos botones arriba, precio + carrito
+   abajo. `auto-fill` (no `auto-fit`) para que con pocos productos las cards no se estiren. */
 .products-catalog-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 18px;
 }
 

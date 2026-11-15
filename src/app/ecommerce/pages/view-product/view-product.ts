@@ -72,10 +72,8 @@ export default class ViewProduct {
     };
   });
 
-  private readonly relatedResource = this.productsService.list(() => {
-    const current = this.product();
-    return current ? { category: current.category, limit: 5 } : undefined;
-  });
+  /** Arranca junto con el pedido del producto (solo necesita el id), no después. */
+  private readonly relatedResource = this.productsService.related(this.id);
 
   protected readonly hasUsageGuide = computed(() => {
     const product = this.product();
@@ -89,16 +87,10 @@ export default class ViewProduct {
     );
   });
 
-  protected readonly relatedProducts = computed(() => {
-    const current = this.product();
-    if (!current) {
-      return [];
-    }
-    return this.relatedResource
-      .value()
-      .data.filter((item) => item.id !== current.id)
-      .slice(0, 4);
-  });
+  /** `value()` tira error si el pedido falló (ej. 404) - sin relacionados, la sección no se muestra. */
+  protected readonly relatedProducts = computed(() =>
+    this.relatedResource.hasValue() ? this.relatedResource.value() : [],
+  );
 
   constructor() {
     effect(() => {

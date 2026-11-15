@@ -103,6 +103,17 @@ describe('ProductsService - ficha del producto y precarga', () => {
     await vi.waitFor(() => expect(ref.value()?.id).toBe('p1'));
   });
 
+  it('"También te puede gustar" pide solo los relacionados del producto, no la categoría entera', async () => {
+    const ref = TestBed.runInInjectionContext(() => service.related(signal('p1')));
+    TestBed.tick();
+
+    const request = http.expectOne(`${API_BASE_URL}/products/p1/related`);
+    expect(request.request.params.keys()).toEqual([]);
+    request.flush([product('p2'), product('p3')]);
+
+    await vi.waitFor(() => expect(ref.value().map((p) => p.id)).toEqual(['p2', 'p3']));
+  });
+
   it('si la precarga falla mientras la ficha la espera, reintenta una vez', async () => {
     service.prefetchProduct('p1');
     const prefetch = http.expectOne(productUrl('p1'));

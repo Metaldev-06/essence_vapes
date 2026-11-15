@@ -7,7 +7,16 @@
   white-space: nowrap;
 }
 
+/* La tarjeta llena su celda de la grilla: todas miden lo mismo aunque una tenga menos contenido
+   ("No disponible") o más (el link al reporte). Las grillas igualan además el alto de todas las
+   filas (`grid-auto-rows: 1fr` en dashboard.css / reports.css). */
+:host {
+  display: block;
+}
+
 .kpi-card {
+  box-sizing: border-box;
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -120,7 +129,9 @@
 }
 
 .kpi-card-link {
-  margin-top: 4px;
+  /* Siempre al pie de la tarjeta. */
+  margin-top: auto;
+  padding-top: 4px;
   font-size: 12.5px;
   font-weight: 600;
   color: var(--color-accent);

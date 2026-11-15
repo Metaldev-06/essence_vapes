@@ -6,6 +6,8 @@
 
 .product-card {
   position: relative;
+  /* El sitio no tiene un box-sizing global: sin esto, el borde suma 2px al 100%. */
+  box-sizing: border-box;
   height: 100%;
   display: flex;
   flex-direction: column;

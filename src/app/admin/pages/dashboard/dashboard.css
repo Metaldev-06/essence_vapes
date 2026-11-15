@@ -366,6 +366,8 @@ a.stat-tile:focus-visible {
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Todas las filas del alto de la tarjeta más alta, así todas las tarjetas miden lo mismo. */
+  grid-auto-rows: 1fr;
   gap: 12px;
 }
 

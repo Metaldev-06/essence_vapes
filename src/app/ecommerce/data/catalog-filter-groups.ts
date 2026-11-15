@@ -34,3 +34,36 @@ export function brandGroupKey(category: ProductCategory | 'todos'): string {
   if (category === 'perfumes' || category === 'decants') return 'perfumes-decants';
   return category;
 }
+
+/** Cómo se nombra lo que lista el catálogo en cada categoría. "Fragancias" es SOLO para
+ *  perfumes y decants (pedido del usuario, 2026-11-15): un vape o una esencia no es una
+ *  fragancia, y "Todos" mezcla las cuatro categorías. */
+export function catalogNounFor(category: ProductCategory | 'todos'): string {
+  switch (category) {
+    case 'perfumes':
+    case 'decants':
+      return 'fragancias';
+    case 'vapes':
+      return 'vapes';
+    case 'esencias':
+      return 'esencias';
+    default:
+      return 'productos';
+  }
+}
+
+/** Sugerencia del estado vacío: nombra los filtros que de verdad están en pantalla - "estilos"
+ *  (Fresco, Dulce...) en perfumes/decants, "sabores" (Frutal, Mentolado...) en vapes/esencias, y
+ *  ninguno en "Todos", que no muestra esos botones. */
+export function emptyCatalogHintFor(category: ProductCategory | 'todos'): string {
+  switch (category) {
+    case 'perfumes':
+    case 'decants':
+      return 'Probá ajustar la búsqueda, la categoría o los estilos seleccionados.';
+    case 'vapes':
+    case 'esencias':
+      return 'Probá ajustar la búsqueda, la categoría o los sabores seleccionados.';
+    default:
+      return 'Probá ajustar la búsqueda o elegir otra categoría.';
+  }
+}

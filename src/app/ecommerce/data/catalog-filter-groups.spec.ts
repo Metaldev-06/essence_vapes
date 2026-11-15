@@ -2,8 +2,37 @@ import {
   brandGroupKey,
   capacitySuffixFor,
   capacityUnitForCategory,
+  catalogNounFor,
+  emptyCatalogHintFor,
   showsGenderFilter,
 } from './catalog-filter-groups';
+
+describe('catalogNounFor', () => {
+  it('"fragancias" solo para perfumes y decants', () => {
+    expect(catalogNounFor('perfumes')).toBe('fragancias');
+    expect(catalogNounFor('decants')).toBe('fragancias');
+  });
+
+  it('vapes, esencias y "Todos" se nombran por lo que son', () => {
+    expect(catalogNounFor('vapes')).toBe('vapes');
+    expect(catalogNounFor('esencias')).toBe('esencias');
+    expect(catalogNounFor('todos')).toBe('productos');
+  });
+});
+
+describe('emptyCatalogHintFor', () => {
+  it('nombra los filtros que se ven en cada categoría', () => {
+    expect(emptyCatalogHintFor('perfumes')).toContain('estilos');
+    expect(emptyCatalogHintFor('vapes')).toContain('sabores');
+    expect(emptyCatalogHintFor('esencias')).toContain('sabores');
+  });
+
+  it('en "Todos" no menciona estilos ni sabores (no hay esos botones)', () => {
+    const hint = emptyCatalogHintFor('todos');
+    expect(hint).not.toContain('estilos');
+    expect(hint).not.toContain('sabores');
+  });
+});
 
 describe('showsGenderFilter', () => {
   it('is true only for perfumes and decants', () => {

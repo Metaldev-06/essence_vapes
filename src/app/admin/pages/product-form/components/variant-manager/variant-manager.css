@@ -68,6 +68,14 @@
   gap: 10px;
 }
 
+/* Ocupa su propia fila: el botón "+ Imagen" queda debajo. */
+.variant-images-inherited {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+
 .variant-image-thumb {
   position: relative;
   width: 72px;

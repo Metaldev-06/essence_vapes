@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { SeoService } from '../../../core/seo/seo.service';
 import { ProductsService } from '../../data/products.service';
+import { ProductsFiltersStore } from '../../data/products-filters-store';
 import { CATEGORY_LABELS, type Product } from '../../data/product.model';
 import { ProductGallery } from './components/product-gallery/product-gallery';
 import { ProductDetails } from './components/product-details/product-details';
@@ -32,6 +33,7 @@ export default class ViewProduct {
   private readonly titleService = inject(Title);
   private readonly seoService = inject(SeoService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly filtersStore = inject(ProductsFiltersStore);
 
   readonly id = input('');
   /** Which variant to preselect, from `?variant=` - e.g. coming from a catalog card. */
@@ -149,5 +151,8 @@ export default class ViewProduct {
       );
     });
     this.destroyRef.onDestroy(() => this.seoService.setStructuredData(null));
+    // Los filtros del catálogo se conservaron para volver atrás; si desde acá se va a otra
+    // sección, se descartan.
+    this.destroyRef.onDestroy(() => this.filtersStore.leaveProductView());
   }
 }

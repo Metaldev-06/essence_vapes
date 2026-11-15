@@ -204,9 +204,10 @@ export default class Products implements OnDestroy {
     });
   }
 
-  /** Leaving the page resets the filters for next time - only a refresh WHILE on it keeps them. */
+  /** Salir de la página reinicia los filtros, salvo que se vaya a ver un producto: al volver
+   *  atrás se sigue viendo lo mismo. Un refresh estando acá también los conserva. */
   ngOnDestroy(): void {
-    this.filtersStore.clear();
+    this.filtersStore.leaveCatalog();
   }
 
   protected loadMore(): void {

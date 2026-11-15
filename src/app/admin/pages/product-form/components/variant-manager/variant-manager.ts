@@ -3,6 +3,7 @@ import { extractErrorMessage } from '../../../../data/extract-error-message';
 import { ProductsAdminService } from '../../../../data/products-admin.service';
 import {
   BASE_VARIANT_ID,
+  type MediaAsset,
   type Product,
   type VariantSummary,
 } from '../../../../../ecommerce/data/product.model';
@@ -33,6 +34,12 @@ export class VariantManager {
   protected readonly extraVariants = computed(() =>
     this.variants().filter((variant) => variant.id !== BASE_VARIANT_ID),
   );
+
+  /** Solo las imágenes que son de la variante. Las heredadas del producto no se listan acá: no
+   *  se pueden borrar "de la variante" porque no son suyas (el backend respondía 404). */
+  protected ownImages(variant: VariantSummary): readonly MediaAsset[] {
+    return variant.inheritsImages ? [] : variant.images;
+  }
 
   protected readonly isAdding = signal(false);
   protected readonly savingNew = signal(false);
@@ -156,7 +163,7 @@ export class VariantManager {
     if (files.length === 0) return;
 
     const current = this.extraVariants().find((variant) => variant.id === variantId);
-    if (current && current.images.length + files.length > this.maxImages) {
+    if (current && this.ownImages(current).length + files.length > this.maxImages) {
       this.error.set(`Una variante puede tener como máximo ${this.maxImages} imágenes`);
       return;
     }

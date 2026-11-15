@@ -123,7 +123,11 @@ export interface VariantSummary {
   readonly priceValue: number;
   readonly price: string;
   readonly stock: number;
+  /** Las que se muestran: las propias de la variante o, si no tiene, las del producto. */
   readonly images: readonly MediaAsset[];
+  /** `true` = la variante no tiene imágenes propias y `images` son las del producto. Opcional
+   *  porque un backend anterior no lo manda (se trata como `false`). */
+  readonly inheritsImages?: boolean;
   readonly featured: boolean;
   /** Costo de adquisición de ESTA variante - solo presente cuando viene de la ruta admin
    *  (`GET /products/:id/admin`); la ruta pública nunca lo expone. */

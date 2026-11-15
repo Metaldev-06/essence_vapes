@@ -68,7 +68,13 @@
           </div>
 
           <div class="variant-row-images">
-            @for (image of variant.images; track image.publicId) {
+            @if (variant.inheritsImages) {
+              <p class="variant-images-inherited">
+                Sin imágenes propias: usa las del producto. Subí una para que esta variante tenga
+                las suyas.
+              </p>
+            }
+            @for (image of ownImages(variant); track image.publicId) {
               <div class="variant-image-thumb">
                 <img [src]="image.url" alt="" />
                 <button
@@ -82,7 +88,7 @@
                 </button>
               </div>
             }
-            @if (variant.images.length < maxImages) {
+            @if (ownImages(variant).length < maxImages) {
               <label class="media-add variant-image-add" [class.disabled]="uploadingId() === variant.id">
                 <span>{{ uploadingId() === variant.id ? 'Subiendo...' : '+ Imagen' }}</span>
                 <input

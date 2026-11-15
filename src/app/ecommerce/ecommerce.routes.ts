@@ -4,6 +4,7 @@ import { guestOnlyGuard } from '../core/auth/guest-only.guard';
 import { Ecommerce } from './ecommerce';
 import { CheckoutService } from './pages/checkout/checkout.service';
 import { productPreviewResolver } from './pages/view-product/product-preview.resolver';
+import { sharedFiltersResolver } from './data/shared-filters-api';
 
 export const ecommerceRoutes: Routes = [
   {
@@ -22,6 +23,10 @@ export const ecommerceRoutes: Routes = [
       {
         path: 'productos',
         loadComponent: () => import('./pages/products/products'),
+        // Link corto compartido (`?c=<código>`): los filtros llegan antes de mostrar el catálogo.
+        resolve: { sharedFilters: sharedFiltersResolver },
+        // Abrir otro link compartido estando ya en el catálogo también vuelve a resolverlo.
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'Productos | Essence Vapes',
         data: {
           description:

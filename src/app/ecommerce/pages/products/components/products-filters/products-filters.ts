@@ -24,6 +24,13 @@ export class ProductsFilters {
 
   readonly toggleStyle = output<ProductStyle>();
   readonly clearStyles = output<void>();
+  /** Compartir un link con estos filtros (lo arma la página, que tiene el estado). */
+  readonly share = output<void>();
+  /** Mouse encima / foco / dedo apoyado sobre Compartir: la página prepara el link corto antes
+   *  del click (ver `Products.prepareShare`). */
+  readonly sharePrepare = output<void>();
+  /** Muestra "¡Link copiado!" en el botón por unos segundos. */
+  readonly linkCopied = input(false);
 
   protected onSearchInput(event: Event): void {
     this.search.set((event.target as HTMLInputElement).value);

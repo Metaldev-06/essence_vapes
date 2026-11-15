@@ -1,4 +1,11 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpContext,
+  HttpErrorResponse,
+  HttpHeaders,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
@@ -6,6 +13,7 @@ import { API_BASE_URL } from '../config/api.config';
 import {
   DAILY_LIMIT_CODE,
   MAX_RATE_LIMIT_RETRIES,
+  OPTIONAL_REQUEST,
   rateLimitInterceptor,
   retryAfterMs,
 } from './rate-limit.interceptor';
@@ -162,6 +170,32 @@ describe('rateLimitInterceptor + RateLimitService', () => {
     expect((failure?.error as { message: string }).message).toContain('Ya enviaste 2 mensajes');
     expect(TestBed.inject(RateLimitService).isBlocked()).toBe(false);
     expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
+  it('un pedido prescindible (link corto de Compartir) con 429 NO pausa el sitio: el error le llega directo', () => {
+    setup();
+    const SHARED = `${API_BASE_URL}/shared-filters`;
+    const optional = { context: new HttpContext().set(OPTIONAL_REQUEST, true) };
+    let failure: HttpErrorResponse | undefined;
+    http.post(SHARED, {}, optional).subscribe({ error: (error: HttpErrorResponse) => (failure = error) });
+
+    const { body, init } = tooManyRequests(60);
+    backend.expectOne(SHARED).flush(body, init);
+
+    expect(failure?.status).toBe(429);
+    expect(TestBed.inject(RateLimitService).isBlocked()).toBe(false);
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    backend.expectNone(SHARED);
+  });
+
+  it('un pedido prescindible no queda retenido por una pausa en curso', () => {
+    setup();
+    TestBed.inject(RateLimitService).block(30_000);
+    const SHARED = `${API_BASE_URL}/shared-filters/k7Qx2m`;
+
+    http.get(SHARED, { context: new HttpContext().set(OPTIONAL_REQUEST, true) }).subscribe();
+
+    backend.expectOne(SHARED).flush({});
   });
 
   it('otros errores pasan de largo, sin espera', () => {

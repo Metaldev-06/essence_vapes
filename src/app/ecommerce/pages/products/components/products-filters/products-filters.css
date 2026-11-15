@@ -19,11 +19,12 @@
   margin-bottom: 32px;
 }
 
+/* Búsqueda y orden en la primera fila; Compartir debajo del orden (ver `.products-share`). */
 .products-filters-tools {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
   flex-shrink: 0;
   /* Keeps it right-aligned even with no style pills sibling (category "todos") to push against. */
   margin-left: auto;
@@ -148,6 +149,8 @@
 
 .products-search input {
   width: 190px;
+  /* Un input no se achica por debajo de su ancho intrínseco sin esto. */
+  min-width: 0;
   border: none;
   background: transparent;
   outline: none;
@@ -179,9 +182,61 @@
 }
 
 .products-search:focus-within,
-.products-sort select:focus-visible {
+.products-sort select:focus-visible,
+.products-share:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+/* Mismo formato de píldora que el orden y la búsqueda. Va debajo del orden, alineado a su borde
+   derecho. */
+.products-share {
+  grid-row: 2;
+  grid-column: 2;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.products-share:hover,
+.products-share.copied {
+  color: var(--color-accent);
+  border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+@media (max-width: 560px) {
+  /* En el celular: la búsqueda a todo el ancho y, debajo, el orden con Compartir (solo el
+     ícono) a su lado - bajarlo una fila más sería una fila entera para un botón de 40px. */
+  .products-search {
+    grid-column: 1 / -1;
+  }
+
+  .products-share {
+    padding: 9px 11px;
+  }
+
+  /* Solo el ícono en pantallas chicas: el texto queda para lectores de pantalla. */
+  .products-share-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 860px) {
@@ -192,9 +247,5 @@
 
   .products-search input {
     width: 100%;
-  }
-
-  .products-filters-tools {
-    justify-content: space-between;
   }
 }

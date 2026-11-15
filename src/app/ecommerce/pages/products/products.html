@@ -24,6 +24,9 @@
         [activeStyles]="activeStyles()"
         (toggleStyle)="toggleStyle($event)"
         (clearStyles)="clearStyles()"
+        [linkCopied]="linkCopied()"
+        (sharePrepare)="prepareShare()"
+        (share)="shareFilters()"
       />
 
       <app-products-grid

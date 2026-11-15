@@ -1,5 +1,7 @@
 import {
   Component,
+  DOCUMENT,
+  afterNextRender,
   computed,
   debounced,
   effect,
@@ -8,6 +10,17 @@ import {
   untracked,
   type OnDestroy,
 } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { skip } from 'rxjs';
+import {
+  SHARE_CODE_PARAM,
+  copyToClipboard,
+  describeFilters,
+  filtersFromShareParams,
+  filtersToShareParams,
+  hasActiveFilters,
+} from '../../data/shared-filters';
+import { SharedFiltersApi } from '../../data/shared-filters-api';
 import {
   ProductsService,
   PRODUCTS_PAGE_SIZE,
@@ -74,8 +87,30 @@ export default class Products implements OnDestroy {
     { id: 'unisex', label: 'Unisex' },
   ];
 
-  /** Read once on load - this page never reflects its filters in the URL, only in sessionStorage. */
-  private readonly initialFilters = this.filtersStore.read();
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
+
+  private readonly sharedFiltersApi = inject(SharedFiltersApi);
+
+  /** Filtros de un link compartido, o `null` si no se entró desde uno. Tienen prioridad sobre
+   *  los guardados. El link corto (`?c=<código>`) ya llega resuelto por `sharedFiltersResolver`;
+   *  el largo (`?categoria=...`) se lee de la URL. */
+  private readonly sharedFilters =
+    (this.route.snapshot.data['sharedFilters'] as ProductsFiltersSnapshot | null | undefined) ??
+    filtersFromShareParams(this.route.snapshot.queryParamMap);
+
+  /** Hay algo de un link compartido en la URL para limpiar (incluido un código que ya no existe). */
+  private readonly enteredFromShareLink =
+    this.sharedFilters !== null || this.route.snapshot.queryParamMap.has(SHARE_CODE_PARAM);
+
+  /** Read once on load. Los filtros viven en sessionStorage, no en la URL: un link compartido
+   *  solo los trae de entrada, y la URL se limpia apenas se aplican. */
+  private readonly initialFilters = this.sharedFilters ?? this.filtersStore.read();
+
+  /** "¡Link copiado!" en el botón Compartir, por unos segundos. */
+  protected readonly linkCopied = signal(false);
+  private linkCopiedTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected readonly search = signal(this.initialFilters.term);
   protected readonly activeCategory = signal<ProductCategory | 'todos'>(this.initialFilters.category);
@@ -140,6 +175,23 @@ export default class Products implements OnDestroy {
     this.filtersStore.applied$
       .pipe(takeUntilDestroyed())
       .subscribe((snapshot) => this.applySnapshot(snapshot));
+
+    // Entrada desde un link compartido: los filtros ya se tomaron arriba (`initialFilters`). La
+    // URL se limpia después del primer render, cuando la navegación de entrada ya terminó.
+    if (this.enteredFromShareLink) {
+      afterNextRender(() => this.clearShareParams());
+    }
+    // Un link compartido abierto estando ya en el catálogo (misma página, otra URL). El corto
+    // llega resuelto por el resolver (`data`), el largo en los parámetros.
+    this.route.data.pipe(skip(1), takeUntilDestroyed()).subscribe((data) => {
+      const shared = data['sharedFilters'] as ProductsFiltersSnapshot | null | undefined;
+      if (shared) this.applySnapshot(shared);
+    });
+    this.route.queryParamMap.pipe(skip(1), takeUntilDestroyed()).subscribe((params) => {
+      const longLink = filtersFromShareParams(params);
+      if (longLink) this.applySnapshot(longLink);
+      if (longLink || params.has(SHARE_CODE_PARAM)) this.clearShareParams();
+    });
 
     // Fragrance styles don't apply to vapes/esencias (and vice versa) - switching into a
     // different style group drops whatever was selected under the previous one, so a stale
@@ -215,18 +267,85 @@ export default class Products implements OnDestroy {
     // Persists every filter change to sessionStorage - a refresh (or navigating away and back)
     // keeps whatever was last applied, since none of this ever reaches the URL.
     effect(() => {
-      const styles = this.activeStyles();
-      const capacity = this.activeCapacity();
-      this.filtersStore.write({
-        term: this.search(),
-        category: this.activeCategory(),
-        brand: this.activeBrand(),
-        gender: this.activeGender(),
-        sort: this.sortBy(),
-        styles: Array.from(styles),
-        capacityMl: capacity === 'todas' ? null : capacity,
-      });
+      this.filtersStore.write(this.currentFilters());
     });
+  }
+
+  private currentFilters(): ProductsFiltersSnapshot {
+    const capacity = this.activeCapacity();
+    return {
+      term: this.search(),
+      category: this.activeCategory(),
+      brand: this.activeBrand(),
+      gender: this.activeGender(),
+      sort: this.sortBy(),
+      styles: Array.from(this.activeStyles()),
+      capacityMl: capacity === 'todas' ? null : capacity,
+    };
+  }
+
+  /**
+   * Mouse encima, foco o dedo apoyado sobre Compartir: se pide el código ya. Así, al soltar, el
+   * link corto suele estar listo y el menú de compartir del celular se abre sin esperar (el
+   * navegador solo lo permite inmediatamente después de un toque).
+   */
+  protected prepareShare(): void {
+    const filters = this.currentFilters();
+    if (hasActiveFilters(filters)) void this.sharedFiltersApi.codeFor(filters).catch(() => undefined);
+  }
+
+  /**
+   * Botón Compartir: un link corto (`/productos?c=k7Qx2m`) que abre el catálogo con estos mismos
+   * filtros. En el celular abre el menú de compartir del sistema (WhatsApp, etc.); en la
+   * computadora lo copia. Si el servidor no da el código, se comparte el link largo, que también
+   * funciona.
+   */
+  protected async shareFilters(): Promise<void> {
+    const filters = this.currentFilters();
+    const url = await this.shareUrlFor(filters);
+    const view = this.document.defaultView;
+
+    if (view && typeof view.navigator.share === 'function' && view.matchMedia?.('(pointer: coarse)')?.matches) {
+      try {
+        await view.navigator.share({ title: 'Essence Vapes', text: describeFilters(filters), url });
+        return;
+      } catch (error) {
+        // Cerró el menú sin compartir: no hay nada más que hacer. Otro error: se copia el link.
+        if ((error as { name?: string } | null)?.name === 'AbortError') return;
+      }
+    }
+
+    if (await copyToClipboard(url, this.document)) {
+      this.linkCopied.set(true);
+      clearTimeout(this.linkCopiedTimer);
+      this.linkCopiedTimer = setTimeout(() => this.linkCopied.set(false), 2500);
+    } else {
+      // Último recurso: el link queda seleccionado en un cuadro para copiarlo a mano.
+      view?.prompt('Copiá este link para compartir:', url);
+    }
+  }
+
+  /** El link a compartir: corto si hay código (ya listo o pedido ahora), largo si el servidor
+   *  falla, y `/productos` a secas si no hay filtros. */
+  private async shareUrlFor(filters: ProductsFiltersSnapshot): Promise<string> {
+    const toUrl = (queryParams: Record<string, string>) =>
+      `${this.document.location.origin}${this.router.serializeUrl(
+        this.router.createUrlTree(['/productos'], { queryParams }),
+      )}`;
+
+    if (!hasActiveFilters(filters)) return toUrl({});
+    const ready = this.sharedFiltersApi.peekCode(filters);
+    if (ready) return toUrl({ [SHARE_CODE_PARAM]: ready });
+    try {
+      return toUrl({ [SHARE_CODE_PARAM]: await this.sharedFiltersApi.codeFor(filters) });
+    } catch {
+      return toUrl(filtersToShareParams(filters));
+    }
+  }
+
+  /** Saca los parámetros del link compartido de la URL (quedan aplicados y guardados). */
+  private clearShareParams(): void {
+    void this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
   }
 
   /** Filtros que llegan de afuera con la página ya abierta (ej. "Perfumes" en el footer estando
@@ -251,6 +370,7 @@ export default class Products implements OnDestroy {
   /** Salir de la página reinicia los filtros, salvo que se vaya a ver un producto: al volver
    *  atrás se sigue viendo lo mismo. Un refresh estando acá también los conserva. */
   ngOnDestroy(): void {
+    clearTimeout(this.linkCopiedTimer);
     this.filtersStore.leaveCatalog();
   }
 

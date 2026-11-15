@@ -1,4 +1,4 @@
-import { HttpErrorResponse, type HttpEvent, type HttpInterceptorFn } from '@angular/common/http';
+import { HttpContextToken, HttpErrorResponse, type HttpEvent, type HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { type Observable, catchError, switchMap, throwError } from 'rxjs';
 
@@ -15,6 +15,13 @@ export const MAX_RATE_LIMIT_RETRIES = 3;
  * el resto sigue funcionando. Mismo valor que `DAILY_LIMIT_CODE` en el backend.
  */
 export const DAILY_LIMIT_CODE = 'DAILY_LIMIT_REACHED';
+
+/**
+ * Pedido prescindible: quien lo hace tiene un plan B si falla (ej. el link corto de "Compartir"
+ * cae al link largo). Un 429 suyo NO pausa el sitio ni se reintenta - el error le llega directo -
+ * y tampoco espera una pausa en curso: el límite es de esa ruta, no de toda la tienda.
+ */
+export const OPTIONAL_REQUEST = new HttpContextToken<boolean>(() => false);
 
 function isDailyFormLimit(error: HttpErrorResponse): boolean {
   return (error.error as { code?: unknown } | null)?.code === DAILY_LIMIT_CODE;
@@ -52,7 +59,7 @@ export function retryAfterMs(error: HttpErrorResponse, now = Date.now()): number
  * autenticación y sale con el token vigente en ese momento.
  */
 export const rateLimitInterceptor: HttpInterceptorFn = (req, next) => {
-  if (!req.url.startsWith(API_BASE_URL)) return next(req);
+  if (!req.url.startsWith(API_BASE_URL) || req.context.get(OPTIONAL_REQUEST)) return next(req);
   const rateLimit = inject(RateLimitService);
 
   const attempt = (retriesLeft: number): Observable<HttpEvent<unknown>> =>

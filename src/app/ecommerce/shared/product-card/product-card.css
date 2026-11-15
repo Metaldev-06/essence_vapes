@@ -133,6 +133,29 @@
   --category-color: #fbbf24;
 }
 
+/* Sin stock: misma familia que el chip de categoría (texto blanco sobre fondo oscuro, para
+   mantener el contraste AA sobre cualquier color de acento); el rojo va solo en el borde. */
+.product-card-sold-out {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-bg) 85%, transparent);
+  border: 1px solid var(--color-danger);
+}
+
+/* La foto se atenúa para que se note de un vistazo, sin esconder el producto. */
+.product-card--sold-out .product-card-photo-frame,
+.product-card--sold-out .product-bottle {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
 .product-card-favorite,
 .product-card-compare {
   position: absolute;

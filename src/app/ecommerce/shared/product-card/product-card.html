@@ -1,6 +1,7 @@
 <article
   class="product-card"
   [class.product-card--list]="layout() === 'list'"
+  [class.product-card--sold-out]="isSoldOut()"
   [style.--accent-color]="product().accent"
   (mouseenter)="prefetchDetail()"
 >
@@ -80,6 +81,10 @@
         {{ categoryLabel() }}
       </span>
     </div>
+
+    @if (isSoldOut()) {
+      <span class="product-card-sold-out">Sin stock</span>
+    }
 
     <button
       type="button"

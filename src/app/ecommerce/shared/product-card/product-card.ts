@@ -61,6 +61,10 @@ export class ProductCard {
     () => !this.isComparing() && this.compareService.isFull(),
   );
 
+  /** Agotado de verdad (stock 0). Distinto de `canAddToCart`, que también se apaga cuando ya
+   *  tenés en el carrito todas las unidades disponibles. */
+  protected readonly isSoldOut = computed(() => this.product().stock <= 0);
+
   protected readonly canAddToCart = computed(() => {
     const product = this.product();
     return (

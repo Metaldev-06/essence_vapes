@@ -25,6 +25,23 @@ export const cloudinaryUrl = (url: string, width?: number): string => {
  */
 export const productMainImageUrl = (url: string): string => cloudinaryUrl(url, 800);
 
+/**
+ * Descarga y decodifica una imagen, esperando como mucho `timeoutMs`. Para que una imagen esté
+ * lista para pintarse en el mismo cuadro en que aparece (ej. el destino de una view transition:
+ * si no, "vuela" hacia un recuadro vacío). Nunca falla: si no llega a tiempo, sigue igual.
+ */
+export function decodeImage(url: string, timeoutMs: number): Promise<void> {
+  if (typeof Image === 'undefined' || timeoutMs <= 0) return Promise.resolve();
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = url;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<void>((resolve) => {
+    timer = setTimeout(resolve, timeoutMs);
+  });
+  return Promise.race([image.decode().catch(() => undefined), timeout]).then(() => clearTimeout(timer));
+}
+
 const preloadedUrls = new Set<string>();
 
 /**

@@ -14,11 +14,30 @@
         rel="noopener"
         [attr.aria-label]="'Ampliar imagen de ' + product().name"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m11 0h3a2 2 0 0 0 2-2v-3" />
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m11 0h3a2 2 0 0 0 2-2v-3"
+          />
         </svg>
       </a>
-      <img [ngSrc]="mainImageUrl(image.url)" [alt]="product().name" fill priority class="product-gallery-photo" />
+      <img
+        [ngSrc]="mainImageUrl(image.url)"
+        [alt]="product().name"
+        fill
+        priority
+        class="product-gallery-photo"
+        [style.view-transition-name]="viewTransitionName()"
+      />
     } @else {
       <svg class="product-gallery-bottle" viewBox="0 0 100 180" aria-hidden="true">
         <rect x="38" y="8" width="24" height="14" rx="4" class="product-gallery-bottle-cap" />
@@ -29,7 +48,11 @@
   </div>
 
   @if (product().images.length > 1) {
-    <div class="product-gallery-thumbs" role="group" [attr.aria-label]="'Más imágenes de ' + product().name">
+    <div
+      class="product-gallery-thumbs"
+      role="group"
+      [attr.aria-label]="'Más imágenes de ' + product().name"
+    >
       @for (image of product().images; track image.publicId; let i = $index) {
         <button
           type="button"

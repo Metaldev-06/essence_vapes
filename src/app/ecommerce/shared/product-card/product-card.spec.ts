@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 
 import { CartService } from '../../../core/cart/cart.service';
 import { CompareService } from '../../../core/compare/compare.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
 import { productMainImageUrl } from '../../data/cloudinary-url.helper';
+import { PRODUCT_IMAGE_TRANSITION_NAME, ProductViewTransition } from '../../data/product-view-transition';
 import type { Product } from '../../data/product.model';
 import { ProductsService } from '../../data/products.service';
 import { ProductCard } from './product-card';
@@ -92,6 +93,61 @@ describe('ProductCard - precarga al pasar el mouse', () => {
 
     expect(prefetchProduct).toHaveBeenCalledWith('p1');
     expect(preloaded).toEqual([productMainImageUrl(cover)]);
+  });
+});
+
+describe('ProductCard - view transition hacia la ficha', () => {
+  async function renderWithPhoto(): Promise<HTMLElement> {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: CartService, useValue: { getQuantity: () => 0, add: vi.fn() } },
+        { provide: FavoritesService, useValue: { isFavorite: () => false, toggle: vi.fn() } },
+        {
+          provide: CompareService,
+          useValue: { maxItems: 4, isComparing: () => false, isFull: () => false, toggle: vi.fn() },
+        },
+        { provide: ProductsService, useValue: { prefetchProduct: vi.fn() } },
+      ],
+    });
+    // El click también activa el `routerLink`: acá solo importa la transición, así que la
+    // navegación se simula (si no, termina fallando después de que el test ya cerró).
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const fixture = TestBed.createComponent(ProductCard);
+    fixture.componentRef.setInput('product', {
+      ...makeProduct(3),
+      variantId: 'v200',
+      images: [{ publicId: 'p1/foto', url: 'https://res.cloudinary.com/demo/image/upload/v1/p1/foto.png' }],
+    } as unknown as Product);
+    await fixture.whenStable();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  const photo = (element: HTMLElement) => element.querySelector<HTMLImageElement>('.product-card-photo')!;
+  const cover = (element: HTMLElement) => element.querySelector<HTMLAnchorElement>('.product-card-cover-link')!;
+
+  it('antes del click la foto no tiene nombre de transición', async () => {
+    const element = await renderWithPhoto();
+
+    expect(photo(element).style.viewTransitionName).toBe('');
+  });
+
+  it('al tocar la card, su foto (y solo esta variante) pasa a ser la que transiciona', async () => {
+    const element = await renderWithPhoto();
+
+    cover(element).dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+
+    expect(photo(element).style.viewTransitionName).toBe(PRODUCT_IMAGE_TRANSITION_NAME);
+    expect(TestBed.inject(ProductViewTransition).nameFor('p1', 'v200')).toBe(PRODUCT_IMAGE_TRANSITION_NAME);
+  });
+
+  it('Ctrl+click (otra pestaña) no arranca una transición en esta', async () => {
+    const element = await renderWithPhoto();
+
+    cover(element).dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0, ctrlKey: true }));
+
+    expect(photo(element).style.viewTransitionName).toBe('');
+    expect(TestBed.inject(ProductViewTransition).activeKey()).toBeNull();
   });
 });
 

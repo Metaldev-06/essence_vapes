@@ -3,6 +3,7 @@ import { authOnlyGuard } from '../core/auth/auth-only.guard';
 import { guestOnlyGuard } from '../core/auth/guest-only.guard';
 import { Ecommerce } from './ecommerce';
 import { CheckoutService } from './pages/checkout/checkout.service';
+import { productPreviewResolver } from './pages/view-product/product-preview.resolver';
 
 export const ecommerceRoutes: Routes = [
   {
@@ -30,6 +31,8 @@ export const ecommerceRoutes: Routes = [
       {
         path: 'productos/:id',
         loadComponent: () => import('./pages/view-product/view-product'),
+        // Abre la ficha ya con el producto y su foto, para la view transition desde la card.
+        resolve: { preview: productPreviewResolver },
         title: 'Producto | Essence Vapes',
         data: {
           description: 'Conocé los detalles, notas y precio de esta fragancia en Essence Vapes.',

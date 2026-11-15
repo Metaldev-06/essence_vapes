@@ -11,12 +11,20 @@
     class="product-card-cover-link"
     [attr.aria-label]="'Ver ' + product().name"
     (focus)="prefetchDetail()"
+    (click)="startTransition($event)"
   ></a>
 
   <div class="product-card-visual">
     @if (coverImageUrl(); as coverUrl) {
       <div class="product-card-photo-frame">
-        <img [ngSrc]="coverUrl" [alt]="product().name" fill class="product-card-photo" />
+        <img
+          #cover
+          [ngSrc]="coverUrl"
+          [alt]="product().name"
+          fill
+          class="product-card-photo"
+          [style.view-transition-name]="viewTransitionName()"
+        />
       </div>
     } @else {
       <!-- Placeholder silhouette, shaped after the product type. -->
@@ -74,7 +82,9 @@
               <path d="M12 3s-6 6.5-6 11a6 6 0 0 0 12 0c0-4.5-6-11-6-11z" />
             }
             @default {
-              <path d="M10 2h4v4h-4zM7 6h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+              <path
+                d="M10 2h4v4h-4zM7 6h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"
+              />
             }
           }
         </svg>
@@ -96,7 +106,16 @@
       [attr.data-tooltip]="compareTooltip()"
       (click)="toggleCompare()"
     >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <rect x="3" y="3" width="8" height="18" rx="1.5" />
         <rect x="13" y="3" width="8" height="18" rx="1.5" />
         <path d="M7 9v2M17 9v2" />

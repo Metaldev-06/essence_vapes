@@ -38,15 +38,21 @@ export default class ViewProduct {
   readonly id = input('');
   /** Which variant to preselect, from `?variant=` - e.g. coming from a catalog card. */
   readonly variant = input('');
+  /** El producto que ya trajo `productPreviewResolver` antes de abrir la ficha (o `null` si no
+   *  llegó a tiempo): permite mostrarlo en el primer render, que es lo que necesita la view
+   *  transition desde la card. */
+  readonly preview = input<Product | null>(null);
 
   protected readonly categoryLabels = CATEGORY_LABELS;
 
   private readonly productResource = this.productsService.byId(this.id);
-  /** `value()` throws while the resource is in an error state (e.g. 404), so guard it with `hasValue()`. */
+  /** `value()` throws while the resource is in an error state (e.g. 404), so guard it with `hasValue()`.
+   *  Mientras la respuesta del recurso no está, se usa el `preview` (es el mismo producto: el
+   *  recurso toma la misma precarga, sin pedirlo de nuevo). */
   protected readonly product = computed(() =>
-    this.productResource.hasValue() ? this.productResource.value() : undefined,
+    this.productResource.hasValue() ? this.productResource.value() : (this.preview() ?? undefined),
   );
-  protected readonly isLoading = this.productResource.isLoading;
+  protected readonly isLoading = computed(() => this.productResource.isLoading() && !this.preview());
 
   /** Two-way bound with `ProductDetails`, so switching a pill there also swaps the gallery photo. */
   protected readonly selectedVariantId = signal('');

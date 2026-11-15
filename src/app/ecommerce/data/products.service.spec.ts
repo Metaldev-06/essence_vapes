@@ -103,6 +103,32 @@ describe('ProductsService - ficha del producto y precarga', () => {
     await vi.waitFor(() => expect(ref.value()?.id).toBe('p1'));
   });
 
+  it('loadForNavigation espera el producto y la ficha reutiliza ese mismo pedido', async () => {
+    const pending = service.loadForNavigation('p1', 1_000);
+    http.expectOne(productUrl('p1')).flush(product('p1'));
+
+    await expect(pending).resolves.toEqual(product('p1'));
+
+    const ref = openDetail('p1');
+    http.expectNone(productUrl('p1'));
+    await vi.waitFor(() => expect(ref.value()?.id).toBe('p1'));
+  });
+
+  it('loadForNavigation no espera más que el tiempo máximo', async () => {
+    vi.useFakeTimers();
+    try {
+      const pending = service.loadForNavigation('p1', 350);
+      const request = http.expectOne(productUrl('p1'));
+
+      vi.advanceTimersByTime(350);
+      await expect(pending).resolves.toBeUndefined();
+
+      request.flush(product('p1'));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('"También te puede gustar" pide solo los relacionados del producto, no la categoría entera', async () => {
     const ref = TestBed.runInInjectionContext(() => service.related(signal('p1')));
     TestBed.tick();

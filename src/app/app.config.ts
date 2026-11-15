@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  inject,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
@@ -16,6 +17,7 @@ import { routes } from './app.routes';
 import { adminAuthInterceptor } from './admin/data/admin-auth.interceptor';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { rateLimitInterceptor } from './core/http/rate-limit.interceptor';
+import { ProductViewTransition } from './ecommerce/data/product-view-transition';
 import { AdminExcludedPreloadingStrategy } from './core/routing/admin-excluded-preloading-strategy';
 
 export const appConfig: ApplicationConfig = {
@@ -27,7 +29,15 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([rateLimitInterceptor, authInterceptor, adminAuthInterceptor])),
     provideRouter(
       routes,
-      withViewTransitions(),
+      withViewTransitions({
+        // Al terminar cada transición, ninguna imagen de producto conserva el nombre compartido:
+        // la próxima navegación tiene que encontrarlo en UN solo elemento por página.
+        onViewTransitionCreated: ({ transition }) => {
+          const productTransition = inject(ProductViewTransition);
+          const clear = () => productTransition.clear();
+          transition.finished.then(clear, clear);
+        },
+      }),
       withPreloading(AdminExcludedPreloadingStrategy),
       withComponentInputBinding(),
       // Al navegar a una ruta nueva arranca arriba del todo; al volver atrás/adelante con el

@@ -138,8 +138,12 @@ export class ProductsService {
     });
   }
 
-  /** Precargas hechas al pasar el mouse por una card, a la espera del clic. */
-  private readonly prefetchedProducts = new Map<string, { at: number; response: Observable<Product> }>();
+  /** Precargas hechas al pasar el mouse por una card, a la espera del clic. `ready` se cumple
+   *  cuando llega la respuesta (con el producto, o `undefined` si falló). */
+  private readonly prefetchedProducts = new Map<
+    string,
+    { at: number; response: Observable<Product>; ready: Promise<Product | undefined> }
+  >();
 
   /**
    * Hover/focus sobre una card: pide el producto ya, y la ficha usa esta misma respuesta.
@@ -158,8 +162,38 @@ export class ProductsService {
 
     const response = this.fetchProduct(id).pipe(shareReplay({ bufferSize: 1, refCount: false }));
     // Arranca el pedido ya; si falla, no queda guardado y la ficha lo pide de nuevo.
-    response.subscribe({ error: () => this.prefetchedProducts.delete(id) });
-    this.prefetchedProducts.set(id, { at: now, response });
+    const ready = new Promise<Product | undefined>((resolve) => {
+      response.subscribe({
+        next: (product) => resolve(product),
+        error: () => {
+          this.prefetchedProducts.delete(id);
+          resolve(undefined);
+        },
+      });
+    });
+    this.prefetchedProducts.set(id, { at: now, response, ready });
+  }
+
+  /**
+   * Para abrir la ficha ya con el producto (ver `productPreviewResolver`): lo precarga si hacía
+   * falta y espera la respuesta, como mucho `timeoutMs`. Devuelve el producto si llegó a tiempo,
+   * `undefined` si no. NO consume la precarga: la ficha la sigue usando con `byId`, así que no
+   * se hace un pedido de más.
+   */
+  async loadForNavigation(id: string, timeoutMs: number): Promise<Product | undefined> {
+    this.prefetchProduct(id);
+    const entry = this.prefetchedProducts.get(id);
+    if (!entry) return undefined;
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<undefined>((resolve) => {
+      timer = setTimeout(() => resolve(undefined), timeoutMs);
+    });
+    try {
+      return await Promise.race([entry.ready, timeout]);
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   /**

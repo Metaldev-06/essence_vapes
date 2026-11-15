@@ -1,11 +1,16 @@
 import { NgOptimizedImage } from '@angular/common';
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
 import { CompareService } from '../../../core/compare/compare.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
 import { cloudinaryUrl, preloadImage, productMainImageUrl } from '../../data/cloudinary-url.helper';
 import { CATEGORY_SINGULAR_LABELS, type Gender, type Product } from '../../data/product.model';
+import {
+  PRODUCT_IMAGE_TRANSITION_NAME,
+  ProductViewTransition,
+} from '../../data/product-view-transition';
+import { isModifiedClick } from '../../data/products-filters-store';
 import { ProductsService } from '../../data/products.service';
 
 const GENDER_LABELS: Record<Gender, string> = {
@@ -25,6 +30,7 @@ export class ProductCard {
   private readonly cartService = inject(CartService);
   private readonly compareService = inject(CompareService);
   private readonly productsService = inject(ProductsService);
+  private readonly viewTransition = inject(ProductViewTransition);
 
   readonly product = input.required<Product>();
   /** `'list'` lays the card out as a horizontal row (used by `/favoritos`' list view toggle). */
@@ -47,6 +53,13 @@ export class ProductCard {
     const cover = this.coverImage();
     return cover ? cloudinaryUrl(cover.url, 480) : undefined;
   });
+
+  /** Solo la card que se tocó lleva el nombre de la transición (ver `ProductViewTransition`). */
+  protected readonly viewTransitionName = computed(() =>
+    this.viewTransition.nameFor(this.product().id, this.product().variantId),
+  );
+
+  private readonly cover = viewChild<ElementRef<HTMLImageElement>>('cover');
 
   protected readonly isFavorite = computed(() =>
     this.favoritesService.isFavorite(this.product().id, this.product().variantId),
@@ -97,6 +110,20 @@ export class ProductCard {
   protected addToCart(): void {
     if (!this.canAddToCart()) return;
     void this.cartService.add(this.product(), 1);
+  }
+
+  /**
+   * Click en la card: esta imagen es la que va a "volar" hasta la ficha. El nombre se pone
+   * también directo en el elemento, porque el navegador saca la "foto" de la página actual apenas
+   * arranca la navegación y no hay garantía de que Angular ya haya aplicado el binding. Con
+   * Ctrl/Cmd (abrir en otra pestaña) no hay transición en esta pestaña.
+   */
+  protected startTransition(event: MouseEvent): void {
+    if (isModifiedClick(event)) return;
+    const product = this.product();
+    this.viewTransition.start(product.id, product.variantId);
+    const cover = this.cover()?.nativeElement;
+    if (cover) cover.style.viewTransitionName = PRODUCT_IMAGE_TRANSITION_NAME;
   }
 
   /** Hover/focus on the card - warms its detail page's data before the click (see

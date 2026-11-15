@@ -217,14 +217,45 @@
   border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
 }
 
+/* Sin lugar para estilos y herramientas lado a lado: búsqueda, orden y Compartir arriba (en una
+   fila, a todo el ancho) y los estilos debajo. */
+@media (max-width: 1050px) {
+  .products-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .products-filters-tools {
+    order: -1;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    /* Un margen automático le ganaría al estiramiento y lo dejaría angosto a la derecha. */
+    margin-left: 0;
+  }
+
+  .products-share {
+    grid-row: 1;
+    grid-column: 3;
+  }
+
+  .products-search input {
+    width: 100%;
+  }
+}
+
 @media (max-width: 560px) {
   /* En el celular: la búsqueda a todo el ancho y, debajo, el orden con Compartir (solo el
      ícono) a su lado - bajarlo una fila más sería una fila entera para un botón de 40px. */
+  .products-filters-tools {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
   .products-search {
     grid-column: 1 / -1;
   }
 
   .products-share {
+    grid-row: 2;
+    grid-column: 2;
     padding: 9px 11px;
   }
 
@@ -236,16 +267,5 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-  }
-}
-
-@media (max-width: 860px) {
-  .products-filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .products-search input {
-    width: 100%;
   }
 }

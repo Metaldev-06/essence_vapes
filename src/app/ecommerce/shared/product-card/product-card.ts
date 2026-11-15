@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
 import { CompareService } from '../../../core/compare/compare.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
-import { cloudinaryUrl } from '../../data/cloudinary-url.helper';
+import { cloudinaryUrl, preloadImage, productMainImageUrl } from '../../data/cloudinary-url.helper';
 import { CATEGORY_SINGULAR_LABELS, type Gender, type Product } from '../../data/product.model';
 import { ProductsService } from '../../data/products.service';
 
@@ -104,5 +104,9 @@ export class ProductCard {
    *  `variantId`, so that's what gets prefetched too. */
   protected prefetchDetail(): void {
     this.productsService.prefetchProduct(this.product().id);
+    // La foto grande de la ficha es la misma que la portada de esta card (las dos usan las
+    // imágenes efectivas de la variante): se baja ya, así al hacer clic aparece al instante.
+    const cover = this.coverImage();
+    if (cover) preloadImage(productMainImageUrl(cover.url));
   }
 }

@@ -17,3 +17,25 @@ export const cloudinaryUrl = (url: string, width?: number): string => {
   const insertAt = markerIndex + marker.length;
   return `${url.slice(0, insertAt)}${transform}/${url.slice(insertAt)}`;
 };
+
+/**
+ * La imagen grande de la ficha del producto. Una sola definición para la galería y para la
+ * precarga desde la card del catálogo: si las dos URLs no fueran idénticas, la precarga no
+ * serviría de nada (el navegador las trataría como imágenes distintas).
+ */
+export const productMainImageUrl = (url: string): string => cloudinaryUrl(url, 800);
+
+const preloadedUrls = new Set<string>();
+
+/**
+ * Descarga una imagen en segundo plano para que, cuando se muestre, ya esté en la caché del
+ * navegador. Una sola vez por URL. Además "calienta" la versión en Cloudinary: la primera vez que
+ * se pide una variante (ej. `w_800`), Cloudinary la genera en el momento (~0,6-1 s medidos).
+ */
+export function preloadImage(url: string): void {
+  if (typeof Image === 'undefined' || preloadedUrls.has(url)) return;
+  preloadedUrls.add(url);
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = url;
+}

@@ -1,6 +1,6 @@
 import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, input, linkedSignal } from '@angular/core';
-import { cloudinaryUrl } from '../../../../data/cloudinary-url.helper';
+import { cloudinaryUrl, productMainImageUrl } from '../../../../data/cloudinary-url.helper';
 import type { Product } from '../../../../data/product.model';
 
 @Component({
@@ -28,7 +28,8 @@ export class ProductGallery {
    *  since it needs to stay correlated with the same `image` the `@if`/`as` block already
    *  narrowed to non-null, instead of a separately-nullable signal. */
   protected mainImageUrl(url: string): string {
-    return cloudinaryUrl(url, 800);
+    // Misma URL que precarga la card del catálogo al pasar el mouse (`productMainImageUrl`).
+    return productMainImageUrl(url);
   }
 
   protected thumbUrl(url: string): string {

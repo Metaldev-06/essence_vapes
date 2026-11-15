@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { CartService } from '../../../core/cart/cart.service';
 import { CompareService } from '../../../core/compare/compare.service';
 import { FavoritesService } from '../../../core/favorites/favorites.service';
+import { productMainImageUrl } from '../../data/cloudinary-url.helper';
 import type { Product } from '../../data/product.model';
 import { ProductsService } from '../../data/products.service';
 import { ProductCard } from './product-card';
@@ -50,6 +51,49 @@ async function render(stock: number, cartQuantity = 0): Promise<HTMLElement> {
   await fixture.whenStable();
   return fixture.nativeElement as HTMLElement;
 }
+
+describe('ProductCard - precarga al pasar el mouse', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('pide los datos del producto y baja la foto grande que va a mostrar la ficha', async () => {
+    const preloaded: string[] = [];
+    vi.stubGlobal(
+      'Image',
+      class {
+        decoding = '';
+        set src(value: string) {
+          preloaded.push(value);
+        }
+      },
+    );
+    const prefetchProduct = vi.fn();
+    const cover = 'https://res.cloudinary.com/demo/image/upload/v1/essence-vapes/products/card-hover/foto.png';
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: CartService, useValue: { getQuantity: () => 0, add: vi.fn() } },
+        { provide: FavoritesService, useValue: { isFavorite: () => false, toggle: vi.fn() } },
+        {
+          provide: CompareService,
+          useValue: { maxItems: 4, isComparing: () => false, isFull: () => false, toggle: vi.fn() },
+        },
+        { provide: ProductsService, useValue: { prefetchProduct } },
+      ],
+    });
+    const fixture = TestBed.createComponent(ProductCard);
+    fixture.componentRef.setInput('product', {
+      ...makeProduct(3),
+      images: [{ publicId: 'card-hover/foto', url: cover }],
+    } as unknown as Product);
+    await fixture.whenStable();
+
+    (fixture.nativeElement as HTMLElement).querySelector('article')!.dispatchEvent(new Event('mouseenter'));
+
+    expect(prefetchProduct).toHaveBeenCalledWith('p1');
+    expect(preloaded).toEqual([productMainImageUrl(cover)]);
+  });
+});
 
 describe('ProductCard - sin stock', () => {
   it('un producto agotado lo dice en la card y no deja agregarlo al carrito', async () => {

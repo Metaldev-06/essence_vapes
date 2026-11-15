@@ -15,13 +15,16 @@ import {
 import { routes } from './app.routes';
 import { adminAuthInterceptor } from './admin/data/admin-auth.interceptor';
 import { authInterceptor } from './core/auth/auth.interceptor';
+import { rateLimitInterceptor } from './core/http/rate-limit.interceptor';
 import { AdminExcludedPreloadingStrategy } from './core/routing/admin-excluded-preloading-strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideHttpClient(withInterceptors([authInterceptor, adminAuthInterceptor])),
+    // `rateLimitInterceptor` primero: cuando reintenta un pedido tras un 429, el reintento vuelve
+    // a pasar por los de autenticación y sale con el token vigente.
+    provideHttpClient(withInterceptors([rateLimitInterceptor, authInterceptor, adminAuthInterceptor])),
     provideRouter(
       routes,
       withViewTransitions(),

@@ -1,1 +1,6 @@
-<router-outlet />
+<!-- Mientras dura una espera por límite de solicitudes, todo el sitio (header incluido) queda
+     inerte: no responde a clics, teclado ni lectores de pantalla. Solo queda activo el aviso. -->
+<div class="app-content" [attr.inert]="rateLimit.isBlocked() ? '' : null">
+  <router-outlet />
+</div>
+<app-rate-limit-modal />

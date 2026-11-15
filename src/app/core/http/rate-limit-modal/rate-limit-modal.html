@@ -1,0 +1,41 @@
+@if (rateLimit.isBlocked()) {
+  <div class="rate-limit-backdrop" role="presentation">
+    <div
+      #dialog
+      class="rate-limit-modal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="rate-limit-title"
+      aria-describedby="rate-limit-message"
+      tabindex="-1"
+    >
+      <div class="rate-limit-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="13" r="8" />
+          <path d="M12 9v4l2.5 2.5M9 2h6" />
+        </svg>
+      </div>
+
+      <h2 id="rate-limit-title" class="rate-limit-title">Demasiadas solicitudes</h2>
+      <p id="rate-limit-message" class="rate-limit-message">
+        Hiciste muchas solicitudes en poco tiempo y, por seguridad, el acceso quedó en pausa un
+        momento. Cuando termine la cuenta, retomamos automáticamente lo que estabas haciendo.
+      </p>
+
+      <p class="rate-limit-countdown" aria-hidden="true">{{ countdown() }}</p>
+      <!-- Para lectores de pantalla: legible al recorrer el aviso, sin anunciar cada segundo. -->
+      <p class="sr-only">Vas a poder seguir en {{ rateLimit.remainingSeconds() }} segundos.</p>
+
+      <div
+        class="rate-limit-progress"
+        role="progressbar"
+        aria-label="Tiempo de espera transcurrido"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="progressPercent()"
+      >
+        <span class="rate-limit-progress-bar" [style.width.%]="progressPercent()"></span>
+      </div>
+    </div>
+  </div>
+}

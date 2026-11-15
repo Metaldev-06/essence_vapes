@@ -1,7 +1,9 @@
 .session-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  /* Por encima del header de la tienda (1000): con 200 el header quedaba arriba del fondo y se
+     podía seguir navegando con el aviso abierto. Debajo del de límite de solicitudes (2000). */
+  z-index: 1100;
   display: flex;
   align-items: center;
   justify-content: center;

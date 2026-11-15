@@ -1,0 +1,5 @@
+/* Solo existe para poder marcar el sitio como `inert` (ver app.html): no genera caja propia, así
+   el layout de cada página queda exactamente igual que sin este contenedor. */
+.app-content {
+  display: contents;
+}

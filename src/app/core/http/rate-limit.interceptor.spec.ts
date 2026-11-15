@@ -3,7 +3,12 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { API_BASE_URL } from '../config/api.config';
-import { MAX_RATE_LIMIT_RETRIES, rateLimitInterceptor, retryAfterMs } from './rate-limit.interceptor';
+import {
+  DAILY_LIMIT_CODE,
+  MAX_RATE_LIMIT_RETRIES,
+  rateLimitInterceptor,
+  retryAfterMs,
+} from './rate-limit.interceptor';
 import { DEFAULT_RATE_LIMIT_WAIT_MS, RateLimitService } from './rate-limit.service';
 
 const STORAGE_KEY = 'ev:rate-limit';
@@ -136,6 +141,27 @@ describe('rateLimitInterceptor + RateLimitService', () => {
 
     expect(failure?.status).toBe(429);
     backend.expectNone(PRODUCTS);
+  });
+
+  it('el tope diario de un formulario NO pausa el sitio: el error le llega al formulario', () => {
+    setup();
+    let failure: HttpErrorResponse | undefined;
+    http.post(`${API_BASE_URL}/contact`, {}).subscribe({ error: (error: HttpErrorResponse) => (failure = error) });
+
+    backend.expectOne(`${API_BASE_URL}/contact`).flush(
+      {
+        statusCode: 429,
+        code: DAILY_LIMIT_CODE,
+        message: 'Ya enviaste 2 mensajes en las últimas 24 horas. Vas a poder enviar otro en 5 h.',
+        retryAfterSeconds: 18_000,
+      },
+      { status: 429, statusText: 'Too Many Requests' },
+    );
+
+    expect(failure?.status).toBe(429);
+    expect((failure?.error as { message: string }).message).toContain('Ya enviaste 2 mensajes');
+    expect(TestBed.inject(RateLimitService).isBlocked()).toBe(false);
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
   it('otros errores pasan de largo, sin espera', () => {

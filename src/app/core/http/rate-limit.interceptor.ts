@@ -10,6 +10,17 @@ import { DEFAULT_RATE_LIMIT_WAIT_MS, RateLimitService } from './rate-limit.servi
 export const MAX_RATE_LIMIT_RETRIES = 3;
 
 /**
+ * 429 del tope diario de los formularios públicos (contacto, arrepentimiento): 2 envíos cada 24
+ * horas por visitante. NO es una pausa del sitio - se le muestra el mensaje en el formulario y
+ * el resto sigue funcionando. Mismo valor que `DAILY_LIMIT_CODE` en el backend.
+ */
+export const DAILY_LIMIT_CODE = 'DAILY_LIMIT_REACHED';
+
+function isDailyFormLimit(error: HttpErrorResponse): boolean {
+  return (error.error as { code?: unknown } | null)?.code === DAILY_LIMIT_CODE;
+}
+
+/**
  * Cuánto esperar según la respuesta 429. Primero `retryAfterSeconds` del cuerpo (lo agrega el
  * filtro global del backend), después el header `Retry-After` (segundos o fecha HTTP), y si no
  * hay ninguno, un minuto.
@@ -48,7 +59,12 @@ export const rateLimitInterceptor: HttpInterceptorFn = (req, next) => {
     rateLimit.whenAvailable().pipe(
       switchMap(() => next(req)),
       catchError((error: unknown) => {
-        if (!(error instanceof HttpErrorResponse) || error.status !== 429 || retriesLeft <= 0) {
+        if (
+          !(error instanceof HttpErrorResponse) ||
+          error.status !== 429 ||
+          isDailyFormLimit(error) ||
+          retriesLeft <= 0
+        ) {
           return throwError(() => error);
         }
         rateLimit.block(retryAfterMs(error));

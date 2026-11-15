@@ -17,7 +17,12 @@ import {
 import { ViewportScroller } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductsFiltersStore, type ProductsFiltersSnapshot } from '../../data/products-filters-store';
-import { styleGroupForCategory, styleOptionsForGroup } from '../../data/style-group';
+import {
+  keepsStylesOnCategoryChange,
+  styleGroupForCategory,
+  styleGroupOfSelection,
+  styleOptionsForGroup,
+} from '../../data/style-group';
 import {
   brandGroupKey,
   capacitySuffixFor,
@@ -86,6 +91,10 @@ export default class Products implements OnDestroy {
   );
   /** Not a signal on purpose - only read inside the effect below to detect a real group change. */
   private lastStyleGroup = styleGroupForCategory(this.initialFilters.category);
+  /** Vocabulario de los estilos ELEGIDOS (no de la categoría actual): con el buscador del home,
+   *  la categoría es "Todos" pero los estilos son de fragancias. Decide si sobreviven a un cambio
+   *  de categoría (ver `keepsStylesOnCategoryChange`). */
+  private stylesGroup = styleGroupOfSelection(this.initialFilters.category, this.initialFilters.styles);
   protected readonly activeCapacity = signal<number | 'todas'>(
     this.initialFilters.capacityMl ?? 'todas',
   );
@@ -135,15 +144,21 @@ export default class Products implements OnDestroy {
     // Fragrance styles don't apply to vapes/esencias (and vice versa) - switching into a
     // different style group drops whatever was selected under the previous one, so a stale
     // filter from the other vocabulary never silently keeps narrowing the results.
+    // Los estilos elegidos se mantienen mientras la categoría use su mismo vocabulario (perfumes ↔
+    // decants, o de "Todos" con los del buscador del home a perfumes/decants) y se borran al pasar
+    // al otro (vapes/esencias) o al volver a "Todos".
     effect(() => {
-      const group = styleGroupForCategory(this.activeCategory());
+      const category = this.activeCategory();
+      const group = styleGroupForCategory(category);
       untracked(() => {
         if (group === this.lastStyleGroup) return;
         this.lastStyleGroup = group;
         // Solo si había alguno elegido: un `Set` vacío nuevo igual cuenta como cambio y disparaba
         // un segundo pedido idéntico al catálogo en cada cambio de categoría (cancelando el
         // primero, que el servidor igual pudo haber procesado).
-        if (this.activeStyles().size > 0) this.activeStyles.set(new Set());
+        if (this.activeStyles().size === 0) return;
+        if (keepsStylesOnCategoryChange(this.stylesGroup, category)) return;
+        this.activeStyles.set(new Set());
       });
     });
 
@@ -217,6 +232,12 @@ export default class Products implements OnDestroy {
   /** Filtros que llegan de afuera con la página ya abierta (ej. "Perfumes" en el footer estando
    *  en el catálogo): se aplican todos de una y se vuelve arriba, a los resultados. */
   private applySnapshot(snapshot: ProductsFiltersSnapshot): void {
+    // El snapshot manda: los effects de "cambió el grupo de la categoría" no deben limpiar lo que
+    // trae (ej. estilos del buscador del home sobre "Todos").
+    this.lastStyleGroup = styleGroupForCategory(snapshot.category);
+    this.lastBrandGroup = brandGroupKey(snapshot.category);
+    this.lastCapacityUnit = capacityUnitForCategory(snapshot.category);
+    this.stylesGroup = styleGroupOfSelection(snapshot.category, snapshot.styles);
     this.search.set(snapshot.term);
     this.activeCategory.set(snapshot.category);
     this.activeBrand.set(snapshot.brand);
@@ -241,6 +262,9 @@ export default class Products implements OnDestroy {
   }
 
   protected toggleStyle(style: ProductStyle): void {
+    // Los botones de estilo solo se ven en perfumes/decants o vapes/esencias: lo que se elige acá
+    // es del vocabulario de la categoría actual.
+    this.stylesGroup = styleGroupForCategory(this.activeCategory());
     this.activeStyles.update((current) => {
       const next = new Set(current);
       if (next.has(style)) {

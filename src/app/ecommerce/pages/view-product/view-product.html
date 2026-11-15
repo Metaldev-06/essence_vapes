@@ -22,7 +22,11 @@
             <a routerLink="/productos" class="breadcrumb-link">Productos</a>
           </li>
           <li class="breadcrumb-item">
-            <a routerLink="/productos" [queryParams]="{ cat: currentProduct.category }" class="breadcrumb-link">
+            <a
+              routerLink="/productos"
+              class="breadcrumb-link"
+              (click)="openCategory($event, currentProduct.category)"
+            >
               {{ categoryLabels[currentProduct.category] }}
             </a>
           </li>

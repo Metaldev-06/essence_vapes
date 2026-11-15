@@ -40,7 +40,9 @@
       <span class="footer-nav-title">Categorías</span>
       <ul>
         @for (link of categoryLinks; track link.label) {
-          <li><a [routerLink]="link.routerLink" [queryParams]="link.queryParams">{{ link.label }}</a></li>
+          <li>
+            <a routerLink="/productos" (click)="openCategory($event, link.category)">{{ link.label }}</a>
+          </li>
         }
       </ul>
     </nav>

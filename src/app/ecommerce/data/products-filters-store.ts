@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
 import type { Gender, ProductCategory, ProductStyle, SortOption } from './product.model';
 
 export interface ProductsFiltersSnapshot {
@@ -35,6 +36,14 @@ export function isProductDetailUrl(url: string): boolean {
 }
 
 /**
+ * Click con Ctrl/Cmd/Shift/Alt o con un botón que no es el izquierdo: el navegador abre el link
+ * en otra pestaña o ventana, así que no hay que tocar los filtros de ESTA pestaña.
+ */
+export function isModifiedClick(event: MouseEvent): boolean {
+  return event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey;
+}
+
+/**
  * Persists the /productos filter state in sessionStorage instead of the URL - refreshing the
  * page while still on it keeps whatever was last applied, and this is deliberately NOT synced to
  * query params. Other pages (home's category cards, finder, decants banner) jump straight into a
@@ -48,6 +57,26 @@ export function isProductDetailUrl(url: string): boolean {
 @Injectable({ providedIn: 'root' })
 export class ProductsFiltersStore {
   private readonly router = inject(Router);
+  private readonly appliedSubject = new Subject<ProductsFiltersSnapshot>();
+
+  /**
+   * Filtros elegidos desde fuera del catálogo (footer, miga de pan de la ficha). Si `/productos`
+   * ya está abierto, el link no navega (es la misma URL) y la página no se vuelve a crear: se
+   * entera por acá y los aplica en el momento. Sin replay: solo cambios nuevos.
+   */
+  readonly applied$ = this.appliedSubject.asObservable();
+
+  /** Abre el catálogo con estos filtros: quedan guardados para cuando la página se cree y, si ya
+   *  está abierta, se le avisa. */
+  apply(snapshot: ProductsFiltersSnapshot): void {
+    this.write(snapshot);
+    this.appliedSubject.next(snapshot);
+  }
+
+  /** El catálogo de una sola categoría, con el resto de los filtros en su valor inicial. */
+  showCategory(category: ProductCategory): void {
+    this.apply({ ...DEFAULT_PRODUCTS_FILTERS, category });
+  }
 
   /** /productos se cierra: los filtros quedan solo si se va a ver un producto. */
   leaveCatalog(): void {

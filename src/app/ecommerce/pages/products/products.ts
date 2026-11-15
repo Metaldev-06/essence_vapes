@@ -14,7 +14,9 @@ import {
   type ProductsQuery,
   type ProductsSortField,
 } from '../../data/products.service';
-import { ProductsFiltersStore } from '../../data/products-filters-store';
+import { ViewportScroller } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ProductsFiltersStore, type ProductsFiltersSnapshot } from '../../data/products-filters-store';
 import { styleGroupForCategory, styleOptionsForGroup } from '../../data/style-group';
 import {
   brandGroupKey,
@@ -43,6 +45,7 @@ import { ProductsGrid } from './components/products-grid/products-grid';
 export default class Products implements OnDestroy {
   private readonly productsService = inject(ProductsService);
   private readonly filtersStore = inject(ProductsFiltersStore);
+  private readonly viewportScroller = inject(ViewportScroller);
 
   protected readonly categories: readonly FilterOption<ProductCategory | 'todos'>[] = [
     { id: 'todos', label: 'Todos' },
@@ -125,6 +128,10 @@ export default class Products implements OnDestroy {
   protected readonly hasMore = computed(() => this.items().length < this.total());
 
   constructor() {
+    this.filtersStore.applied$
+      .pipe(takeUntilDestroyed())
+      .subscribe((snapshot) => this.applySnapshot(snapshot));
+
     // Fragrance styles don't apply to vapes/esencias (and vice versa) - switching into a
     // different style group drops whatever was selected under the previous one, so a stale
     // filter from the other vocabulary never silently keeps narrowing the results.
@@ -133,7 +140,10 @@ export default class Products implements OnDestroy {
       untracked(() => {
         if (group === this.lastStyleGroup) return;
         this.lastStyleGroup = group;
-        this.activeStyles.set(new Set());
+        // Solo si había alguno elegido: un `Set` vacío nuevo igual cuenta como cambio y disparaba
+        // un segundo pedido idéntico al catálogo en cada cambio de categoría (cancelando el
+        // primero, que el servidor igual pudo haber procesado).
+        if (this.activeStyles().size > 0) this.activeStyles.set(new Set());
       });
     });
 
@@ -202,6 +212,19 @@ export default class Products implements OnDestroy {
         capacityMl: capacity === 'todas' ? null : capacity,
       });
     });
+  }
+
+  /** Filtros que llegan de afuera con la página ya abierta (ej. "Perfumes" en el footer estando
+   *  en el catálogo): se aplican todos de una y se vuelve arriba, a los resultados. */
+  private applySnapshot(snapshot: ProductsFiltersSnapshot): void {
+    this.search.set(snapshot.term);
+    this.activeCategory.set(snapshot.category);
+    this.activeBrand.set(snapshot.brand);
+    this.activeGender.set(snapshot.gender);
+    this.sortBy.set(snapshot.sort);
+    this.activeStyles.set(new Set(snapshot.styles));
+    this.activeCapacity.set(snapshot.capacityMl ?? 'todas');
+    this.viewportScroller.scrollToPosition([0, 0]);
   }
 
   /** Salir de la página reinicia los filtros, salvo que se vaya a ver un producto: al volver

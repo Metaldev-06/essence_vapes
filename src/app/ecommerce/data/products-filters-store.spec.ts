@@ -9,9 +9,54 @@ import {
   DEFAULT_PRODUCTS_FILTERS,
   ProductsFiltersStore,
   isCatalogUrl,
+  isModifiedClick,
   isProductDetailUrl,
   type ProductsFiltersSnapshot,
 } from './products-filters-store';
+
+describe('isModifiedClick', () => {
+  const click = (init: MouseEventInit = {}) => new MouseEvent('click', { button: 0, ...init });
+
+  it('un click izquierdo común no es "modificado"', () => {
+    expect(isModifiedClick(click())).toBe(false);
+  });
+
+  it('Ctrl, Cmd, Shift, Alt o el botón del medio abren otra pestaña o ventana', () => {
+    expect(isModifiedClick(click({ ctrlKey: true }))).toBe(true);
+    expect(isModifiedClick(click({ metaKey: true }))).toBe(true);
+    expect(isModifiedClick(click({ shiftKey: true }))).toBe(true);
+    expect(isModifiedClick(click({ altKey: true }))).toBe(true);
+    expect(isModifiedClick(click({ button: 1 }))).toBe(true);
+  });
+});
+
+describe('ProductsFiltersStore.showCategory', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+  });
+
+  afterEach(() => sessionStorage.clear());
+
+  it('guarda la categoría con el resto de los filtros en su valor inicial', () => {
+    const store = TestBed.inject(ProductsFiltersStore);
+    store.write({ ...DEFAULT_PRODUCTS_FILTERS, brand: 'Valentino', styles: ['fresco'], term: 'roma' });
+
+    store.showCategory('perfumes');
+
+    expect(store.read()).toEqual({ ...DEFAULT_PRODUCTS_FILTERS, category: 'perfumes' });
+  });
+
+  it('avisa a un catálogo ya abierto', () => {
+    const store = TestBed.inject(ProductsFiltersStore);
+    const received: ProductsFiltersSnapshot[] = [];
+    store.applied$.subscribe((snapshot) => received.push(snapshot));
+
+    store.showCategory('vapes');
+
+    expect(received).toEqual([{ ...DEFAULT_PRODUCTS_FILTERS, category: 'vapes' }]);
+  });
+});
 
 describe('reglas de URL del catálogo', () => {
   it('reconoce la vista de un producto', () => {

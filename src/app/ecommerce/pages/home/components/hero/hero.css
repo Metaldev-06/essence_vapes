@@ -224,6 +224,85 @@
   animation: float 2s ease-in-out infinite;
 }
 
+/* ── Celular ──────────────────────────────────────────────────────────────
+   Hasta acá todo eran medidas de escritorio: en el celular los 4 datos se partían en filas
+   desparejas (3+1 o 2+1+1) con las divisorias sueltas, el indicador "Scroll" se encimaba con el
+   contenido y los botones apilados quedaban de anchos distintos. */
+
+/* El indicador está fijo al fondo de la pantalla: si el contenido es más alto que la pantalla,
+   se le encima. En el celular, además, no hace falta. */
+@media (max-width: 720px), (max-height: 720px) {
+  .hero-scroll {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    /* `svh`: el alto real con la barra del navegador visible (con `vh` el celular lo tapa). El
+       padding de arriba deja libre el header fijo, que antes quedaba pegado al chip. */
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: calc(var(--header-height) + 32px) 20px 48px;
+  }
+
+  .hero-content {
+    width: 100%;
+    gap: 24px;
+  }
+
+  /* Los 4 datos en una grilla de 2×2 pareja, con divisorias en cruz. */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    max-width: 380px;
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  .hero-stat-item {
+    padding: 14px 8px;
+    border-right: none;
+  }
+
+  .hero-stat-item:nth-child(odd) {
+    border-right: 1px solid var(--color-border-subtle);
+  }
+
+  .hero-stat-item:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .hero-stat-value {
+    font-size: 24px;
+  }
+}
+
+/* Celulares angostos (ej. 360px): los dos botones no entran uno al lado del otro. */
+@media (max-width: 400px) {
+  .hero-desc {
+    font-size: 15.5px;
+    line-height: 1.65;
+  }
+
+  /* Apilados y del mismo ancho, en vez de dos anchos distintos uno abajo del otro. */
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .hero-actions .btn {
+    justify-content: center;
+  }
+
+  .hero-stat-value {
+    font-size: 22px;
+  }
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;

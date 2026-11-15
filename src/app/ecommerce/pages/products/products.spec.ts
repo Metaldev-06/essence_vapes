@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
+import { ProductsFiltersStore } from '../../data/products-filters-store';
 import Products from './products';
 
 const EMPTY_PAGE = {
@@ -42,5 +43,22 @@ describe('Products', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Ej. "Perfumes" en el footer estando ya en /productos: el link no navega (misma URL), así que
+  // la página tiene que aplicar la categoría sola.
+  it('con la página abierta, una categoría elegida desde afuera se aplica en el momento', async () => {
+    TestBed.inject(ProductsFiltersStore).showCategory('perfumes');
+    TestBed.tick();
+
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne(`${API_BASE_URL}/products/brands?category=perfumes`).flush([]);
+    http.expectOne(`${API_BASE_URL}/products/capacities?category=perfumes`).flush([]);
+    const list = http.expectOne((req) => req.url === `${API_BASE_URL}/products`);
+    expect(list.request.params.get('category')).toBe('perfumes');
+    list.flush(EMPTY_PAGE);
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.products-empty-title')?.textContent).toContain('fragancias');
   });
 });

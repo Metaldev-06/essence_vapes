@@ -3,8 +3,8 @@ import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { SeoService } from '../../../core/seo/seo.service';
 import { ProductsService } from '../../data/products.service';
-import { ProductsFiltersStore } from '../../data/products-filters-store';
-import { CATEGORY_LABELS, type Product } from '../../data/product.model';
+import { ProductsFiltersStore, isModifiedClick } from '../../data/products-filters-store';
+import { CATEGORY_LABELS, type Product, type ProductCategory } from '../../data/product.model';
 import { ProductGallery } from './components/product-gallery/product-gallery';
 import { ProductDetails } from './components/product-details/product-details';
 import { AccordsBand } from './components/accords-band/accords-band';
@@ -91,6 +91,13 @@ export default class ViewProduct {
   protected readonly relatedProducts = computed(() =>
     this.relatedResource.hasValue() ? this.relatedResource.value() : [],
   );
+
+  /** Miga de pan de la categoría: abre el catálogo con esa categoría elegida (antes mandaba
+   *  `?cat=`, que el catálogo ignora - ver `ProductsFiltersStore`). */
+  protected openCategory(event: MouseEvent, category: ProductCategory): void {
+    if (isModifiedClick(event)) return;
+    this.filtersStore.showCategory(category);
+  }
 
   constructor() {
     effect(() => {
